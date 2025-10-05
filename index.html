@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmos Visualization</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Baskervville:ital@0;1&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            background: #000;
+            color: #fff;
+        }
+
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .info-panel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 400px;
+            background: linear-gradient(to right,
+                rgba(0, 0, 0, 0.9) 0%,
+                rgba(0, 0, 0, 0.6) 60%,
+                rgba(0, 0, 0, 0) 100%);
+            padding: 60px 40px;
+            font-family: "Baskervville", serif;
+            z-index: 10;
+            opacity: 0;
+            transform: translateX(-50px);
+            display: none;
+        }
+
+        .info-panel.show {
+            display: block;
+            animation: slideInFade 1.4s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+        }
+
+        .info-panel h1 {
+            font-size: 48px;
+            font-weight: 400;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s cubic-bezier(0.22, 0.61, 0.36, 1) 0.3s forwards;
+        }
+
+        .info-panel h2 {
+            font-size: 24px;
+            font-weight: 400;
+            margin-bottom: 30px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s cubic-bezier(0.22, 0.61, 0.36, 1) 0.5s forwards;
+        }
+
+        .info-panel p {
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .info-panel p:nth-of-type(1) {
+            animation: fadeInUp 1s cubic-bezier(0.22, 0.61, 0.36, 1) 0.7s forwards;
+        }
+
+        .info-panel p:nth-of-type(2) {
+            animation: fadeInUp 1s cubic-bezier(0.22, 0.61, 0.36, 1) 0.9s forwards;
+        }
+
+        .info-panel p:nth-of-type(3) {
+            animation: fadeInUp 1s cubic-bezier(0.22, 0.61, 0.36, 1) 1.1s forwards;
+        }
+
+        @keyframes slideInFade {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 0.9;
+                transform: translateY(0);
+            }
+        }
+
+        #star-info {
+            position: absolute;
+            background: linear-gradient(135deg,
+                rgba(0, 0, 0, 0.95) 0%,
+                rgba(20, 20, 30, 0.92) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 0;
+            font-family: "Inter", sans-serif;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+            z-index: 100;
+            min-width: 240px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        #star-info.visible {
+            opacity: 1;
+        }
+
+        #star-info h3 {
+            font-size: 16px;
+            font-weight: 500;
+            margin: 0;
+            padding: 16px 20px;
+            letter-spacing: -0.01em;
+            color: #fff;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            line-height: 1.3;
+        }
+
+        #star-info .info-content {
+            padding: 14px 20px;
+        }
+
+        #star-info .info-row {
+            display: grid;
+            grid-template-columns: 90px 1fr;
+            gap: 12px;
+            margin-bottom: 9px;
+            font-size: 13px;
+            align-items: baseline;
+        }
+
+        #star-info .info-row:last-child {
+            margin-bottom: 0;
+        }
+
+        #star-info .info-label {
+            opacity: 0.6;
+            font-size: 12px;
+            font-weight: 400;
+            letter-spacing: 0.01em;
+        }
+
+        #star-info .info-value {
+            font-weight: 500;
+            opacity: 0.95;
+            text-align: right;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            letter-spacing: -0.01em;
+        }
+
+        #star-info .color-indicator {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            flex-shrink: 0;
+        }
+
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #debug-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 16px;
+            font-family: "Inter", sans-serif;
+            font-size: 12px;
+            z-index: 1000;
+            min-width: 320px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        #debug-panel h3 {
+            margin: 0 0 12px 0;
+            font-size: 14px;
+            font-weight: 600;
+            opacity: 0.9;
+        }
+
+        .debug-control {
+            margin-bottom: 12px;
+        }
+
+        .debug-control label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            opacity: 0.8;
+            font-size: 11px;
+        }
+
+        .debug-control input[type="range"] {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .debug-control input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #667eea;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        .debug-control input[type="range"]::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            background: #667eea;
+            cursor: pointer;
+            border-radius: 50%;
+            border: none;
+        }
+
+        .debug-section {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .debug-section:first-child {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
+        }
+
+        .debug-section h4 {
+            margin: 0 0 10px 0;
+            font-size: 12px;
+            font-weight: 500;
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Entry Animation */
+        #entry-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at 50% 20%, rgba(12, 14, 20, 0.72) 0%, rgba(4, 5, 10, 0.94) 58%, rgba(0, 0, 0, 1) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            pointer-events: none;
+            overflow: hidden;
+            transition: opacity 0.8s cubic-bezier(0.55, 0.06, 0.35, 1);
+        }
+
+        #entry-overlay::before {
+            content: '';
+            position: absolute;
+            inset: -120%;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 40%),
+                radial-gradient(circle at 80% 30%, rgba(129, 140, 248, 0.12) 0%, rgba(129, 140, 248, 0) 32%),
+                radial-gradient(circle at 50% 80%, rgba(56, 189, 248, 0.08) 0%, rgba(56, 189, 248, 0) 30%);
+            opacity: 0;
+            transform: translate3d(0, 22%, 0) scale(0.92);
+            transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #entry-overlay.is-active::before {
+            opacity: 0.55;
+            transform: translate3d(0, 0, 0) scale(1);
+        }
+
+        #entry-overlay::after {
+            content: '';
+            position: absolute;
+            inset: -100%;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+            background-size: 120px 120px;
+            opacity: 0;
+            transform: translateY(6%);
+            animation: starDrift 18s linear infinite;
+        }
+
+        #entry-overlay.is-active::after {
+            opacity: 0.25;
+        }
+
+        .overlay-inner {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            text-align: center;
+            max-width: min(620px, 90vw);
+            padding: 0 32px;
+            z-index: 1;
+            font-family: 'Baskervville', serif;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        #entry-subtitle {
+            font-size: clamp(1.05rem, 2.1vw, 1.4rem);
+            line-height: 1.9;
+            letter-spacing: 0.01em;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: flowInSubtle 1.2s cubic-bezier(0.42, 0, 1, 1) forwards;
+            animation-play-state: paused;
+        }
+
+        #entry-subtitle.is-visible {
+            animation-play-state: running;
+        }
+
+        #entry-title {
+            font-size: clamp(2.6rem, 4.6vw, 3.8rem);
+            font-weight: 400;
+            line-height: 1.2;
+            color: #ffffff;
+            opacity: 0;
+            transform: translateY(40px);
+            animation: flowInBold 1.2s cubic-bezier(0.42, 0, 1, 1) forwards;
+            animation-play-state: paused;
+            animation-delay: 0.2s;
+        }
+
+        #entry-title.is-visible {
+            animation-play-state: running;
+        }
+
+        @keyframes flowInSubtle {
+            to {
+                opacity: 0.6;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes flowInBold {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #entry-overlay.is-exiting {
+            animation: overlayFadeAway 0.9s cubic-bezier(0.55, 0.08, 0.35, 1) forwards;
+        }
+
+        @keyframes overlayFadeAway {
+            to {
+                opacity: 0;
+                transform: scale(1.02);
+            }
+        }
+
+        @keyframes starDrift {
+            from {
+                transform: translateY(6%);
+            }
+            to {
+                transform: translateY(-6%);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .overlay-inner {
+                gap: 18px;
+            }
+            #entry-title {
+                font-size: clamp(2.2rem, 7vw, 3.1rem);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .overlay-inner {
+                gap: 14px;
+                padding: 0 20px;
+            }
+            #entry-subtitle {
+                font-size: clamp(0.95rem, 3.6vw, 1.1rem);
+                line-height: 1.7;
+            }
+        }
+
+
+    </style>
+</head>
+<body>
+    <!-- Entry Animation Overlay -->
+    <div id="entry-overlay">
+        <div class="overlay-inner">
+            <p id="entry-subtitle"></p>
+            <h1 id="entry-title"></h1>
+        </div>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <div class="info-panel">
+        <h1>Artorizer</h1>
+        <h2>Protecting the Finite Gesture</h2>
+        <p>The universe may be infinite, but every work of art is singular—born from specific hands, at a specific moment, carrying the unrepeatable signature of its creator. In the digital age, this singularity faces a paradox: the very technology that allows art to reach unlimited audiences also makes it effortlessly replicable, stripped of context, divorced from attribution. What can be copied in an instant can be claimed by anyone, leaving artists unmoored from their own creations.</p>
+        <p>Artorizer exists to restore that essential connection. Through invisible watermarks that embed ownership into the image itself, through perceptual hashes that create digital fingerprints, through protection layers that guard against unauthorized appropriation—we fortify art without compromising its beauty. Each piece processed through our pipeline carries hidden testimony to its origin, markers that whisper rather than shout, technical safeguards woven into pixels themselves.</p>
+        <p>This is not about locking art away. It's about ensuring that when your work travels across the infinite expanse of the internet, it carries its provenance with it—a quiet but unshakable record of where it came from, and who brought it into being.</p>
+    </div>
+
+    <div id="star-info"></div>
+
+    <div id="loading">
+        <div class="spinner"></div>
+        <p>Loading star catalog...</p>
+    </div>
+
+    <div id="debug-panel" style="display: none;">
+        <h3>Debug Panel</h3>
+
+        <div class="debug-section">
+            <h4>Camera</h4>
+            <div class="debug-control">
+                <label>
+                    <span>Camera Z</span>
+                    <span id="camera-z-value">980</span>
+                </label>
+                <input type="range" id="camera-z" min="100" max="2500" step="10" value="980">
+            </div>
+            <div class="debug-control">
+                <label>
+                    <span>Min Distance</span>
+                    <span id="min-distance-value">100</span>
+                </label>
+                <input type="range" id="min-distance" min="10" max="500" step="10" value="100">
+            </div>
+            <div class="debug-control">
+                <label>
+                    <span>Max Distance</span>
+                    <span id="max-distance-value">2500</span>
+                </label>
+                <input type="range" id="max-distance" min="1000" max="5000" step="100" value="2500">
+            </div>
+        </div>
+
+        <div class="debug-section">
+            <h4>Bloom</h4>
+            <div class="debug-control">
+                <label>
+                    <span>Strength</span>
+                    <span id="bloom-strength-value">3.4</span>
+                </label>
+                <input type="range" id="bloom-strength" min="0" max="10" step="0.1" value="3.4">
+            </div>
+            <div class="debug-control">
+                <label>
+                    <span>Radius</span>
+                    <span id="bloom-radius-value">0.85</span>
+                </label>
+                <input type="range" id="bloom-radius" min="0" max="2" step="0.05" value="0.85">
+            </div>
+            <div class="debug-control">
+                <label>
+                    <span>Threshold</span>
+                    <span id="bloom-threshold-value">0.0</span>
+                </label>
+                <input type="range" id="bloom-threshold" min="0" max="1" step="0.05" value="0.0">
+            </div>
+        </div>
+
+        <div class="debug-section">
+            <h4>Rendering</h4>
+            <div class="debug-control">
+                <label>
+                    <span>Exposure</span>
+                    <span id="exposure-value">2.8</span>
+                </label>
+                <input type="range" id="exposure" min="0.5" max="5" step="0.1" value="2.8">
+            </div>
+        </div>
+
+        <div class="debug-section">
+            <h4>Blur</h4>
+            <div class="debug-control">
+                <label>
+                    <span>Mode</span>
+                </label>
+                <select id="blur-direction" style="width: 100%; padding: 4px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px;">
+                    <option value="close">Blur when close</option>
+                    <option value="far">Blur when far</option>
+                    <option value="manual">Manual</option>
+                </select>
+            </div>
+            <div class="debug-control">
+                <label>
+                    <span>Blur Strength</span>
+                    <span id="blur-strength-value">0.00</span>
+                </label>
+                <input type="range" id="blur-strength" min="0" max="1" step="0.01" value="0">
+            </div>
+            <div class="debug-control">
+                <label>
+                    <span>Max Blur (manual)</span>
+                    <span id="blur-maxblur-value">0.0010</span>
+                </label>
+                <input type="range" id="blur-maxblur" min="0" max="0.02" step="0.0001" value="0.001">
+            </div>
+        </div>
+
+        <div class="debug-section">
+            <h4>Controls</h4>
+            <div class="debug-control">
+                <label>
+                    <span>Damping</span>
+                    <span id="damping-value">0.05</span>
+                </label>
+                <input type="range" id="damping" min="0.01" max="0.2" step="0.01" value="0.05">
+            </div>
+            <div class="debug-control">
+                <label>
+                    <span>Rotation Speed</span>
+                    <span id="rotation-speed-value">1.0</span>
+                </label>
+                <input type="range" id="rotation-speed" min="0" max="3" step="0.1" value="1.0">
+            </div>
+        </div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module" src="app.js"></script>
+</body>
+</html>
