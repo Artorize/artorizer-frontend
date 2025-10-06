@@ -23,19 +23,21 @@ const entryNarratives = [
     }
 ];
 
+// Track when animation started
+let animationStartTime = null;
+
 // Entry Animation Controller
 function playEntryAnimation() {
     const overlay = document.getElementById('entry-overlay');
     const title = document.getElementById('entry-title');
     const subtitle = document.getElementById('entry-subtitle');
-    const infoPanel = document.querySelector('.info-panel');
 
     if (!overlay) {
-        if (infoPanel) {
-            infoPanel.classList.add('show');
-        }
         return;
     }
+
+    // Record when animation starts
+    animationStartTime = Date.now();
 
     const reveal = (element, delay = 0) => {
         if (!element) {
@@ -58,21 +60,28 @@ function playEntryAnimation() {
     overlay.classList.add('is-active');
     reveal(subtitle, 160);
     reveal(title, 480);
+}
 
-    const exitDelay = 2400;
-    const fallbackTimeout = setTimeout(() => {
+// Function to hide entry animation after stars load
+function hideEntryAnimation() {
+    const overlay = document.getElementById('entry-overlay');
+    const infoPanel = document.querySelector('.info-panel');
+
+    if (!overlay) {
         if (infoPanel) {
             infoPanel.classList.add('show');
         }
-        if (overlay.parentElement) {
-            overlay.remove();
-        }
-    }, exitDelay + 1200);
+        return;
+    }
+
+    // Ensure intro displays for at least 2.4 seconds
+    const minDisplayTime = 2400;
+    const elapsed = Date.now() - animationStartTime;
+    const remainingTime = Math.max(0, minDisplayTime - elapsed);
 
     setTimeout(() => {
         overlay.classList.add('is-exiting');
         overlay.addEventListener('animationend', () => {
-            clearTimeout(fallbackTimeout);
             if (overlay.parentElement) {
                 overlay.remove();
             }
@@ -80,10 +89,10 @@ function playEntryAnimation() {
                 infoPanel.classList.add('show');
             }
         }, { once: true });
-    }, exitDelay);
+    }, remainingTime);
 }
 
-// Start entry animation when DOM is ready
+// Start entry animation immediately
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', playEntryAnimation);
 } else {
@@ -199,7 +208,11 @@ function animate() {
     composer.render();
 }
 
-// Initialize
-loadStars(scene);
+// Start animation loop immediately
 animate();
+
+// Load stars in background, hide intro when done
+loadStars(scene).then(() => {
+    hideEntryAnimation();
+});
 

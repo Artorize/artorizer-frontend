@@ -132,13 +132,15 @@ export async function loadStars(scene) {
         // Add ambient dust/nebula particles for depth
         createAmbientDust(scene);
 
-        // Hide loading indicator
-        document.getElementById('loading').style.display = 'none';
+        // Show canvas now that stars are loaded
+        const canvasContainer = document.getElementById('canvas-container');
+        if (canvasContainer) {
+            canvasContainer.classList.add('loaded');
+        }
 
         console.log(`Loaded ${data.length} stars from BSC5P catalog`);
     } catch (error) {
         console.error('Error loading stars:', error);
-        document.getElementById('loading').textContent = 'Error loading stars';
     }
 }
 
