@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cosmos Visualization</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="intro/intro-styles.css">
 </head>
 <body>
     <!-- Entry Animation Overlay -->
@@ -152,6 +152,18 @@
             }
         }
     </script>
-    <script type="module" src="app.js"></script>
+    <script type="module" src="intro/intro.js"></script>
+    <script>
+        // Dashboard navigation will be added when dashboard is created
+        document.addEventListener('DOMContentLoaded', () => {
+            const exploreBtn = document.getElementById('explore-button');
+            if (exploreBtn) {
+                exploreBtn.addEventListener('click', () => {
+                    // TODO: Add dashboard navigation
+                    console.log('Dashboard not yet created');
+                });
+            }
+        });
+    </script>
 </body>
 </html>

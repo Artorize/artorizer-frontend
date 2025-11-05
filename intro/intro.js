@@ -1,8 +1,7 @@
-import { setupScene, setupWindowResize } from './src/setup/sceneSetup.js';
-import { loadStars, getStarPoints, getStarData } from './src/rendering/starRenderer.js';
-import { setupStarInteraction, updateStarInfoPosition } from './src/interaction/starInteraction.js';
-import { setupDebugPanel } from './src/debug/debugPanel.js';
-import { calculateAdaptiveBloomStrength, calculateAdaptiveBloomRadius, calculateAdaptiveBloomThreshold, calculateAdaptiveBlurClose, calculateAdaptiveBlurFar } from './src/utils/bloomUtils.js';
+import { setupScene, setupWindowResize } from '../src/setup/sceneSetup.js';
+import { loadStars, getStarPoints, getStarData } from '../src/rendering/starRenderer.js';
+import { setupDebugPanel } from '../src/debug/debugPanel.js';
+import { calculateAdaptiveBloomStrength, calculateAdaptiveBloomRadius, calculateAdaptiveBloomThreshold, calculateAdaptiveBlurClose, calculateAdaptiveBlurFar } from '../src/utils/bloomUtils.js';
 
 const entryNarratives = [
     {
@@ -105,9 +104,6 @@ const { scene, camera, renderer, composer, controls, bloomPass, bokehPass } = se
 // Setup window resize handler
 setupWindowResize(camera, renderer, composer);
 
-// Setup star interaction (click handling)
-setupStarInteraction(renderer, camera, controls, getStarPoints, getStarData);
-
 // Setup debug panel
 const debugPanel = setupDebugPanel(camera, renderer, composer, controls);
 
@@ -202,8 +198,6 @@ function animate() {
             }
         }
     }
-
-    updateStarInfoPosition(camera, controls);
 
     composer.render();
 }
