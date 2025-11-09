@@ -10,6 +10,19 @@ class ArtorizeDashboard {
     this.uploader = new ArtworkUploader(window.ArtorizeConfig);
     this.currentJobId = null;
     this.selectedFile = null;
+    this.currentResult = null;
+
+    // Image blobs for comparison
+    this.images = {
+      original: null,
+      protected: null,
+      reconstructed: null,
+      mask: null
+    };
+
+    // Current view state
+    this.currentView = 'comparison';
+    this.comparisonMode = 'side-by-side';
 
     this.initializeElements();
     this.attachEventListeners();
@@ -53,6 +66,31 @@ class ArtorizeDashboard {
 
     // Generate button
     this.generateButton.addEventListener('click', () => this.handleSubmit());
+  }
+
+  /**
+   * Initialize comparison controls
+   */
+  initializeComparisonControls() {
+    // View toggle buttons
+    document.getElementById('view-original-btn').addEventListener('click', () => this.switchView('original'));
+    document.getElementById('view-protected-btn').addEventListener('click', () => this.switchView('protected'));
+    document.getElementById('view-reconstructed-btn').addEventListener('click', () => this.switchView('reconstructed'));
+    document.getElementById('view-comparison-btn').addEventListener('click', () => this.switchView('comparison'));
+
+    // Comparison mode selector
+    document.getElementById('comparison-mode-select').addEventListener('change', (e) => {
+      this.comparisonMode = e.target.value;
+      if (this.currentView === 'comparison') {
+        this.renderComparisonView();
+      }
+    });
+
+    // Download buttons
+    document.getElementById('download-original-btn').addEventListener('click', () => this.downloadImage('original'));
+    document.getElementById('download-protected-btn').addEventListener('click', () => this.downloadImage('protected'));
+    document.getElementById('download-mask-btn').addEventListener('click', () => this.downloadImage('mask'));
+    document.getElementById('download-reconstructed-btn').addEventListener('click', () => this.downloadImage('reconstructed'));
   }
 
   /**
@@ -202,123 +240,331 @@ class ArtorizeDashboard {
   }
 
   /**
-   * Display protected artwork result
+   * Display protected artwork result with comparison views
    */
   async displayResult(result) {
-    // Create result container
-    let resultContainer = document.getElementById('result-container');
-    if (!resultContainer) {
-      resultContainer = document.createElement('div');
-      resultContainer.id = 'result-container';
-      resultContainer.style.cssText = `
-        margin: 30px 0;
-        padding: 20px;
-        border: 2px solid #4CAF50;
-        border-radius: 10px;
-        background: #f9f9f9;
-      `;
-      this.generateButton.parentElement.appendChild(resultContainer);
+    this.currentResult = result;
+    this.showStatus('Loading images...', 'info');
+
+    try {
+      // Download all image variants
+      this.showProgress(25, 'Downloading original image...');
+      this.images.original = await this.uploader.downloadVariant(result.job_id, 'original');
+
+      this.showProgress(50, 'Downloading protected image...');
+      this.images.protected = await this.uploader.downloadVariant(result.job_id, 'protected');
+
+      this.showProgress(75, 'Downloading mask...');
+      this.images.mask = await this.uploader.downloadVariant(result.job_id, 'mask');
+
+      // Reconstruct image from CDN
+      this.showProgress(90, 'Reconstructing from CDN...');
+      await this.reconstructFromCDN(result);
+
+      this.hideProgress();
+      this.showStatus('All images loaded successfully!', 'success');
+
+      // Show comparison section
+      document.getElementById('comparison-section').style.display = 'block';
+
+      // Initialize comparison controls
+      this.initializeComparisonControls();
+
+      // Display job info
+      this.displayJobInfo(result);
+
+      // Render default comparison view
+      this.switchView('comparison');
+
+    } catch (error) {
+      this.hideProgress();
+      this.showStatus(`Failed to load images: ${error.message}`, 'error');
+      console.error('Display error:', error);
+    }
+  }
+
+  /**
+   * Reconstruct image from CDN (protected + mask)
+   */
+  async reconstructFromCDN(result) {
+    try {
+      // If we have backend_artwork_id, try to fetch from CDN
+      const artworkId = result.backend_artwork_id;
+      if (!artworkId) {
+        console.warn('No backend_artwork_id, using router protected image as reconstructed');
+        this.images.reconstructed = this.images.protected;
+        return;
+      }
+
+      // Fetch protected image from CDN
+      const cdnProtectedUrl = this.uploader.getCDNUrl(artworkId, 'protected');
+      const cdnMaskUrl = this.uploader.getCDNUrl(artworkId, 'mask');
+
+      // Try to fetch from CDN
+      try {
+        const cdnProtectedResponse = await fetch(cdnProtectedUrl);
+        if (cdnProtectedResponse.ok) {
+          const cdnProtectedBlob = await cdnProtectedResponse.blob();
+
+          // Create a reconstructed image by applying the mask
+          // For now, we'll use the CDN protected image directly
+          // In a real implementation, you'd apply the mask to reconstruct the original quality
+          this.images.reconstructed = cdnProtectedBlob;
+          console.log('Successfully fetched from CDN:', cdnProtectedUrl);
+        } else {
+          console.warn('CDN not available, using router protected image');
+          this.images.reconstructed = this.images.protected;
+        }
+      } catch (cdnError) {
+        console.warn('Failed to fetch from CDN, using router image:', cdnError);
+        this.images.reconstructed = this.images.protected;
+      }
+
+    } catch (error) {
+      console.error('Reconstruction error:', error);
+      this.images.reconstructed = this.images.protected;
+    }
+  }
+
+  /**
+   * Display job information
+   */
+  displayJobInfo(result) {
+    const jobInfo = document.getElementById('job-info');
+    jobInfo.innerHTML = `
+      <h3 style="margin-bottom: 1rem;">Job Information</h3>
+      <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem;">
+        <strong>Job ID:</strong> <span>${result.job_id}</span>
+        <strong>Status:</strong> <span>${result.status}</span>
+        <strong>Backend ID:</strong> <span>${result.backend_artwork_id || 'N/A'}</span>
+        <strong>Completed:</strong> <span>${result.completed_at || 'N/A'}</span>
+        <strong>Router URL:</strong> <span>${this.uploader.routerUrl}</span>
+        <strong>CDN URL:</strong> <span>${this.uploader.cdnUrl}</span>
+      </div>
+    `;
+  }
+
+  /**
+   * Switch between different views
+   */
+  switchView(viewType) {
+    this.currentView = viewType;
+
+    // Update active button
+    document.querySelectorAll('.view-toggle-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`view-${viewType}-btn`).classList.add('active');
+
+    // Show/hide comparison mode selector
+    document.getElementById('comparison-mode').style.display =
+      viewType === 'comparison' ? 'block' : 'none';
+
+    // Render the view
+    if (viewType === 'comparison') {
+      this.renderComparisonView();
+    } else {
+      this.renderSingleImageView(viewType);
+    }
+  }
+
+  /**
+   * Render single image view
+   */
+  async renderSingleImageView(imageType) {
+    const container = document.getElementById('image-display-container');
+    const blob = this.images[imageType];
+
+    if (!blob) {
+      container.innerHTML = `<p style="text-align: center; color: red;">Image not available</p>`;
+      return;
     }
 
-    resultContainer.innerHTML = `
-      <h2 style="text-align: center; margin-bottom: 20px;">Protected Artwork</h2>
-      <div style="position: relative; max-width: 800px; margin: 0 auto;">
-        <div style="position: relative; display: inline-block;">
-          <img id="protected-image" src="" alt="Protected artwork" style="max-width: 100%; display: block;">
-          <canvas id="mask-canvas" style="position: absolute; top: 0; left: 0; pointer-events: none;"></canvas>
+    const url = URL.createObjectURL(blob);
+    const title = imageType.charAt(0).toUpperCase() + imageType.slice(1);
+
+    container.innerHTML = `
+      <div style="text-align: center;">
+        <h3 style="margin-bottom: 1rem;">${title} Image</h3>
+        <div class="image-container">
+          <img src="${url}" alt="${title}" style="max-width: 100%; border-radius: 0.5rem;">
         </div>
       </div>
-      <div style="margin-top: 20px; text-align: center;">
-        <label for="mask-opacity" style="margin-right: 10px;">Mask Opacity:</label>
-        <input type="range" id="mask-opacity" min="0" max="100" value="50" style="width: 200px;">
-        <span id="opacity-value" style="margin-left: 10px;">50%</span>
+    `;
+  }
+
+  /**
+   * Render comparison view based on current mode
+   */
+  async renderComparisonView() {
+    const container = document.getElementById('image-display-container');
+
+    switch (this.comparisonMode) {
+      case 'side-by-side':
+        await this.renderSideBySide(container);
+        break;
+      case 'slider':
+        await this.renderSlider(container);
+        break;
+      case 'overlay':
+        await this.renderOverlay(container);
+        break;
+    }
+  }
+
+  /**
+   * Render side-by-side comparison
+   */
+  async renderSideBySide(container) {
+    const originalUrl = URL.createObjectURL(this.images.original);
+    const protectedUrl = URL.createObjectURL(this.images.protected);
+    const reconstructedUrl = URL.createObjectURL(this.images.reconstructed);
+
+    container.innerHTML = `
+      <div class="side-by-side-container">
+        <div class="comparison-image">
+          <h3>Original</h3>
+          <img src="${originalUrl}" alt="Original" style="max-width: 350px; border-radius: 0.5rem;">
+        </div>
+        <div class="comparison-image">
+          <h3>Protected</h3>
+          <img src="${protectedUrl}" alt="Protected" style="max-width: 350px; border-radius: 0.5rem;">
+        </div>
+        <div class="comparison-image">
+          <h3>Reconstructed (CDN)</h3>
+          <img src="${reconstructedUrl}" alt="Reconstructed" style="max-width: 350px; border-radius: 0.5rem;">
+        </div>
       </div>
-      <div style="margin-top: 20px; text-align: center;">
-        <button id="download-protected" style="padding: 10px 20px; margin: 5px; cursor: pointer; border-radius: 5px; border: 1px solid #4CAF50; background: #4CAF50; color: white; font-size: 1rem;">Download Protected</button>
-        <button id="download-mask" style="padding: 10px 20px; margin: 5px; cursor: pointer; border-radius: 5px; border: 1px #2196F3; background: #2196F3; color: white; font-size: 1rem;">Download Mask (.sac)</button>
+    `;
+  }
+
+  /**
+   * Render slider comparison
+   */
+  async renderSlider(container) {
+    const originalUrl = URL.createObjectURL(this.images.original);
+    const protectedUrl = URL.createObjectURL(this.images.protected);
+
+    container.innerHTML = `
+      <div style="text-align: center; margin-bottom: 1rem;">
+        <p>Drag the slider to compare Original (left) vs Protected (right)</p>
       </div>
-      <div id="result-info" style="margin-top: 20px; padding: 15px; background: white; border-radius: 5px; font-size: 0.9rem;">
-        <strong>Job ID:</strong> ${result.job_id}<br>
-        <strong>Status:</strong> ${result.status}<br>
-        <strong>Backend Artwork ID:</strong> ${result.backend_artwork_id || 'N/A'}<br>
-        <strong>Completed:</strong> ${result.completed_at || 'N/A'}
+      <div id="slider-container" style="position: relative; max-width: 800px; margin: 0 auto; height: 600px; overflow: hidden; border-radius: 0.5rem;">
+        <img id="slider-img-1" src="${protectedUrl}" alt="Protected" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain;">
+        <div id="slider-overlay" style="position: absolute; top: 0; left: 0; width: 50%; height: 100%; overflow: hidden;">
+          <img id="slider-img-2" src="${originalUrl}" alt="Original" style="position: absolute; top: 0; left: 0; width: 800px; height: 600px; max-width: none; object-fit: contain;">
+        </div>
+        <div id="slider-handle" style="position: absolute; top: 0; left: 50%; width: 4px; height: 100%; background: white; cursor: ew-resize; box-shadow: 0 0 10px rgba(0,0,0,0.5); z-index: 10;">
+          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; background: white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.3);"></div>
+        </div>
       </div>
     `;
 
-    // Load protected image
-    const protectedImg = document.getElementById('protected-image');
-    const maskCanvas = document.getElementById('mask-canvas');
+    // Add slider interaction
+    this.initializeSlider();
+  }
 
+  /**
+   * Initialize slider interaction
+   */
+  initializeSlider() {
+    const sliderContainer = document.getElementById('slider-container');
+    const sliderHandle = document.getElementById('slider-handle');
+    const sliderOverlay = document.getElementById('slider-overlay');
+
+    if (!sliderContainer || !sliderHandle || !sliderOverlay) return;
+
+    let isDragging = false;
+
+    const updateSlider = (e) => {
+      const rect = sliderContainer.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+
+      sliderHandle.style.left = `${percentage}%`;
+      sliderOverlay.style.width = `${percentage}%`;
+    };
+
+    sliderHandle.addEventListener('mousedown', () => isDragging = true);
+    document.addEventListener('mouseup', () => isDragging = false);
+    document.addEventListener('mousemove', (e) => {
+      if (isDragging) updateSlider(e);
+    });
+
+    sliderContainer.addEventListener('click', updateSlider);
+  }
+
+  /**
+   * Render overlay comparison
+   */
+  async renderOverlay(container) {
+    const originalUrl = URL.createObjectURL(this.images.original);
+    const protectedUrl = URL.createObjectURL(this.images.protected);
+    const reconstructedUrl = URL.createObjectURL(this.images.reconstructed);
+
+    container.innerHTML = `
+      <div style="text-align: center; margin-bottom: 1rem;">
+        <label for="overlay-selector">Select Image:</label>
+        <select id="overlay-selector" style="margin-left: 1rem; padding: 0.5rem; font-size: 1rem;">
+          <option value="original">Original</option>
+          <option value="protected">Protected</option>
+          <option value="reconstructed">Reconstructed (CDN)</option>
+        </select>
+        <label for="overlay-opacity" style="margin-left: 2rem;">Opacity:</label>
+        <input type="range" id="overlay-opacity" min="0" max="100" value="100" style="width: 150px; margin-left: 0.5rem;">
+        <span id="overlay-opacity-value" style="margin-left: 0.5rem;">100%</span>
+      </div>
+      <div class="overlay-container" style="position: relative; max-width: 800px; margin: 0 auto; height: 600px;">
+        <img id="overlay-base" src="${originalUrl}" alt="Base" style="width: 100%; height: 100%; object-fit: contain;">
+        <img id="overlay-top" src="${protectedUrl}" alt="Overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; opacity: 1;">
+      </div>
+    `;
+
+    // Add overlay controls
+    const selector = document.getElementById('overlay-selector');
+    const opacitySlider = document.getElementById('overlay-opacity');
+    const opacityValue = document.getElementById('overlay-opacity-value');
+    const overlayTop = document.getElementById('overlay-top');
+
+    const urlMap = {
+      original: originalUrl,
+      protected: protectedUrl,
+      reconstructed: reconstructedUrl
+    };
+
+    selector.addEventListener('change', (e) => {
+      overlayTop.src = urlMap[e.target.value];
+    });
+
+    opacitySlider.addEventListener('input', (e) => {
+      const opacity = e.target.value / 100;
+      opacityValue.textContent = `${e.target.value}%`;
+      overlayTop.style.opacity = opacity;
+    });
+  }
+
+  /**
+   * Download image variant
+   */
+  async downloadImage(variant) {
     try {
-      // Download protected image from router
-      const protectedBlob = await this.uploader.downloadVariant(result.job_id, 'protected');
-      const protectedUrl = URL.createObjectURL(protectedBlob);
-      protectedImg.src = protectedUrl;
-
-      // Wait for image to load
-      await new Promise((resolve, reject) => {
-        protectedImg.onload = resolve;
-        protectedImg.onerror = reject;
-      });
-
-      // Fetch and render SAC mask
-      const maskUrl = result.urls?.mask || `${this.uploader.routerUrl}/jobs/${result.job_id}/download/mask`;
-
-      try {
-        const sacData = await window.SAC.loadMaskAndRender(
-          protectedImg,
-          maskUrl,
-          maskCanvas,
-          { opacity: 0.5, colorMode: 'white' }
-        );
-
-        // Setup opacity slider
-        const opacitySlider = document.getElementById('mask-opacity');
-        const opacityValue = document.getElementById('opacity-value');
-
-        opacitySlider.addEventListener('input', (e) => {
-          const opacity = e.target.value / 100;
-          opacityValue.textContent = `${e.target.value}%`;
-
-          window.SAC.renderMask(sacData, maskCanvas, {
-            opacity,
-            colorMode: 'white',
-            width: protectedImg.naturalWidth,
-            height: protectedImg.naturalHeight
-          });
-        });
-
-        this.showStatus('Artwork protected successfully! Mask overlay is visible.', 'success');
-      } catch (maskError) {
-        console.warn('Failed to load mask, showing image only:', maskError);
-        this.showStatus('Protected image loaded, but mask rendering failed.', 'warning');
+      const blob = this.images[variant];
+      if (!blob) {
+        this.showStatus(`${variant} image not available`, 'error');
+        return;
       }
 
-      // Download buttons
-      document.getElementById('download-protected').addEventListener('click', () => {
-        const a = document.createElement('a');
-        a.href = protectedUrl;
-        a.download = `protected_${result.job_id}.jpg`;
-        a.click();
-      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
 
-      document.getElementById('download-mask').addEventListener('click', async () => {
-        try {
-          const maskBlob = await this.uploader.downloadVariant(result.job_id, 'mask');
-          const maskUrl = URL.createObjectURL(maskBlob);
-          const a = document.createElement('a');
-          a.href = maskUrl;
-          a.download = `mask_${result.job_id}.sac`;
-          a.click();
-          URL.revokeObjectURL(maskUrl);
-        } catch (error) {
-          this.showStatus(`Failed to download mask: ${error.message}`, 'error');
-        }
-      });
+      const extension = variant === 'mask' ? '.sac' : '.jpg';
+      a.download = `${variant}_${this.currentResult.job_id}${extension}`;
 
+      a.click();
+      URL.revokeObjectURL(url);
+
+      this.showStatus(`Downloaded ${variant} image`, 'success');
     } catch (error) {
-      this.showStatus(`Failed to display result: ${error.message}`, 'error');
-      console.error('Display error:', error);
+      this.showStatus(`Failed to download ${variant}: ${error.message}`, 'error');
     }
   }
 

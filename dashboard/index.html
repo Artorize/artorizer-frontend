@@ -65,6 +65,47 @@
     </div>
 
     <!-- Status and results will be dynamically inserted here by dashboard.js -->
+
+    <!-- Image Comparison Section (will be populated dynamically) -->
+    <div id="comparison-section" style="display: none;">
+        <h2 style="text-align: center; margin: 30px 0 20px;">Image Comparison</h2>
+
+        <!-- View Toggle Buttons -->
+        <div id="view-controls" style="text-align: center; margin: 20px 0;">
+            <button id="view-original-btn" class="view-toggle-btn">Original</button>
+            <button id="view-protected-btn" class="view-toggle-btn">Protected</button>
+            <button id="view-reconstructed-btn" class="view-toggle-btn">Reconstructed (CDN)</button>
+            <button id="view-comparison-btn" class="view-toggle-btn active">Compare</button>
+        </div>
+
+        <!-- Comparison Mode Selector -->
+        <div id="comparison-mode" style="text-align: center; margin: 20px 0;">
+            <label style="margin-right: 10px;">Comparison Mode:</label>
+            <select id="comparison-mode-select">
+                <option value="side-by-side">Side by Side</option>
+                <option value="slider">Slider</option>
+                <option value="overlay">Overlay</option>
+            </select>
+        </div>
+
+        <!-- Image Display Container -->
+        <div id="image-display-container" style="max-width: 1200px; margin: 0 auto; position: relative;">
+            <!-- Content will be dynamically generated -->
+        </div>
+
+        <!-- Download Controls -->
+        <div id="download-controls" style="text-align: center; margin: 30px 0;">
+            <button id="download-original-btn" class="download-btn">Download Original</button>
+            <button id="download-protected-btn" class="download-btn">Download Protected</button>
+            <button id="download-mask-btn" class="download-btn">Download Mask (.sac)</button>
+            <button id="download-reconstructed-btn" class="download-btn">Download Reconstructed</button>
+        </div>
+
+        <!-- Job Information -->
+        <div id="job-info" style="margin: 30px auto; max-width: 600px; padding: 20px; background: #f5f5f5; border-radius: 8px;">
+            <!-- Will be populated dynamically -->
+        </div>
+    </div>
 </div>
 
 <script>
