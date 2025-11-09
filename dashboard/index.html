@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Artorize DashBoard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="content">
+    <div class="header">
+        <h1>Artorize DashBoard</h1>
+    </div>
+    <div class="input-area">
+        <div class="upload-area">
+            <span class="upload-label">Upload Image:</span>
+            <label for="image-upload" class="upload-icon">+</label>
+            <input type="file" id="image-upload" accept="image/*">
+        </div>
+        <div class="extend-input-area">
+<!--            input author name, creation date and description-->
+            <label for="author-name">Author Name:</label>
+            <input type="text" id="author-name">
+            <label for="creation-date">Creation Date:</label>
+            <input type="date" id="creation-date">
+            <label for="description">Description:</label>
+            <textarea id="description" rows="4" cols="50"></textarea>
+            <button id="submit-button">Submit</button>
+        </div>
+        <div class="extended-config-area">
+<!--
+
+{
+  "workflow": {
+    "enable_fawkes": true,
+    "enable_photoguard": true,
+    "enable_mist": true,
+    "enable_nightshade": true,
+    "watermark_strategy": "invisible-watermark",
+    "enable_c2pa_manifest": true
+  }
+}
+-->
+            <input type="checkbox" id="enable-fawkes">
+             <label for="enable-fawkes">Enable Fawkes</label>
+             <input type="checkbox" id="enable-photoguard">
+             <label for="enable-photoguard">Enable Photoguard</label>
+             <input type="checkbox" id="enable-mist">
+             <label for="enable-mist">Enable Mist</label>
+             <input type="checkbox" id="enable-nightshade">
+             <label for="enable-nightshade">Enable Nightshade</label>
+             <input type="checkbox" id="enable-c2pa-manifest">
+             <label for="enable-c2pa-manifest">Enable C2PA Manifest</label>
+            <label for="watermark-strategy">Watermark Strategy:</label>
+            <select id="watermark-strategy">
+                <option value="invisible-watermark">Invisible Watermark</option>
+                <option value="visible-watermark">Tree ring</option>
+            </select>
+        </div>
+        <button id="generate-button">Generate</button>
+    </div>
+</div>
+</body>
+</html>
