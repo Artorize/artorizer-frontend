@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <title>Artorize DashBoard</title>
     <link rel="stylesheet" href="styles.css">
+
+    <!-- Artorize Dashboard Scripts -->
+    <script src="config.js"></script>
+    <script src="sacParser.js"></script>
+    <script src="artworkUploader.js"></script>
+    <script src="dashboard.js"></script>
 </head>
 <body>
 <div class="content">
@@ -58,6 +64,14 @@
         </div>
         <button id="generate-button">Generate</button>
     </div>
+
+    <!-- Status and results will be dynamically inserted here by dashboard.js -->
 </div>
+
+<script>
+// Optional: Override config for this deployment
+// window.ArtorizeConfig.ROUTER_URL = 'https://your-router.com';
+// window.ArtorizeConfig.CDN_URL = 'https://your-cdn.com';
+</script>
 </body>
 </html>
