@@ -146,7 +146,14 @@ class ArtorizeDashboard {
   gatherFormData() {
     const artistName = this.authorNameInput.value.trim();
     const description = this.descriptionInput.value.trim();
-    const creationDate = this.creationDateInput.value;
+    const creationDateValue = this.creationDateInput.value;
+
+    // Convert date string to Date object for proper ISO formatting
+    // HTML date input returns "YYYY-MM-DD", but API needs full datetime
+    let creationDate = undefined;
+    if (creationDateValue) {
+      creationDate = new Date(creationDateValue + 'T00:00:00.000Z');
+    }
 
     // Protection options
     const protectionOptions = {
@@ -163,7 +170,7 @@ class ArtorizeDashboard {
       artist_name: artistName,
       artwork_title: artistName, // Using artist name as title (you should add a title field)
       artwork_description: description || undefined,
-      artwork_creation_time: creationDate || undefined,
+      artwork_creation_time: creationDate,
       tags: [], // You could add a tags input field
       protectionOptions
     };
