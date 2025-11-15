@@ -14,10 +14,10 @@
 
 const ArtorizeConfig = {
   // Router API base URL (no trailing slash)
-  ROUTER_URL: 'http://localhost:7000',
+  ROUTER_URL: 'https://router.artorizer.com',
 
   // CDN base URL for protected images and SAC masks (no trailing slash)
-  CDN_URL: 'http://localhost:3000',
+  CDN_URL: 'https://cdn.artorizer.com',
 
   // Optional: Auth token if your router requires authentication
   AUTH_TOKEN: null,
