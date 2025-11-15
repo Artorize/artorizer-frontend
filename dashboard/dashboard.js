@@ -47,7 +47,6 @@ class ArtorizeDashboard {
     this.watermarkStrategySelect = document.getElementById('watermark-strategy');
 
     // Buttons
-    this.submitButton = document.getElementById('submit-button');
     this.generateButton = document.getElementById('generate-button');
 
     // Upload label
@@ -60,9 +59,6 @@ class ArtorizeDashboard {
   attachEventListeners() {
     // File selection
     this.imageUploadInput.addEventListener('change', (e) => this.handleFileSelect(e));
-
-    // Submit button (currently same as generate)
-    this.submitButton.addEventListener('click', () => this.handleSubmit());
 
     // Generate button
     this.generateButton.addEventListener('click', () => this.handleSubmit());
