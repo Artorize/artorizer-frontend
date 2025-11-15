@@ -575,8 +575,7 @@ class ArtorizeDashboard {
       return;
     }
 
-    // Disable buttons during upload
-    this.submitButton.disabled = true;
+    // Disable button during upload
     this.generateButton.disabled = true;
 
     try {
@@ -601,7 +600,6 @@ class ArtorizeDashboard {
         // You could display the existing artwork here
         console.log('Existing artwork:', submitResult.artwork);
 
-        this.submitButton.disabled = false;
         this.generateButton.disabled = false;
         return;
       }
@@ -623,7 +621,6 @@ class ArtorizeDashboard {
       // Check final status
       if (result.status === 'failed') {
         this.showStatus(`Processing failed: ${result.error?.message || 'Unknown error'}`, 'error');
-        this.submitButton.disabled = false;
         this.generateButton.disabled = false;
         return;
       }
@@ -636,7 +633,6 @@ class ArtorizeDashboard {
       this.showStatus(`Error: ${error.message}`, 'error');
       this.hideProgress();
     } finally {
-      this.submitButton.disabled = false;
       this.generateButton.disabled = false;
     }
   }
