@@ -49,8 +49,16 @@ class ArtorizeDashboard {
     // Buttons
     this.generateButton = document.getElementById('generate-button');
 
-    // Upload label
+    // Upload elements
+    this.uploadZone = document.getElementById('upload-zone');
     this.uploadLabel = document.querySelector('.upload-label');
+    this.imagePreview = document.getElementById('image-preview');
+    this.previewImage = document.getElementById('preview-image');
+    this.removeImageBtn = document.getElementById('remove-image');
+
+    // Status banner
+    this.statusBanner = document.getElementById('status-banner');
+    this.statusMessage = document.getElementById('status-message');
   }
 
   /**
@@ -62,6 +70,37 @@ class ArtorizeDashboard {
 
     // Generate button
     this.generateButton.addEventListener('click', () => this.handleSubmit());
+
+    // Remove image button
+    if (this.removeImageBtn) {
+      this.removeImageBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.clearImagePreview();
+      });
+    }
+
+    // Drag and drop functionality
+    if (this.uploadZone) {
+      this.uploadZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        this.uploadZone.classList.add('drag-over');
+      });
+
+      this.uploadZone.addEventListener('dragleave', () => {
+        this.uploadZone.classList.remove('drag-over');
+      });
+
+      this.uploadZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        this.uploadZone.classList.remove('drag-over');
+
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          this.imageUploadInput.files = files;
+          this.handleFileSelect({ target: { files: files } });
+        }
+      });
+    }
   }
 
   /**
@@ -95,21 +134,49 @@ class ArtorizeDashboard {
   handleFileSelect(event) {
     const file = event.target.files[0];
     if (!file) {
-      this.selectedFile = null;
-      this.updateUploadLabel('Upload Image:');
+      this.clearImagePreview();
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      this.showStatus('Please select a valid image file', 'error');
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      this.showStatus('Image size must be less than 10MB', 'error');
       return;
     }
 
     this.selectedFile = file;
-    const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
-    this.updateUploadLabel(`Selected: ${file.name} (${fileSizeMB} MB)`);
+    this.showImagePreview(file);
   }
 
   /**
-   * Update upload label text
+   * Show image preview
    */
-  updateUploadLabel(text) {
-    this.uploadLabel.textContent = text;
+  showImagePreview(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      this.previewImage.src = e.target.result;
+      this.uploadLabel.style.display = 'none';
+      this.imagePreview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  /**
+   * Clear image preview
+   */
+  clearImagePreview() {
+    this.selectedFile = null;
+    this.imageUploadInput.value = '';
+    this.previewImage.src = '';
+    this.uploadLabel.style.display = 'flex';
+    this.imagePreview.style.display = 'none';
   }
 
   /**
@@ -180,34 +247,39 @@ class ArtorizeDashboard {
    * Show status message
    */
   showStatus(message, type = 'info') {
-    // Create or update status element
-    let statusEl = document.getElementById('status-message');
-    if (!statusEl) {
-      statusEl = document.createElement('div');
-      statusEl.id = 'status-message';
-      statusEl.style.cssText = `
-        margin: 20px 0;
-        padding: 15px;
-        border-radius: 8px;
-        font-size: 1rem;
-        text-align: center;
-      `;
-      this.generateButton.parentElement.appendChild(statusEl);
+    // Use the status banner element
+    if (!this.statusBanner || !this.statusMessage) {
+      console.warn('Status banner elements not found');
+      return;
     }
 
-    // Style based on type
-    const colors = {
-      info: { bg: '#e3f2fd', color: '#1976d2', border: '#1976d2' },
-      success: { bg: '#e8f5e9', color: '#388e3c', border: '#388e3c' },
-      error: { bg: '#ffebee', color: '#d32f2f', border: '#d32f2f' },
-      warning: { bg: '#fff3e0', color: '#f57c00', border: '#f57c00' }
-    };
+    // Remove all type classes
+    this.statusBanner.classList.remove('success', 'error', 'warning', 'info');
 
-    const style = colors[type] || colors.info;
-    statusEl.style.backgroundColor = style.bg;
-    statusEl.style.color = style.color;
-    statusEl.style.border = `1px solid ${style.border}`;
-    statusEl.textContent = message;
+    // Add the appropriate type class
+    this.statusBanner.classList.add(type);
+
+    // Update message
+    this.statusMessage.textContent = message;
+
+    // Show banner
+    this.statusBanner.style.display = 'flex';
+
+    // Auto-hide after 5 seconds for success messages
+    if (type === 'success') {
+      setTimeout(() => {
+        this.statusBanner.style.display = 'none';
+      }, 5000);
+    }
+  }
+
+  /**
+   * Hide status message
+   */
+  hideStatus() {
+    if (this.statusBanner) {
+      this.statusBanner.style.display = 'none';
+    }
   }
 
   /**
@@ -353,13 +425,13 @@ class ArtorizeDashboard {
   switchView(viewType) {
     this.currentView = viewType;
 
-    // Update active button
-    document.querySelectorAll('.view-toggle-btn').forEach(btn => btn.classList.remove('active'));
+    // Update active button (using new class name)
+    document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
     document.getElementById(`view-${viewType}-btn`).classList.add('active');
 
     // Show/hide comparison mode selector
     document.getElementById('comparison-mode').style.display =
-      viewType === 'comparison' ? 'block' : 'none';
+      viewType === 'comparison' ? 'flex' : 'none';
 
     // Render the view
     if (viewType === 'comparison') {
@@ -565,6 +637,13 @@ class ArtorizeDashboard {
       a.click();
       URL.revokeObjectURL(url);
 
+      // Add success class to download button temporarily
+      const button = document.getElementById(`download-${variant}-btn`);
+      if (button) {
+        button.classList.add('success');
+        setTimeout(() => button.classList.remove('success'), 2000);
+      }
+
       this.showStatus(`Downloaded ${variant} image`, 'success');
     } catch (error) {
       this.showStatus(`Failed to download ${variant}: ${error.message}`, 'error');
@@ -578,12 +657,13 @@ class ArtorizeDashboard {
     // Validate form
     const validation = this.validateForm();
     if (!validation.valid) {
-      this.showStatus(`Validation errors:\n${validation.errors.join('\n')}`, 'error');
+      this.showStatus(validation.errors.join('. '), 'error');
       return;
     }
 
-    // Disable button during upload
+    // Disable button and add loading state
     this.generateButton.disabled = true;
+    this.generateButton.classList.add('loading');
 
     try {
       // Gather form data
@@ -608,6 +688,7 @@ class ArtorizeDashboard {
         console.log('Existing artwork:', submitResult.artwork);
 
         this.generateButton.disabled = false;
+        this.generateButton.classList.remove('loading');
         return;
       }
 
@@ -629,6 +710,7 @@ class ArtorizeDashboard {
       if (result.status === 'failed') {
         this.showStatus(`Processing failed: ${result.error?.message || 'Unknown error'}`, 'error');
         this.generateButton.disabled = false;
+        this.generateButton.classList.remove('loading');
         return;
       }
 
@@ -641,6 +723,7 @@ class ArtorizeDashboard {
       this.hideProgress();
     } finally {
       this.generateButton.disabled = false;
+      this.generateButton.classList.remove('loading');
     }
   }
 }

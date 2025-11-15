@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Artorize DashBoard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artorizer Dashboard - Protect Your Artwork</title>
     <link rel="stylesheet" href="styles.css">
 
     <!-- Artorize Dashboard Scripts -->
@@ -12,106 +13,320 @@
     <script src="dashboard.js"></script>
 </head>
 <body>
-<div class="content">
-    <div class="header">
-        <h1>Artorize DashBoard</h1>
-    </div>
-    <div class="input-area">
-        <div class="upload-area">
-            <span class="upload-label">Upload Image:</span>
-            <label for="image-upload" class="upload-icon">+</label>
-            <input type="file" id="image-upload" accept="image/*">
+    <main class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <h1 class="dashboard-title">Artorizer</h1>
+            <p class="dashboard-subtitle">Protect your artwork from unauthorized AI training</p>
+        </header>
+
+        <!-- Main Content -->
+        <div class="dashboard-content">
+
+            <!-- Upload Section -->
+            <section class="section upload-section" id="upload-section">
+                <div class="section-header">
+                    <svg class="section-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <h2 class="section-title">Upload Artwork</h2>
+                </div>
+
+                <div class="upload-zone" id="upload-zone">
+                    <input type="file" id="image-upload" accept="image/*" class="upload-input">
+                    <label for="image-upload" class="upload-label">
+                        <svg class="upload-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5-5-5 5M12 4v12"/>
+                        </svg>
+                        <span class="upload-text">Drag & drop your artwork or click to browse</span>
+                        <span class="upload-hint">Supports: JPG, PNG, WebP (max 10MB)</span>
+                    </label>
+                    <div id="image-preview" class="image-preview" style="display: none;">
+                        <img id="preview-image" src="" alt="Preview">
+                        <button type="button" class="remove-image" id="remove-image" aria-label="Remove image">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Protection Configuration Section -->
+            <section class="section config-section">
+                <div class="section-header">
+                    <svg class="section-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                    <h2 class="section-title">Protection Configuration</h2>
+                </div>
+
+                <div class="config-grid">
+                    <!-- Fawkes -->
+                    <div class="config-option">
+                        <div class="option-header">
+                            <input type="checkbox" id="enable-fawkes" class="option-checkbox">
+                            <label for="enable-fawkes" class="option-label">
+                                <svg class="option-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                </svg>
+                                <span>Fawkes</span>
+                            </label>
+                            <button type="button" class="info-btn" aria-label="Information about Fawkes">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="option-description">Privacy protection against facial recognition</p>
+                    </div>
+
+                    <!-- PhotoGuard -->
+                    <div class="config-option">
+                        <div class="option-header">
+                            <input type="checkbox" id="enable-photoguard" class="option-checkbox">
+                            <label for="enable-photoguard" class="option-label">
+                                <svg class="option-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                </svg>
+                                <span>PhotoGuard</span>
+                            </label>
+                            <button type="button" class="info-btn" aria-label="Information about PhotoGuard">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="option-description">Adversarial protection against image manipulation</p>
+                    </div>
+
+                    <!-- MIST -->
+                    <div class="config-option">
+                        <div class="option-header">
+                            <input type="checkbox" id="enable-mist" class="option-checkbox">
+                            <label for="enable-mist" class="option-label">
+                                <svg class="option-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                    <path d="M12 8v4M12 16h.01"></path>
+                                </svg>
+                                <span>MIST</span>
+                            </label>
+                            <button type="button" class="info-btn" aria-label="Information about MIST">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="option-description">Prevents AI model training on your artwork</p>
+                    </div>
+
+                    <!-- Nightshade -->
+                    <div class="config-option">
+                        <div class="option-header">
+                            <input type="checkbox" id="enable-nightshade" class="option-checkbox">
+                            <label for="enable-nightshade" class="option-label">
+                                <svg class="option-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                </svg>
+                                <span>Nightshade</span>
+                            </label>
+                            <button type="button" class="info-btn" aria-label="Information about Nightshade">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="option-description">Data poisoning protection for AI datasets</p>
+                    </div>
+
+                    <!-- C2PA Manifest -->
+                    <div class="config-option">
+                        <div class="option-header">
+                            <input type="checkbox" id="enable-c2pa-manifest" class="option-checkbox">
+                            <label for="enable-c2pa-manifest" class="option-label">
+                                <svg class="option-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                                <span>C2PA Manifest</span>
+                            </label>
+                            <button type="button" class="info-btn" aria-label="Information about C2PA">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="option-description">Content authenticity and provenance metadata</p>
+                    </div>
+
+                    <!-- Watermark Strategy -->
+                    <div class="config-option config-option-full">
+                        <label for="watermark-strategy" class="option-label-block">
+                            <svg class="option-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M12 1v6m0 6v6"></path>
+                            </svg>
+                            <span>Watermark Strategy</span>
+                        </label>
+                        <select id="watermark-strategy" class="select-input">
+                            <option value="invisible-watermark">Invisible Watermark</option>
+                            <option value="visible-watermark">Tree Ring Watermark</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Metadata Section -->
+            <section class="section metadata-section">
+                <div class="section-header">
+                    <svg class="section-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                    </svg>
+                    <h2 class="section-title">Artwork Metadata</h2>
+                </div>
+
+                <div class="metadata-grid">
+                    <div class="form-group">
+                        <label for="author-name" class="form-label">Author Name</label>
+                        <input type="text" id="author-name" class="form-input" placeholder="Artist name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="creation-date" class="form-label">Creation Date</label>
+                        <input type="date" id="creation-date" class="form-input">
+                    </div>
+
+                    <div class="form-group form-group-full">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea id="description" class="form-textarea" rows="4" placeholder="Describe your artwork..."></textarea>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CTA Button -->
+            <div class="cta-container">
+                <button type="button" id="generate-button" class="cta-button">
+                    <svg class="button-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        <path d="M9 12l2 2 4-4"></path>
+                    </svg>
+                    <span>Protect Artwork</span>
+                </button>
+            </div>
+
+            <!-- Status Banner (dynamically shown) -->
+            <div id="status-banner" class="status-banner" style="display: none;">
+                <svg class="status-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                <span id="status-message"></span>
+            </div>
+
+            <!-- Image Comparison Section (will be populated dynamically) -->
+            <section id="comparison-section" class="section results-section" style="display: none;">
+                <div class="section-header">
+                    <svg class="section-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="16 18 22 12 16 6"></polyline>
+                        <polyline points="8 6 2 12 8 18"></polyline>
+                    </svg>
+                    <h2 class="section-title">Results & Comparison</h2>
+                </div>
+
+                <!-- View Toggle Buttons -->
+                <div id="view-controls" class="view-controls">
+                    <button id="view-original-btn" class="view-btn">Original</button>
+                    <button id="view-protected-btn" class="view-btn">Protected</button>
+                    <button id="view-reconstructed-btn" class="view-btn">Reconstructed</button>
+                    <button id="view-comparison-btn" class="view-btn active">Compare</button>
+                </div>
+
+                <!-- Comparison Mode Selector -->
+                <div id="comparison-mode" class="comparison-mode">
+                    <label for="comparison-mode-select" class="mode-label">Comparison Mode:</label>
+                    <select id="comparison-mode-select" class="select-input">
+                        <option value="side-by-side">Side by Side</option>
+                        <option value="slider">Slider</option>
+                        <option value="overlay">Overlay</option>
+                    </select>
+                </div>
+
+                <!-- Image Display Container -->
+                <div id="image-display-container" class="image-display-container">
+                    <!-- Content will be dynamically generated -->
+                </div>
+
+                <!-- Download Controls -->
+                <div id="download-controls" class="download-controls">
+                    <button id="download-original-btn" class="download-btn">
+                        <svg class="button-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        <span>Download Original</span>
+                    </button>
+                    <button id="download-protected-btn" class="download-btn">
+                        <svg class="button-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        <span>Download Protected</span>
+                    </button>
+                    <button id="download-mask-btn" class="download-btn">
+                        <svg class="button-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        <span>Download Mask (.sac)</span>
+                    </button>
+                    <button id="download-reconstructed-btn" class="download-btn">
+                        <svg class="button-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        <span>Download Reconstructed</span>
+                    </button>
+                </div>
+
+                <!-- Job Information -->
+                <div id="job-info" class="job-info">
+                    <!-- Will be populated dynamically -->
+                </div>
+            </section>
+
         </div>
-        <div class="extend-input-area">
-<!--            input author name, creation date and description-->
-            <label for="author-name">Author Name:</label>
-            <input type="text" id="author-name">
-            <label for="creation-date">Creation Date:</label>
-            <input type="date" id="creation-date">
-            <label for="description">Description:</label>
-            <textarea id="description" rows="4" cols="50"></textarea>
-        </div>
-        <div class="extended-config-area">
-<!--
+    </main>
 
-{
-  "workflow": {
-    "enable_fawkes": true,
-    "enable_photoguard": true,
-    "enable_mist": true,
-    "enable_nightshade": true,
-    "watermark_strategy": "invisible-watermark",
-    "enable_c2pa_manifest": true
-  }
-}
--->
-            <input type="checkbox" id="enable-fawkes">
-             <label for="enable-fawkes">Enable Fawkes</label>
-             <input type="checkbox" id="enable-photoguard">
-             <label for="enable-photoguard">Enable Photoguard</label>
-             <input type="checkbox" id="enable-mist">
-             <label for="enable-mist">Enable Mist</label>
-             <input type="checkbox" id="enable-nightshade">
-             <label for="enable-nightshade">Enable Nightshade</label>
-             <input type="checkbox" id="enable-c2pa-manifest">
-             <label for="enable-c2pa-manifest">Enable C2PA Manifest</label>
-            <label for="watermark-strategy">Watermark Strategy:</label>
-            <select id="watermark-strategy">
-                <option value="invisible-watermark">Invisible Watermark</option>
-                <option value="visible-watermark">Tree ring</option>
-            </select>
-        </div>
-        <button id="generate-button">Generate</button>
-    </div>
-
-    <!-- Status and results will be dynamically inserted here by dashboard.js -->
-
-    <!-- Image Comparison Section (will be populated dynamically) -->
-    <div id="comparison-section" style="display: none;">
-        <h2 style="text-align: center; margin: 30px 0 20px;">Image Comparison</h2>
-
-        <!-- View Toggle Buttons -->
-        <div id="view-controls" style="text-align: center; margin: 20px 0;">
-            <button id="view-original-btn" class="view-toggle-btn">Original</button>
-            <button id="view-protected-btn" class="view-toggle-btn">Protected</button>
-            <button id="view-reconstructed-btn" class="view-toggle-btn">Reconstructed (CDN)</button>
-            <button id="view-comparison-btn" class="view-toggle-btn active">Compare</button>
-        </div>
-
-        <!-- Comparison Mode Selector -->
-        <div id="comparison-mode" style="text-align: center; margin: 20px 0;">
-            <label style="margin-right: 10px;">Comparison Mode:</label>
-            <select id="comparison-mode-select">
-                <option value="side-by-side">Side by Side</option>
-                <option value="slider">Slider</option>
-                <option value="overlay">Overlay</option>
-            </select>
-        </div>
-
-        <!-- Image Display Container -->
-        <div id="image-display-container" style="max-width: 1200px; margin: 0 auto; position: relative;">
-            <!-- Content will be dynamically generated -->
-        </div>
-
-        <!-- Download Controls -->
-        <div id="download-controls" style="text-align: center; margin: 30px 0;">
-            <button id="download-original-btn" class="download-btn">Download Original</button>
-            <button id="download-protected-btn" class="download-btn">Download Protected</button>
-            <button id="download-mask-btn" class="download-btn">Download Mask (.sac)</button>
-            <button id="download-reconstructed-btn" class="download-btn">Download Reconstructed</button>
-        </div>
-
-        <!-- Job Information -->
-        <div id="job-info" style="margin: 30px auto; max-width: 600px; padding: 20px; background: #f5f5f5; border-radius: 8px;">
-            <!-- Will be populated dynamically -->
-        </div>
-    </div>
-</div>
-
-<script>
-// Optional: Override config for this deployment
-// window.ArtorizeConfig.ROUTER_URL = 'https://your-router.com';
-// window.ArtorizeConfig.CDN_URL = 'https://your-cdn.com';
-</script>
+    <script>
+    // Optional: Override config for this deployment
+    // window.ArtorizeConfig.ROUTER_URL = 'https://your-router.com';
+    // window.ArtorizeConfig.CDN_URL = 'https://your-cdn.com';
+    </script>
 </body>
 </html>
