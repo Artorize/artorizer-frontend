@@ -59,6 +59,13 @@ class ArtorizeDashboard {
     // Status banner
     this.statusBanner = document.getElementById('status-banner');
     this.statusMessage = document.getElementById('status-message');
+
+    // Today button
+    this.todayBtn = document.getElementById('today-btn');
+
+    // Global drop overlay
+    this.globalDropOverlay = document.getElementById('global-drop-overlay');
+    this.appBody = document.getElementById('app-body');
   }
 
   /**
@@ -79,7 +86,15 @@ class ArtorizeDashboard {
       });
     }
 
-    // Drag and drop functionality
+    // Today button
+    if (this.todayBtn) {
+      this.todayBtn.addEventListener('click', () => this.setTodayDate());
+    }
+
+    // Global drag and drop - anywhere on page
+    this.setupGlobalDragAndDrop();
+
+    // Drag and drop functionality for upload zone
     if (this.uploadZone) {
       this.uploadZone.addEventListener('dragover', (e) => {
         e.preventDefault();
@@ -177,6 +192,92 @@ class ArtorizeDashboard {
     this.previewImage.src = '';
     this.uploadLabel.style.display = 'flex';
     this.imagePreview.style.display = 'none';
+  }
+
+  /**
+   * Set date input to today
+   */
+  setTodayDate() {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    this.creationDateInput.value = `${yyyy}-${mm}-${dd}`;
+
+    // Visual feedback
+    this.todayBtn.style.background = 'var(--color-success)';
+    this.todayBtn.style.color = 'white';
+    this.todayBtn.style.borderColor = 'var(--color-success)';
+    setTimeout(() => {
+      this.todayBtn.style.background = '';
+      this.todayBtn.style.color = '';
+      this.todayBtn.style.borderColor = '';
+    }, 500);
+  }
+
+  /**
+   * Setup global drag and drop functionality
+   */
+  setupGlobalDragAndDrop() {
+    let dragCounter = 0;
+
+    // Prevent default drag behaviors on the entire document
+    document.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    document.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    // Show overlay when dragging over the body
+    this.appBody.addEventListener('dragenter', (e) => {
+      e.preventDefault();
+      dragCounter++;
+
+      // Only show overlay if dragging files
+      if (e.dataTransfer.types && e.dataTransfer.types.includes('Files')) {
+        this.globalDropOverlay.style.display = 'flex';
+      }
+    });
+
+    this.appBody.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      dragCounter--;
+
+      if (dragCounter === 0) {
+        this.globalDropOverlay.style.display = 'none';
+      }
+    });
+
+    // Handle drop on overlay
+    this.globalDropOverlay.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dragCounter = 0;
+      this.globalDropOverlay.style.display = 'none';
+
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        // Set the files to the input
+        this.imageUploadInput.files = files;
+        this.handleFileSelect({ target: { files: files } });
+
+        // Scroll to upload section
+        document.getElementById('upload-section').scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    });
+
+    // Hide overlay when dragging over it
+    this.globalDropOverlay.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
   }
 
   /**
