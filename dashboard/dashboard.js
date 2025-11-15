@@ -47,7 +47,6 @@ class ArtorizeDashboard {
     this.watermarkStrategySelect = document.getElementById('watermark-strategy');
 
     // Buttons
-    this.submitButton = document.getElementById('submit-button');
     this.generateButton = document.getElementById('generate-button');
 
     // Upload label
@@ -60,9 +59,6 @@ class ArtorizeDashboard {
   attachEventListeners() {
     // File selection
     this.imageUploadInput.addEventListener('change', (e) => this.handleFileSelect(e));
-
-    // Submit button (currently same as generate)
-    this.submitButton.addEventListener('click', () => this.handleSubmit());
 
     // Generate button
     this.generateButton.addEventListener('click', () => this.handleSubmit());
@@ -150,7 +146,14 @@ class ArtorizeDashboard {
   gatherFormData() {
     const artistName = this.authorNameInput.value.trim();
     const description = this.descriptionInput.value.trim();
-    const creationDate = this.creationDateInput.value;
+    const creationDateValue = this.creationDateInput.value;
+
+    // Convert date string to Date object for proper ISO formatting
+    // HTML date input returns "YYYY-MM-DD", but API needs full datetime
+    let creationDate = undefined;
+    if (creationDateValue) {
+      creationDate = new Date(creationDateValue + 'T00:00:00.000Z');
+    }
 
     // Protection options
     const protectionOptions = {
@@ -167,7 +170,7 @@ class ArtorizeDashboard {
       artist_name: artistName,
       artwork_title: artistName, // Using artist name as title (you should add a title field)
       artwork_description: description || undefined,
-      artwork_creation_time: creationDate || undefined,
+      artwork_creation_time: creationDate,
       tags: [], // You could add a tags input field
       protectionOptions
     };
@@ -579,8 +582,7 @@ class ArtorizeDashboard {
       return;
     }
 
-    // Disable buttons during upload
-    this.submitButton.disabled = true;
+    // Disable button during upload
     this.generateButton.disabled = true;
 
     try {
@@ -605,7 +607,6 @@ class ArtorizeDashboard {
         // You could display the existing artwork here
         console.log('Existing artwork:', submitResult.artwork);
 
-        this.submitButton.disabled = false;
         this.generateButton.disabled = false;
         return;
       }
@@ -627,7 +628,6 @@ class ArtorizeDashboard {
       // Check final status
       if (result.status === 'failed') {
         this.showStatus(`Processing failed: ${result.error?.message || 'Unknown error'}`, 'error');
-        this.submitButton.disabled = false;
         this.generateButton.disabled = false;
         return;
       }
@@ -640,7 +640,6 @@ class ArtorizeDashboard {
       this.showStatus(`Error: ${error.message}`, 'error');
       this.hideProgress();
     } finally {
-      this.submitButton.disabled = false;
       this.generateButton.disabled = false;
     }
   }
