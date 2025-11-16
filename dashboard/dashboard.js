@@ -485,21 +485,189 @@ class ArtorizeDashboard {
   }
 
   /**
-   * Show progress
+   * Build processing steps from processor config
+   * @param {Object} config - Processor configuration from API
+   * @returns {Array} Array of step objects
    */
-  showProgress(percent, message) {
-    let progressContainer = document.getElementById('progress-container');
+  buildProcessingSteps(config) {
+    const steps = [];
+
+    // Add enabled processors
+    if (config.processors && config.processors.length > 0) {
+      config.processors.forEach(processor => {
+        steps.push({
+          id: `processor-${processor}`,
+          title: `Processing ${processor}`,
+          type: 'processor',
+          processor: processor
+        });
+      });
+    }
+
+    // Add protection layers
+    if (config.protection_layers) {
+      Object.entries(config.protection_layers).forEach(([layer, enabled]) => {
+        if (enabled) {
+          const layerNames = {
+            fawkes: 'Fawkes Protection',
+            photoguard: 'PhotoGuard Protection',
+            mist: 'MIST Protection',
+            nightshade: 'Nightshade Protection',
+            stegano_embed: 'Steganography Embedding',
+            c2pa_manifest: 'C2PA Manifest'
+          };
+          steps.push({
+            id: `layer-${layer}`,
+            title: `Applying ${layerNames[layer] || layer}`,
+            type: 'protection',
+            layer: layer
+          });
+        }
+      });
+    }
+
+    // Add watermark step if configured
+    if (config.watermark_strategy && config.watermark_strategy !== 'none') {
+      const strategyNames = {
+        'invisible-watermark': 'Invisible Watermark',
+        'tree-ring': 'Tree Ring Watermark',
+        'visible-watermark': 'Visible Watermark'
+      };
+      steps.push({
+        id: 'watermark',
+        title: `Applying ${strategyNames[config.watermark_strategy] || config.watermark_strategy}`,
+        type: 'watermark',
+        strategy: config.watermark_strategy
+      });
+    }
+
+    // Add final upload step
+    steps.push({
+      id: 'upload',
+      title: 'Uploading results to backend',
+      type: 'upload'
+    });
+
+    return steps;
+  }
+
+  /**
+   * Show progress tracker (GitHub style)
+   * @param {Object} statusData - Job status data from API
+   */
+  showProgressTracker(statusData) {
+    let progressContainer = document.getElementById('progress-tracker-container');
+
     if (!progressContainer) {
       progressContainer = document.createElement('div');
-      progressContainer.id = 'progress-container';
+      progressContainer.id = 'progress-tracker-container';
+      this.generateButton.parentElement.appendChild(progressContainer);
+    }
+
+    // Build steps from processor config
+    const steps = statusData.processor_config
+      ? this.buildProcessingSteps(statusData.processor_config)
+      : [];
+
+    // Get current progress
+    const progress = statusData.progress || {};
+    const currentStepNumber = progress.step_number || 0;
+    const totalSteps = progress.total_steps || steps.length;
+    const percentage = progress.percentage || 0;
+
+    // Build HTML
+    const stepsHtml = steps.map((step, index) => {
+      const stepNumber = index + 1;
+      let state = 'pending';
+      let details = '';
+
+      if (stepNumber < currentStepNumber) {
+        state = 'completed';
+      } else if (stepNumber === currentStepNumber) {
+        state = 'processing';
+        details = progress.details ? this.formatProgressDetails(progress.details) : '';
+      }
+
+      return `
+        <li class="progress-step ${state}">
+          <div class="progress-step-indicator"></div>
+          <div class="progress-step-content">
+            <div class="progress-step-title">${step.title}</div>
+            ${details ? `<div class="progress-step-details">${details}</div>` : ''}
+          </div>
+        </li>
+      `;
+    }).join('');
+
+    progressContainer.innerHTML = `
+      <div class="progress-tracker">
+        <div class="progress-tracker-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+          Processing Progress
+        </div>
+        <ul class="progress-steps">
+          ${stepsHtml}
+        </ul>
+        <div class="progress-overall">
+          <div class="progress-overall-bar">
+            <div class="progress-overall-fill" style="width: ${percentage}%"></div>
+          </div>
+          <div class="progress-overall-text">
+            <span>Step ${currentStepNumber} of ${totalSteps}</span>
+            <span class="progress-overall-percentage">${percentage}%</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Format progress details for display
+   * @param {Object} details - Progress details object
+   * @returns {string} Formatted details string
+   */
+  formatProgressDetails(details) {
+    const parts = [];
+
+    if (details.processor) {
+      parts.push(`Processor: ${details.processor}`);
+    }
+    if (details.hash_type) {
+      parts.push(`Hash type: ${details.hash_type}`);
+    }
+    if (details.protection_layer) {
+      parts.push(`Layer: ${details.protection_layer}`);
+    }
+    if (details.watermark_strategy) {
+      parts.push(`Strategy: ${details.watermark_strategy}`);
+    }
+    if (details.operation) {
+      parts.push(`Operation: ${details.operation}`);
+    }
+
+    return parts.join(' • ');
+  }
+
+  /**
+   * Show progress (legacy - for upload progress)
+   */
+  showProgress(percent, message) {
+    // For upload progress, show a simple bar
+    let progressContainer = document.getElementById('upload-progress-container');
+    if (!progressContainer) {
+      progressContainer = document.createElement('div');
+      progressContainer.id = 'upload-progress-container';
       progressContainer.style.cssText = 'margin: 20px 0;';
       this.generateButton.parentElement.appendChild(progressContainer);
     }
 
     progressContainer.innerHTML = `
       <div style="margin-bottom: 10px; text-align: center; font-size: 1rem;">${message}</div>
-      <div style="width: 100%; background: #e0e0e0; border-radius: 10px; overflow: hidden; height: 30px;">
-        <div style="width: ${percent}%; background: linear-gradient(90deg, #4CAF50, #45a049); height: 100%; transition: width 0.3s ease; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+      <div style="width: 100%; background: var(--color-surface-recessed); border-radius: 10px; overflow: hidden; height: 30px; box-shadow: var(--shadow-inset-recessed);">
+        <div style="width: ${percent}%; background: linear-gradient(90deg, #10b981, #059669); height: 100%; transition: width 0.3s ease; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
           ${percent}%
         </div>
       </div>
@@ -510,7 +678,17 @@ class ArtorizeDashboard {
    * Hide progress
    */
   hideProgress() {
-    const progressContainer = document.getElementById('progress-container');
+    const uploadProgress = document.getElementById('upload-progress-container');
+    if (uploadProgress) {
+      uploadProgress.remove();
+    }
+  }
+
+  /**
+   * Hide progress tracker
+   */
+  hideProgressTracker() {
+    const progressContainer = document.getElementById('progress-tracker-container');
     if (progressContainer) {
       progressContainer.remove();
     }
@@ -539,6 +717,7 @@ class ArtorizeDashboard {
       await this.reconstructFromCDN(result);
 
       this.hideProgress();
+      this.hideProgressTracker(); // Also hide progress tracker if still visible
       this.showStatus('All images loaded successfully!', 'success');
 
       // Show comparison section
@@ -895,18 +1074,26 @@ class ArtorizeDashboard {
       }
 
       // Poll for completion
-      this.showProgress(100, 'Processing artwork...');
+      this.hideProgress(); // Hide upload progress
       this.showStatus('Processing your artwork with protection layers...', 'info');
 
       const result = await this.uploader.pollJobUntilComplete(
         this.currentJobId,
         (status) => {
           console.log('Status update:', status);
-          this.showStatus(`Processing... (${status.status})`, 'info');
+
+          // Update progress tracker with current status
+          if (status.processor_config || status.progress) {
+            this.showProgressTracker(status);
+          }
+
+          // Update status message
+          const currentStep = status.progress?.current_step || 'Processing';
+          this.showStatus(currentStep, 'info');
         }
       );
 
-      this.hideProgress();
+      this.hideProgressTracker();
 
       // Check final status
       if (result.status === 'failed') {
@@ -923,6 +1110,7 @@ class ArtorizeDashboard {
       console.error('Submission error:', error);
       this.showStatus(`Error: ${error.message}`, 'error');
       this.hideProgress();
+      this.hideProgressTracker();
     } finally {
       this.generateButton.disabled = false;
       this.generateButton.classList.remove('loading');
