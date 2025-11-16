@@ -11,11 +11,11 @@
 }
 
 :root {
-    /* Color Palette - Layered depth system (Dark) */
+    /* Color Palette - Layered depth system (Dark) - Enhanced contrast */
     --color-bg: #0a0a0a;
     --color-surface: #1a1a1a;
-    --color-surface-elevated: #232323;
-    --color-surface-recessed: #141414;
+    --color-surface-elevated: #0f0f0f;
+    --color-surface-recessed: #0d0d0d;
 
     /* Borders */
     --color-border: #2a2a2a;
@@ -37,11 +37,11 @@
     --color-disabled-bg: #2a2a2a;
     --color-disabled-text: rgba(245, 245, 245, 0.3);
 
-    /* Focus and selection colors - keeping blue for consistency */
-    --color-focus: #3b82f6;
-    --color-focus-light: rgba(59, 130, 246, 0.2);
-    --color-selection-bg: #1e3a8a;
-    --color-selection-text: #dbeafe;
+    /* Focus and selection colors - gray for subtle indication */
+    --color-focus: #6b7280;
+    --color-focus-light: rgba(107, 116, 128, 0.15);
+    --color-selection-bg: #374151;
+    --color-selection-text: #e5e7eb;
 
     /* Semantic Colors (Messages Only) */
     --color-success: #10b981;
@@ -387,6 +387,21 @@ body {
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08) inset;
 }
 
+/* Remove hover/active effects from watermark strategy */
+.config-option-full {
+    cursor: default;
+}
+
+.config-option-full:hover {
+    transform: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.config-option-full:active {
+    transform: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
 .config-option:has(.option-checkbox:checked) {
     border-color: var(--color-focus);
     background: var(--color-focus-light);
@@ -504,6 +519,20 @@ body {
     transition: all var(--transition-fast);
 }
 
+/* Enhanced select dropdown styling */
+.select-input {
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(245,245,245,0.5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+    background-repeat: no-repeat;
+    background-position: right var(--spacing-sm) center;
+    padding-right: 2.5rem;
+    cursor: pointer;
+}
+
+.select-input:hover {
+    background-color: var(--color-hover-bg);
+}
+
 .form-input:focus,
 .form-textarea:focus,
 .select-input:focus {
@@ -511,7 +540,6 @@ body {
     box-shadow:
         0 0 0 2px var(--color-focus),
         var(--shadow-inset-recessed);
-    background: #97a3ae;
     background: var(--color-focus-light);
 }
 
@@ -533,6 +561,23 @@ body {
 
 .date-input-group .form-input {
     flex: 1;
+}
+
+/* Enhanced date input styling */
+.form-input[type="date"] {
+    position: relative;
+    padding-right: var(--spacing-md);
+}
+
+.form-input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.6;
+    filter: invert(1);
+    transition: opacity var(--transition-fast);
+}
+
+.form-input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
 }
 
 .today-btn {
