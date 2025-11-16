@@ -30,49 +30,75 @@
             <p class="dashboard-subtitle">Protect your artwork from unauthorized AI training</p>
         </header>
 
-        <!-- Main Content -->
-        <div class="dashboard-content">
+        <!-- Main Content - Split Layout -->
+        <div class="dashboard-content-split" id="dashboard-content-split">
 
-            <!-- Two Column Layout -->
-            <div class="main-grid">
+            <!-- Left Sidebar -->
+            <aside class="left-sidebar">
 
-                <!-- Left Column: Upload -->
-                <section class="section upload-section" id="upload-section">
-                <div class="section-header">
-                    <svg class="section-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="17 8 12 3 7 8"></polyline>
-                        <line x1="12" y1="3" x2="12" y2="15"></line>
-                    </svg>
-                    <h2 class="section-title">Upload Artwork</h2>
-                </div>
-
-                <div class="upload-zone" id="upload-zone">
-                    <input type="file" id="image-upload" accept="image/*" class="upload-input">
-                    <label for="image-upload" class="upload-label">
-                        <svg class="upload-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5-5-5 5M12 4v12"/>
+                <!-- Upload Section - Collapsed after upload -->
+                <section class="section upload-section-collapsed" id="upload-section" style="display: none;">
+                    <div class="collapsed-upload-header" id="collapsed-upload-header">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
                         </svg>
-                        <span class="upload-text">Drag & drop or click to browse</span>
-                        <span class="upload-hint">PNG, JPG or WebP · up to 10MB</span>
-                    </label>
-                    <div id="image-preview" class="image-preview" style="display: none;">
-                        <img id="preview-image" src="" alt="Preview">
-                        <button type="button" class="remove-image" id="remove-image" aria-label="Remove image">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                            </svg>
-                        </button>
+                        <div class="collapsed-upload-info">
+                            <span class="collapsed-filename" id="collapsed-filename">artwork.jpg</span>
+                            <button type="button" class="change-image-btn" id="change-image-btn" aria-label="Change image">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
-                </div>
                 </section>
 
-                <!-- Right Column: Configuration + Metadata -->
-                <div class="right-column">
+                <!-- Upload Zone - Initial State -->
+                <section class="section upload-section-initial" id="upload-section-initial">
+                    <div class="section-header">
+                        <svg class="section-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <h2 class="section-title">Upload</h2>
+                    </div>
 
-                    <!-- Protection Configuration Section -->
-                    <section class="section config-section">
+                    <div class="upload-zone" id="upload-zone">
+                        <input type="file" id="image-upload" accept="image/*" class="upload-input">
+                        <label for="image-upload" class="upload-label">
+                            <svg class="upload-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5-5-5 5M12 4v12"/>
+                            </svg>
+                            <span class="upload-text">Drop artwork here or click to browse</span>
+                            <span class="upload-hint">PNG, JPG or WebP · up to 10MB</span>
+                        </label>
+                    </div>
+                </section>
+
+                <!-- Progress Tracker Section -->
+                <section class="section progress-section" id="progress-section">
+                    <div class="section-header">
+                        <svg class="section-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                        <h2 class="section-title">Progress</h2>
+                    </div>
+                    <div id="progress-tracker-content" class="progress-tracker-content">
+                        <!-- Progress steps will be added here dynamically -->
+                    </div>
+                </section>
+
+            </aside>
+
+            <!-- Right Main Area -->
+            <main class="right-main-area">
+
+                <!-- Protection Configuration Section -->
+                <section class="section config-section">
                 <div class="section-header">
                     <svg class="section-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
@@ -252,20 +278,20 @@
                 </div>
                     </section>
 
-                </div> <!-- End right column -->
+                    <!-- CTA Button -->
+                    <div class="cta-container">
+                        <button type="button" id="generate-button" class="cta-button">
+                            <svg class="button-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                <path d="M9 12l2 2 4-4"></path>
+                            </svg>
+                            <span>Protect Artwork</span>
+                        </button>
+                    </div>
 
-            </div> <!-- End main-grid -->
+                </main> <!-- End right-main-area -->
 
-            <!-- CTA Button -->
-            <div class="cta-container">
-                <button type="button" id="generate-button" class="cta-button">
-                    <svg class="button-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                        <path d="M9 12l2 2 4-4"></path>
-                    </svg>
-                    <span>Protect Artwork</span>
-                </button>
-            </div>
+            </div> <!-- End dashboard-content-split -->
 
             <!-- Status Banner (dynamically shown) -->
             <div id="status-banner" class="status-banner" style="display: none;">

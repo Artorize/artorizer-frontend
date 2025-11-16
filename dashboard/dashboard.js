@@ -24,8 +24,22 @@ class ArtorizeDashboard {
     this.currentView = 'comparison';
     this.comparisonMode = 'side-by-side';
 
+    // Step timing tracking
+    this.stepStartTimes = {};
+    this.stepElapsedTimes = {};
+    this.timerInterval = null;
+
+    // Store the submitted processor config for progress tracking
+    this.submittedProcessorConfig = null;
+
+    // Sequential step processing
+    this.currentProcessingStep = 0;
+    this.totalProcessingSteps = 0;
+    this.stepProcessingInterval = null;
+
     this.initializeElements();
     this.attachEventListeners();
+    this.initializeProgressSection();
   }
 
   /**
@@ -668,9 +682,30 @@ class ArtorizeDashboard {
 
   /**
    * Show progress tracker with GitHub Actions inspired styling
+   *
+   * Progress tracking logic based on step_number from callback:
+   * - Steps BEFORE current step_number → marked as "completed" (green checkmark)
+   * - Step AT current step_number → marked as "processing" (spinning icon)
+   * - Steps AFTER current step_number → marked as "pending" (empty circle)
+   *
+   * Example: If step_number = 3, total_steps = 5:
+   *   Step 1: completed ✓
+   *   Step 2: completed ✓
+   *   Step 3: processing ⟳
+   *   Step 4: pending ○
+   *   Step 5: pending ○
+   *
    * @param {Object} statusData - Job status data from API
+   * @param {Object} statusData.progress - Progress information
+   * @param {number} statusData.progress.step_number - Current step number (1-based)
+   * @param {number} statusData.progress.total_steps - Total number of steps
+   * @param {string} statusData.progress.current_step - Description of current step
+   * @param {number} statusData.progress.percentage - Overall progress (0-100)
+   * @param {Object} statusData.progress.details - Additional step details
    */
   showProgressTracker(statusData) {
+    console.log('[Progress Tracker] Called with statusData:', statusData);
+
     const progressSection = document.getElementById('progress-section');
     if (progressSection && progressSection.style.display === 'none') {
       progressSection.style.display = 'block';
@@ -688,12 +723,41 @@ class ArtorizeDashboard {
       return String(value);
     };
 
-    const steps = statusData.processor_config
-      ? this.buildProcessingSteps(statusData.processor_config)
-      : [];
+    // Build steps from processor_config or fall back to current form configuration
+    let steps = [];
+    if (statusData.processor_config) {
+      console.log('[Progress Tracker] Building steps from processor_config:', statusData.processor_config);
+      steps = this.buildProcessingSteps(statusData.processor_config);
+    } else {
+      console.log('[Progress Tracker] No processor_config, building from form state');
+      // Fallback to building from current form state
+      steps = this.buildProcessingSteps();
+    }
+
+    console.log('[Progress Tracker] Built steps:', steps);
+
+    // If still no steps, we can't show progress
+    if (steps.length === 0) {
+      console.warn('[Progress Tracker] No steps available to show progress');
+      return;
+    }
 
     const progress = statusData.progress || {};
     const currentStepNumber = progress.step_number || 0;
+    const totalSteps = progress.total_steps || steps.length;
+    const currentStepDescription = progress.current_step || '';
+    const jobStatus = statusData.status || '';
+
+    // Log progress for debugging
+    console.log('Progress update:', {
+      currentStepNumber,
+      totalSteps,
+      currentStepDescription,
+      percentage: progress.percentage,
+      details: progress.details,
+      jobStatus
+    });
+
     const completedSteps = new Set();
     const explicitStateById = {};
     const detailsByStep = {};
@@ -757,24 +821,58 @@ class ArtorizeDashboard {
         const stepNumber = index + 1;
         const safeId = step.id || `step-${index}`;
         const stepKey = toStepKey(safeId);
-        let state = explicitStateById[stepKey] || 'pending';
+        let state = 'pending';
 
-        if (completedSteps.has(stepKey)) {
+        // Determine state based on job status and step_number (sequential processing)
+        if (jobStatus === 'completed' || currentStepNumber >= 999) {
+          // Job is complete, mark all steps as completed
           state = 'completed';
-        } else if (activeStepId && stepKey === activeStepId) {
-          state = 'processing';
-        } else if (state === 'pending' && currentStepNumber) {
+        } else if (currentStepNumber > 0) {
+          // Sequential step processing
           if (stepNumber < currentStepNumber) {
+            // Steps before current step are completed (green checkmark)
             state = 'completed';
           } else if (stepNumber === currentStepNumber) {
+            // Current step is processing (orange spinner)
             state = 'processing';
+          } else {
+            // Steps after current step are pending (gray circle)
+            state = 'pending';
           }
         }
 
+        // Override with explicit state if provided (for edge cases)
+        if (completedSteps.has(stepKey)) {
+          state = 'completed';
+        } else if (explicitStateById[stepKey]) {
+          state = explicitStateById[stepKey];
+        } else if (activeStepId && stepKey === activeStepId) {
+          state = 'processing';
+        }
+
+        // Get details for the current processing step
         const detailSource =
           detailsByStep[stepKey] || (state === 'processing' ? progress.details : null);
         const details = formatDetails(detailSource);
         const indicatorIcon = this.renderProgressIndicator(state);
+
+        // Track step timing
+        if (state === 'processing') {
+          this.startStepTimer(safeId);
+        } else if (state === 'completed') {
+          this.completeStep(safeId);
+        }
+
+        // Get elapsed time for display
+        let elapsedTimeDisplay = '';
+        if (state === 'processing' && this.stepStartTimes[safeId]) {
+          const elapsed = Date.now() - this.stepStartTimes[safeId];
+          elapsedTimeDisplay = this.formatElapsedTime(elapsed);
+        } else if (state === 'completed' && this.stepElapsedTimes[safeId]) {
+          elapsedTimeDisplay = this.formatElapsedTime(this.stepElapsedTimes[safeId]);
+        }
+
+        console.log(`[Progress Tracker] Step "${step.title}" (${safeId}): state=${state}, elapsed=${elapsedTimeDisplay}`);
 
         return `
             <li class="progress-step ${state}" data-step-id="${safeId}">
@@ -782,7 +880,10 @@ class ArtorizeDashboard {
                 ${indicatorIcon}
               </div>
               <div class="progress-step-content">
-                <div class="progress-step-title">${step.title}</div>
+                <div class="progress-step-header">
+                  <div class="progress-step-title">${step.title}</div>
+                  ${elapsedTimeDisplay ? `<div class="progress-step-elapsed">${elapsedTimeDisplay}</div>` : ''}
+                </div>
                 ${details ? `<div class="progress-step-details">${details}</div>` : ''}
               </div>
             </li>
@@ -835,7 +936,9 @@ class ArtorizeDashboard {
               ${this.renderProgressIndicator('pending')}
             </div>
             <div class="progress-step-content">
-              <div class="progress-step-title">${step.title}</div>
+              <div class="progress-step-header">
+                <div class="progress-step-title">${step.title}</div>
+              </div>
             </div>
           </li>
         `;
@@ -857,14 +960,14 @@ class ArtorizeDashboard {
   }
 
   /**
-   * Render SVG indicator per state
+   * Render SVG indicator per state (GitHub-style icons)
    * @param {'pending'|'processing'|'completed'} state
    * @returns {string}
    */
   renderProgressIndicator(state) {
     if (state === 'completed') {
       return `
-        <svg class="progress-icon" viewBox="0 0 16 16" role="img" aria-label="completed">
+        <svg class="progress-icon octicon-check-circle-fill" viewBox="0 0 16 16" width="16" height="16" role="img" aria-label="completed">
           <path d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16Zm3.78-9.72a.751.751 0 0 0-.018-1.042.751.751 0 0 0-1.042-.018L6.75 9.19 5.28 7.72a.751.751 0 0 0-1.042.018.751.751 0 0 0-.018 1.042l2 2a.75.75 0 0 0 1.06 0Z" fill="currentColor"></path>
         </svg>
       `;
@@ -872,17 +975,17 @@ class ArtorizeDashboard {
 
     if (state === 'processing') {
       return `
-        <svg class="progress-icon progress-spinner" viewBox="0 0 16 16" role="img" aria-label="processing">
-          <path fill="none" stroke="currentColor" stroke-width="2" d="M3.05 3.05a7 7 0 1 1 9.9 9.9 7 7 0 0 1-9.9-9.9Z" opacity=".5"></path>
-          <path fill="currentColor" fill-rule="evenodd" d="M8 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z" clip-rule="evenodd"></path>
-          <path fill="currentColor" d="M14 8a6 6 0 0 0-6-6V0a8 8 0 0 1 8 8h-2Z"></path>
+        <svg class="progress-icon progress-spinner" width="16" height="16" fill="none" viewBox="0 0 16 16" role="img" aria-label="processing">
+          <path opacity=".5" d="M8 15A7 7 0 108 1a7 7 0 000 14v0z" stroke="currentColor" stroke-width="2"></path>
+          <path d="M15 8a7 7 0 01-7 7" stroke="currentColor" stroke-width="2"></path>
+          <path d="M8 12a4 4 0 100-8 4 4 0 000 8z" fill="currentColor"></path>
         </svg>
       `;
     }
 
     return `
-      <svg class="progress-icon" viewBox="0 0 16 16" role="img" aria-label="pending">
-        <path fill="none" stroke="currentColor" stroke-width="1.5" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13Z"></path>
+      <svg class="progress-icon octicon-circle" viewBox="0 0 16 16" width="16" height="16" role="img" aria-label="pending">
+        <path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13Z" fill="currentColor"></path>
       </svg>
     `;
   }
@@ -957,10 +1060,176 @@ class ArtorizeDashboard {
       progressSection.style.display = 'none';
     }
 
+    // Stop timer
+    this.stopTimer();
+
+    // Stop sequential processing
+    if (this.stepProcessingInterval) {
+      clearInterval(this.stepProcessingInterval);
+      this.stepProcessingInterval = null;
+    }
+
+    // Reset sequential state
+    this.currentProcessingStep = 0;
+    this.totalProcessingSteps = 0;
+
     // Also clear the content
     const progressContainer = document.getElementById('progress-tracker-content');
     if (progressContainer) {
       progressContainer.innerHTML = '';
+    }
+  }
+
+  /**
+   * Initialize progress section to be visible by default
+   */
+  initializeProgressSection() {
+    const progressSection = document.getElementById('progress-section');
+    if (progressSection) {
+      progressSection.style.display = 'block';
+    }
+
+    // Show initial steps based on configuration
+    this.showInitialProgressTracker();
+
+    // Set up listeners to update when checkboxes change
+    this.setupConfigChangeListeners();
+  }
+
+  /**
+   * Start tracking time for a step
+   */
+  startStepTimer(stepId) {
+    if (!this.stepStartTimes[stepId]) {
+      this.stepStartTimes[stepId] = Date.now();
+    }
+
+    // Start the update interval if not already running
+    if (!this.timerInterval) {
+      this.timerInterval = setInterval(() => this.updateStepTimers(), 1000);
+    }
+  }
+
+  /**
+   * Stop the timer interval
+   */
+  stopTimer() {
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+      this.timerInterval = null;
+    }
+  }
+
+  /**
+   * Update all step timers in the UI
+   */
+  updateStepTimers() {
+    Object.keys(this.stepStartTimes).forEach(stepId => {
+      const elapsed = Date.now() - this.stepStartTimes[stepId];
+      const elapsedElement = document.querySelector(`[data-step-id="${stepId}"] .progress-step-elapsed`);
+      if (elapsedElement) {
+        elapsedElement.textContent = this.formatElapsedTime(elapsed);
+      }
+    });
+  }
+
+  /**
+   * Format elapsed time in seconds
+   */
+  formatElapsedTime(milliseconds) {
+    const seconds = Math.floor(milliseconds / 1000);
+    if (seconds < 60) {
+      return `${seconds}s`;
+    }
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}m ${remainingSeconds}s`;
+  }
+
+  /**
+   * Complete a step and record its final time
+   */
+  completeStep(stepId) {
+    if (this.stepStartTimes[stepId]) {
+      const elapsed = Date.now() - this.stepStartTimes[stepId];
+      this.stepElapsedTimes[stepId] = elapsed;
+      delete this.stepStartTimes[stepId];
+    }
+  }
+
+  /**
+   * Start sequential step processing simulation
+   */
+  startSequentialProcessing(totalSteps) {
+    console.log('[Sequential] Starting sequential processing with', totalSteps, 'steps');
+
+    this.currentProcessingStep = 0;
+    this.totalProcessingSteps = totalSteps;
+
+    // Clear existing timing data
+    this.stepStartTimes = {};
+    this.stepElapsedTimes = {};
+
+    // Clear any existing interval
+    if (this.stepProcessingInterval) {
+      clearInterval(this.stepProcessingInterval);
+    }
+
+    // Advance to first step immediately
+    this.currentProcessingStep = 1;
+    this.updateProgressDisplay();
+  }
+
+  /**
+   * Advance to next step in sequence
+   */
+  advanceToNextStep() {
+    if (this.currentProcessingStep < this.totalProcessingSteps) {
+      this.currentProcessingStep++;
+      this.updateProgressDisplay();
+      console.log('[Sequential] Advanced to step', this.currentProcessingStep, 'of', this.totalProcessingSteps);
+
+      // If we've reached the last step, stop the interval and keep it spinning
+      // until the actual job completes
+      if (this.currentProcessingStep >= this.totalProcessingSteps) {
+        if (this.stepProcessingInterval) {
+          clearInterval(this.stepProcessingInterval);
+          this.stepProcessingInterval = null;
+        }
+      }
+    }
+  }
+
+  /**
+   * Mark all steps as complete
+   */
+  completeAllSteps() {
+    console.log('[Sequential] Completing all steps');
+    this.currentProcessingStep = 999; // Special value for "all complete"
+    this.updateProgressDisplay();
+
+    // Stop the interval
+    if (this.stepProcessingInterval) {
+      clearInterval(this.stepProcessingInterval);
+      this.stepProcessingInterval = null;
+    }
+  }
+
+  /**
+   * Update progress display based on current step
+   */
+  updateProgressDisplay() {
+    if (this.submittedProcessorConfig) {
+      this.showProgressTracker({
+        processor_config: this.submittedProcessorConfig,
+        progress: {
+          step_number: this.currentProcessingStep,
+          total_steps: this.totalProcessingSteps,
+          current_step: 'Processing',
+          percentage: (this.currentProcessingStep / this.totalProcessingSteps) * 100
+        },
+        status: this.currentProcessingStep >= 999 ? 'completed' : 'processing'
+      });
     }
   }
 
@@ -986,7 +1255,8 @@ class ArtorizeDashboard {
       this.showStatus('Reconstructing preview from CDN...', 'info');
       await this.reconstructFromCDN(result);
 
-      this.hideProgressTracker(); // Also hide progress tracker if still visible
+      // Keep progress tracker visible to show completed steps
+      // this.hideProgressTracker(); // Commented out to keep checkmarks visible
       this.showStatus('All images loaded successfully!', 'success');
 
       // Show comparison section
@@ -1318,6 +1588,20 @@ class ArtorizeDashboard {
       // Gather form data
       const formData = this.gatherFormData();
 
+      // Store the processor config for progress tracking
+      this.submittedProcessorConfig = {
+        protection_layers: {
+          fawkes: formData.protectionOptions.enable_fawkes,
+          photoguard: formData.protectionOptions.enable_photoguard,
+          mist: formData.protectionOptions.enable_mist,
+          nightshade: formData.protectionOptions.enable_nightshade,
+          c2pa_manifest: formData.protectionOptions.enable_c2pa_manifest
+        },
+        watermark_strategy: formData.protectionOptions.watermark_strategy
+      };
+
+      console.log('[Dashboard] Stored processor config:', this.submittedProcessorConfig);
+
       // Submit artwork
       this.showStatus('Preparing upload...', 'info');
 
@@ -1344,6 +1628,19 @@ class ArtorizeDashboard {
         return;
       }
 
+      // Count total steps
+      const steps = this.buildProcessingSteps(this.submittedProcessorConfig);
+      const totalSteps = steps.length;
+
+      // Start sequential step processing
+      this.startSequentialProcessing(totalSteps);
+
+      // Create a timer to advance through steps sequentially
+      // Each step takes ~400ms to "complete" for a nice sequential animation
+      this.stepProcessingInterval = setInterval(() => {
+        this.advanceToNextStep();
+      }, 400);
+
       // Poll for completion
       this.showStatus('Processing your artwork with protection layers...', 'info');
 
@@ -1352,18 +1649,33 @@ class ArtorizeDashboard {
         (status) => {
           console.log('Status update:', status);
 
-          // Update progress tracker with current status
-          if (status.processor_config || status.progress) {
-            this.showProgressTracker(status);
+          // When job completes, mark all steps as complete
+          if (status.status === 'completed') {
+            this.completeAllSteps();
           }
 
           // Update status message
-          const currentStep = status.progress?.current_step || 'Processing';
-          this.showStatus(currentStep, 'info');
+          const progress = status.progress || {};
+          const currentStep = progress.current_step || status.status || 'Processing';
+          const stepNumber = progress.step_number || 0;
+          const totalSteps = progress.total_steps || 0;
+          const percentage = progress.percentage || 0;
+
+          // Build status message
+          let statusMessage = currentStep;
+          if (stepNumber > 0 && totalSteps > 0) {
+            statusMessage += ` (Step ${stepNumber}/${totalSteps})`;
+          }
+          if (percentage > 0 && percentage < 100) {
+            statusMessage += ` - ${Math.round(percentage)}%`;
+          }
+
+          this.showStatus(statusMessage, 'info');
         }
       );
 
-      this.hideProgressTracker();
+      // Keep progress tracker visible to show completed steps
+      // this.hideProgressTracker(); // Commented out to keep checkmarks visible
 
       // Check final status
       if (result.status === 'failed') {

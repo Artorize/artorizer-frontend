@@ -151,7 +151,7 @@ body {
 
 /* Split Layout - Left Sidebar + Right Main */
 .dashboard-content-split {
-    display: none; /* Hidden initially, shown after upload */
+    display: grid; /* Visible by default */
     grid-template-columns: 320px 1fr;
     gap: var(--spacing-xl);
     align-items: start;
@@ -426,7 +426,8 @@ body {
 .progress-tracker-content {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-sm);
+    gap: 0;
+    padding-bottom: 0.75rem; /* 12px - matches GitHub mb-3 */
 }
 
 .section-header {
@@ -902,47 +903,61 @@ body {
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-xs);
+    gap: 0;
 }
 
 .progress-step {
     display: flex;
     align-items: flex-start;
     gap: var(--spacing-sm);
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--color-border-light);
-    background: var(--color-surface);
+    padding-left: 0.5rem; /* 8px - matches GitHub px-2 */
+    padding-right: 0.5rem; /* 8px - matches GitHub px-2 */
+    padding-top: 0;
+    padding-bottom: 0;
+    border-radius: 0;
+    border: none;
+    background: transparent;
 }
 
 .progress-step.empty-state {
-    border-style: dashed;
     color: var(--color-text-tertiary);
 }
 
 .progress-step-indicator {
-    width: 2rem;
-    height: 2rem;
+    min-width: 1.5rem;
+    min-height: 1.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .progress-step-indicator .progress-icon {
-    width: 2rem;
-    height: 2rem;
+    width: 1rem;
+    height: 1rem;
+    display: block;
+}
+
+.progress-step-indicator .octicon-circle {
+    /* Pending state - explicitly no animation */
+    animation: none;
+}
+
+.progress-step-indicator .octicon-check-circle-fill {
+    /* Completed state - no animation, just solid */
+    animation: none;
 }
 
 .progress-step.pending .progress-step-indicator {
-    color: #94a3b8;
+    color: #94a3b8; /* Gray for pending - no animation */
 }
 
 .progress-step.processing .progress-step-indicator {
-    color: #b45309;
+    color: #f59e0b; /* Orange for processing - with spinning animation */
 }
 
 .progress-step.completed .progress-step-indicator {
-    color: #10b981;
+    color: #10b981; /* Green for completed - solid checkmark */
 }
 
 .progress-spinner {
@@ -952,12 +967,36 @@ body {
 
 .progress-step-content {
     flex: 1;
+    padding: 0.5rem; /* 8px - matches GitHub p-2 */
+    margin-left: 0.5rem; /* 8px - matches GitHub mx-2 */
+    margin-right: 0.5rem; /* 8px - matches GitHub mx-2 */
+    margin-bottom: 0.25rem; /* 4px - matches GitHub mb-1 */
+    border-radius: 0.375rem; /* 6px - matches GitHub rounded-2 */
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-light);
+}
+
+.progress-step-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-md);
 }
 
 .progress-step-title {
     font-size: var(--font-size-base);
     font-weight: var(--font-weight-medium);
     color: var(--color-text-primary);
+    flex: 1;
+}
+
+.progress-step-elapsed {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-tertiary);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
 }
 
 .progress-step.pending .progress-step-title {
@@ -981,6 +1020,15 @@ body {
 
 .progress-step.processing .progress-step-details {
     color: var(--color-warning);
+}
+
+.progress-step.processing .progress-step-elapsed {
+    color: var(--color-warning);
+    font-weight: var(--font-weight-semibold);
+}
+
+.progress-step.completed .progress-step-elapsed {
+    color: var(--color-success);
 }
 
 /* Results Section */
