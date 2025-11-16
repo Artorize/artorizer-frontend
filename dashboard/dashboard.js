@@ -87,10 +87,20 @@ class ArtorizeDashboard {
     // Generate button
     this.generateButton.addEventListener('click', () => this.handleSubmit());
 
-    // Remove image button
+    // Remove image button (old preview mode)
     if (this.removeImageBtn) {
       this.removeImageBtn.addEventListener('click', (e) => {
         e.preventDefault();
+        this.clearImagePreview();
+      });
+    }
+
+    // Change image button (new collapsed mode)
+    const changeImageBtn = document.getElementById('change-image-btn');
+    if (changeImageBtn) {
+      changeImageBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         this.clearImagePreview();
       });
     }
@@ -186,16 +196,25 @@ class ArtorizeDashboard {
   }
 
   /**
-   * Show image preview
+   * Show image preview - Collapsed mode in left sidebar
    */
   showImagePreview(file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      this.previewImage.src = e.target.result;
-      this.uploadLabel.style.display = 'none';
-      this.imagePreview.style.display = 'block';
-    };
-    reader.readAsDataURL(file);
+    // Hide initial upload section
+    const uploadSectionInitial = document.getElementById('upload-section-initial');
+    if (uploadSectionInitial) {
+      uploadSectionInitial.style.display = 'none';
+    }
+
+    // Show collapsed upload section with filename
+    const uploadSection = document.getElementById('upload-section');
+    const collapsedFilename = document.getElementById('collapsed-filename');
+    if (uploadSection && collapsedFilename) {
+      collapsedFilename.textContent = file.name;
+      uploadSection.style.display = 'block';
+
+      // Animate in
+      uploadSection.style.animation = 'fadeInUp 0.3s ease-out';
+    }
   }
 
   /**
@@ -204,9 +223,19 @@ class ArtorizeDashboard {
   clearImagePreview() {
     this.selectedFile = null;
     this.imageUploadInput.value = '';
-    this.previewImage.src = '';
-    this.uploadLabel.style.display = 'flex';
-    this.imagePreview.style.display = 'none';
+
+    // Hide collapsed upload section
+    const uploadSection = document.getElementById('upload-section');
+    if (uploadSection) {
+      uploadSection.style.display = 'none';
+    }
+
+    // Show initial upload section
+    const uploadSectionInitial = document.getElementById('upload-section-initial');
+    if (uploadSectionInitial) {
+      uploadSectionInitial.style.display = 'block';
+      uploadSectionInitial.style.animation = 'fadeInUp 0.3s ease-out';
+    }
   }
 
   /**
@@ -318,66 +347,20 @@ class ArtorizeDashboard {
   }
 
   /**
-   * Setup header scroll slide-up effect
+   * Setup header scroll slide-up effect - Simplified for new layout
    */
   setupHeaderScrollEffect() {
     if (!this.dashboardHeader) return;
 
-    // Set initial state for CTA container
-    if (this.ctaContainer) {
-      this.ctaContainer.style.transform = 'translateY(120px)';
-      this.ctaContainer.style.opacity = '0.3';
-    }
-
-    // Set initial state for sections (subtle fade)
-    this.sections.forEach(section => {
-      section.style.opacity = '0.5';
-      section.style.transform = 'translateY(50px)';
-    });
-
     window.addEventListener('scroll', () => {
       const scrollY = window.scrollY;
-      const maxScroll = 200; // Distance to scroll before fully hidden
+      const maxScroll = 150;
 
-      // Header: slide up and fade out
+      // Header: subtle fade on scroll
       const headerProgress = Math.min(scrollY / maxScroll, 1);
-      const headerTranslateY = -headerProgress * 100; // Slide up 100px
-      const headerOpacity = 1 - headerProgress;
+      const headerOpacity = 1 - (headerProgress * 0.3); // Fade slightly
 
-      this.dashboardHeader.style.transform = `translateY(${headerTranslateY}px)`;
       this.dashboardHeader.style.opacity = headerOpacity;
-
-      // CTA: slide up into view and fade in
-      if (this.ctaContainer) {
-        const ctaProgress = Math.min(scrollY / maxScroll, 1);
-        const ctaTranslateY = 120 - (ctaProgress * 120); // Slide up from 120px to 0
-        const ctaOpacity = 0.3 + (ctaProgress * 0.7); // Fade in from 0.3 to 1 (more subtle)
-
-        this.ctaContainer.style.transform = `translateY(${ctaTranslateY}px)`;
-        this.ctaContainer.style.opacity = ctaOpacity;
-      }
-
-      // Sections: subtle fade-in and slide-up effect
-      this.sections.forEach(section => {
-        const rect = section.getBoundingClientRect();
-        const windowHeight = window.innerHeight;
-
-        // Check if section is in viewport
-        if (rect.top < windowHeight && rect.bottom > 0) {
-          // Calculate visibility progress (0 to 1)
-          const visibilityProgress = Math.min(
-            Math.max((windowHeight - rect.top) / windowHeight, 0),
-            1
-          );
-
-          // Apply subtle effects
-          const opacity = 0.5 + (visibilityProgress * 0.5); // 0.5 to 1 (more subtle fade)
-          const translateY = 50 - (visibilityProgress * 50); // 50px to 0
-
-          section.style.opacity = opacity;
-          section.style.transform = `translateY(${translateY}px)`;
-        }
-      });
     });
   }
 
@@ -552,16 +535,23 @@ class ArtorizeDashboard {
   }
 
   /**
-   * Show progress tracker (GitHub style)
+   * Show progress tracker (GitHub style) in left sidebar
    * @param {Object} statusData - Job status data from API
    */
   showProgressTracker(statusData) {
-    let progressContainer = document.getElementById('progress-tracker-container');
+    // Show progress section in left sidebar
+    const progressSection = document.getElementById('progress-section');
+    if (progressSection && progressSection.style.display === 'none') {
+      progressSection.style.display = 'block';
+      progressSection.style.animation = 'fadeInUp 0.3s ease-out';
+    }
+
+    // Get the progress content container
+    let progressContainer = document.getElementById('progress-tracker-content');
 
     if (!progressContainer) {
-      progressContainer = document.createElement('div');
-      progressContainer.id = 'progress-tracker-container';
-      this.generateButton.parentElement.appendChild(progressContainer);
+      console.warn('Progress tracker content container not found');
+      return;
     }
 
     // Build steps from processor config
@@ -600,25 +590,16 @@ class ArtorizeDashboard {
     }).join('');
 
     progressContainer.innerHTML = `
-      <div class="progress-tracker">
-        <div class="progress-tracker-title">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-            <polyline points="22 4 12 14.01 9 11.01"></polyline>
-          </svg>
-          Processing Progress
+      <ul class="progress-steps">
+        ${stepsHtml}
+      </ul>
+      <div class="progress-overall">
+        <div class="progress-overall-bar">
+          <div class="progress-overall-fill" style="width: ${percentage}%"></div>
         </div>
-        <ul class="progress-steps">
-          ${stepsHtml}
-        </ul>
-        <div class="progress-overall">
-          <div class="progress-overall-bar">
-            <div class="progress-overall-fill" style="width: ${percentage}%"></div>
-          </div>
-          <div class="progress-overall-text">
-            <span>Step ${currentStepNumber} of ${totalSteps}</span>
-            <span class="progress-overall-percentage">${percentage}%</span>
-          </div>
+        <div class="progress-overall-text">
+          <span style="font-size: 0.75rem;">${currentStepNumber}/${totalSteps}</span>
+          <span class="progress-overall-percentage" style="font-size: 0.75rem;">${percentage}%</span>
         </div>
       </div>
     `;
@@ -688,9 +669,15 @@ class ArtorizeDashboard {
    * Hide progress tracker
    */
   hideProgressTracker() {
-    const progressContainer = document.getElementById('progress-tracker-container');
+    const progressSection = document.getElementById('progress-section');
+    if (progressSection) {
+      progressSection.style.display = 'none';
+    }
+
+    // Also clear the content
+    const progressContainer = document.getElementById('progress-tracker-content');
     if (progressContainer) {
-      progressContainer.remove();
+      progressContainer.innerHTML = '';
     }
   }
 
