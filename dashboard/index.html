@@ -30,8 +30,33 @@
             <p class="dashboard-subtitle">Protect your artwork from unauthorized AI training</p>
         </header>
 
+        <!-- Initial Upload Section (Centered) - Before any file is selected -->
+        <div id="upload-section-initial-center" class="upload-section-initial-center">
+            <section class="section upload-section-initial" id="upload-section-initial-standalone">
+                <div class="section-header">
+                    <svg class="section-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <h2 class="section-title">Upload Artwork</h2>
+                </div>
+
+                <div class="upload-zone" id="upload-zone-standalone">
+                    <input type="file" id="image-upload" accept="image/*" class="upload-input">
+                    <label for="image-upload" class="upload-label">
+                        <svg class="upload-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5-5-5 5M12 4v12"/>
+                        </svg>
+                        <span class="upload-text">Drop artwork here</span>
+                        <span class="upload-hint">or click to browse</span>
+                    </label>
+                </div>
+            </section>
+        </div>
+
         <!-- Main Content - Split Layout -->
-        <div class="dashboard-content-split">
+        <div class="dashboard-content-split" id="dashboard-content-split">
 
             <!-- Left Sidebar -->
             <aside class="left-sidebar">

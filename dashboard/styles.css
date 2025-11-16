@@ -151,11 +151,15 @@ body {
 
 /* Split Layout - Left Sidebar + Right Main */
 .dashboard-content-split {
-    display: grid;
+    display: none; /* Hidden initially, shown after upload */
     grid-template-columns: 320px 1fr;
     gap: var(--spacing-xl);
     align-items: start;
     animation: fadeInUp var(--anim-slow) var(--ease-out);
+}
+
+.dashboard-content-split.active {
+    display: grid;
 }
 
 @keyframes fadeInUp {
@@ -335,9 +339,16 @@ body {
     transform: scale(1.1);
 }
 
-/* Upload Section - Initial State */
+/* Upload Section - Initial State (Centered) */
 .upload-section-initial {
     padding: var(--spacing-lg);
+}
+
+/* Center upload section when it's the only content */
+.upload-section-initial-center {
+    max-width: 600px;
+    margin: 0 auto;
+    animation: fadeInUp var(--anim-slow) var(--ease-out);
 }
 
 .upload-section-initial .section-header {
@@ -898,25 +909,40 @@ body {
 .progress-step {
     display: flex;
     align-items: flex-start;
-    gap: var(--spacing-md);
-    padding: var(--spacing-sm) 0;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs) 0;
     position: relative;
 }
 
 .progress-step:not(:last-child)::before {
     content: '';
     position: absolute;
-    left: 10px;
-    top: 32px;
+    left: 26px;
+    top: 28px;
     width: 2px;
     height: calc(100% - 12px);
     background: var(--color-border);
 }
 
+/* Chevron icon */
+.progress-step-chevron {
+    flex-shrink: 0;
+    width: 12px;
+    height: 12px;
+    color: #6e7681;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    margin-top: 4px;
+}
+
+.progress-step-chevron.expanded {
+    transform: rotate(90deg);
+}
+
 .progress-step-indicator {
     flex-shrink: 0;
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -924,43 +950,45 @@ body {
     position: relative;
     z-index: 1;
     transition: all var(--transition-fast);
+    margin-top: 2px;
 }
 
 /* Pending state - gray/white circle */
 .progress-step.pending .progress-step-indicator {
     background: #ffffff;
-    border: 2px solid #d1d5db;
+    border: 1.5px solid #d1d5db;
 }
 
 /* Processing state - yellow spinner */
 .progress-step.processing .progress-step-indicator {
     background: #fbbf24;
-    border: 2px solid #f59e0b;
+    border: 1.5px solid #f59e0b;
     animation: pulse 1.5s ease-in-out infinite;
 }
 
 .progress-step.processing .progress-step-indicator::after {
     content: '';
     position: absolute;
-    width: 100%;
-    height: 100%;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     border: 2px solid transparent;
     border-top-color: #ffffff;
     animation: spin 0.8s linear infinite;
 }
 
-/* Completed state - green checkmark */
+/* Completed state - green checkmark circle */
 .progress-step.completed .progress-step-indicator {
     background: #10b981;
-    border: 2px solid #059669;
+    border: 1.5px solid #059669;
 }
 
 .progress-step.completed .progress-step-indicator::after {
     content: '✓';
     color: #ffffff;
-    font-size: 12px;
+    font-size: 10px;
     font-weight: bold;
+    line-height: 1;
 }
 
 .progress-step-content {
@@ -992,6 +1020,13 @@ body {
     font-size: var(--font-size-sm);
     color: var(--color-text-tertiary);
     margin-top: var(--spacing-xs);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.progress-step-details.expanded {
+    max-height: 200px;
 }
 
 .progress-step.processing .progress-step-details {
@@ -1008,42 +1043,7 @@ body {
     }
 }
 
-/* Overall progress bar */
-.progress-overall {
-    margin-top: var(--spacing-lg);
-    padding-top: var(--spacing-lg);
-    border-top: 1px solid var(--color-border);
-}
-
-.progress-overall-bar {
-    width: 100%;
-    height: 8px;
-    background: #f3f4f6;
-    border-radius: 4px;
-    overflow: hidden;
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.progress-overall-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #10b981, #059669);
-    transition: width 0.5s ease-out;
-    border-radius: 4px;
-}
-
-.progress-overall-text {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: var(--spacing-sm);
-    font-size: var(--font-size-sm);
-    color: var(--color-text-secondary);
-}
-
-.progress-overall-percentage {
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text-primary);
-}
+/* Overall progress bar - REMOVED, using only step list */
 
 /* Results Section */
 .results-section {
