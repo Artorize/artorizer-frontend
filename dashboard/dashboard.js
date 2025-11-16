@@ -51,10 +51,15 @@ class ArtorizeDashboard {
 
     // Upload elements
     this.uploadZone = document.getElementById('upload-zone');
+    this.uploadZoneStandalone = document.getElementById('upload-zone-standalone');
     this.uploadLabel = document.querySelector('.upload-label');
     this.imagePreview = document.getElementById('image-preview');
     this.previewImage = document.getElementById('preview-image');
     this.removeImageBtn = document.getElementById('remove-image');
+
+    // Layout sections
+    this.uploadSectionInitialCenter = document.getElementById('upload-section-initial-center');
+    this.dashboardContentSplit = document.getElementById('dashboard-content-split');
 
     // Status banner
     this.statusBanner = document.getElementById('status-banner');
@@ -119,7 +124,30 @@ class ArtorizeDashboard {
     // Header scroll effect
     this.setupHeaderScrollEffect();
 
-    // Drag and drop functionality for upload zone
+    // Drag and drop functionality for upload zone (standalone)
+    if (this.uploadZoneStandalone) {
+      this.uploadZoneStandalone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        this.uploadZoneStandalone.classList.add('drag-over');
+      });
+
+      this.uploadZoneStandalone.addEventListener('dragleave', () => {
+        this.uploadZoneStandalone.classList.remove('drag-over');
+      });
+
+      this.uploadZoneStandalone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        this.uploadZoneStandalone.classList.remove('drag-over');
+
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          this.imageUploadInput.files = files;
+          this.handleFileSelect({ target: { files: files } });
+        }
+      });
+    }
+
+    // Drag and drop functionality for upload zone (in sidebar)
     if (this.uploadZone) {
       this.uploadZone.addEventListener('dragover', (e) => {
         e.preventDefault();
@@ -199,7 +227,17 @@ class ArtorizeDashboard {
    * Show image preview - Collapsed mode in left sidebar
    */
   showImagePreview(file) {
-    // Hide initial upload section
+    // Hide centered standalone upload section
+    if (this.uploadSectionInitialCenter) {
+      this.uploadSectionInitialCenter.style.display = 'none';
+    }
+
+    // Show split layout with sidebar and config
+    if (this.dashboardContentSplit) {
+      this.dashboardContentSplit.classList.add('active');
+    }
+
+    // Hide initial upload section in sidebar
     const uploadSectionInitial = document.getElementById('upload-section-initial');
     if (uploadSectionInitial) {
       uploadSectionInitial.style.display = 'none';
@@ -224,17 +262,27 @@ class ArtorizeDashboard {
     this.selectedFile = null;
     this.imageUploadInput.value = '';
 
+    // Hide split layout
+    if (this.dashboardContentSplit) {
+      this.dashboardContentSplit.classList.remove('active');
+    }
+
+    // Show centered standalone upload section
+    if (this.uploadSectionInitialCenter) {
+      this.uploadSectionInitialCenter.style.display = 'block';
+      this.uploadSectionInitialCenter.style.animation = 'fadeInUp 0.3s ease-out';
+    }
+
     // Hide collapsed upload section
     const uploadSection = document.getElementById('upload-section');
     if (uploadSection) {
       uploadSection.style.display = 'none';
     }
 
-    // Show initial upload section
+    // Show initial upload section in sidebar (for when we're back in split mode)
     const uploadSectionInitial = document.getElementById('upload-section-initial');
     if (uploadSectionInitial) {
       uploadSectionInitial.style.display = 'block';
-      uploadSectionInitial.style.animation = 'fadeInUp 0.3s ease-out';
     }
   }
 
@@ -565,7 +613,7 @@ class ArtorizeDashboard {
     const totalSteps = progress.total_steps || steps.length;
     const percentage = progress.percentage || 0;
 
-    // Build HTML
+    // Build HTML with chevrons
     const stepsHtml = steps.map((step, index) => {
       const stepNumber = index + 1;
       let state = 'pending';
@@ -578,8 +626,14 @@ class ArtorizeDashboard {
         details = progress.details ? this.formatProgressDetails(progress.details) : '';
       }
 
+      // Chevron icon (right-pointing triangle)
+      const chevronSvg = `<svg class="progress-step-chevron" viewBox="0 0 12 12" fill="currentColor">
+        <path d="M4.5 2L8.5 6L4.5 10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      </svg>`;
+
       return `
-        <li class="progress-step ${state}">
+        <li class="progress-step ${state}" data-step-id="${step.id}">
+          ${chevronSvg}
           <div class="progress-step-indicator"></div>
           <div class="progress-step-content">
             <div class="progress-step-title">${step.title}</div>
@@ -603,6 +657,32 @@ class ArtorizeDashboard {
         </div>
       </div>
     `;
+
+    // Add click handlers for chevrons to make steps collapsible
+    this.attachProgressChevronListeners();
+  }
+
+  /**
+   * Attach click listeners to chevrons for collapsible steps
+   */
+  attachProgressChevronListeners() {
+    const chevrons = document.querySelectorAll('.progress-step-chevron');
+    chevrons.forEach(chevron => {
+      chevron.addEventListener('click', (e) => {
+        e.stopPropagation();
+
+        const step = chevron.closest('.progress-step');
+        const detailsEl = step.querySelector('.progress-step-details');
+
+        // Toggle chevron rotation
+        chevron.classList.toggle('expanded');
+
+        // Toggle details visibility
+        if (detailsEl) {
+          detailsEl.classList.toggle('expanded');
+        }
+      });
+    });
   }
 
   /**
