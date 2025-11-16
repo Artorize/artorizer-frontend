@@ -242,7 +242,7 @@ body {
 
 .upload-zone {
     position: relative;
-    min-height: 12rem; /* 192px - shorter */
+    min-height: 11rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -257,44 +257,44 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: var(--spacing-md);
+    gap: var(--spacing-sm);
     width: 100%;
-    min-height: 12rem; /* 192px - shorter */
-    padding: var(--spacing-xl);
-    border: 2px dashed rgba(10, 10, 10, 0.15);
-    border-radius: var(--radius-md);
-    background: var(--color-surface-recessed);
+    height: 100%;
+    padding: var(--spacing-lg);
+    border: 1px dashed rgba(148, 163, 184, 0.4);
+    border-radius: var(--radius-lg);
+    background: rgba(15, 23, 42, 0.6);
     cursor: pointer;
-    transition: all var(--transition-fast);
-    box-shadow: var(--shadow-inset-recessed);
+    transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 
-.upload-label:hover {
-    border-color: var(--color-focus);
-    background: var(--color-focus-light);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
+.upload-label:hover,
+.upload-zone.drag-over .upload-label {
+    border-color: rgba(125, 211, 252, 0.8);
+    background: rgba(30, 41, 59, 0.85);
 }
 
 .upload-icon {
-    color: var(--color-text-secondary);
+    color: rgba(226, 232, 240, 0.8);
     transition: color var(--transition-fast);
 }
 
-.upload-label:hover .upload-icon {
-    color: var(--color-focus);
+.upload-label:hover .upload-icon,
+.upload-zone.drag-over .upload-icon {
+    color: #93c5fd;
 }
 
 .upload-text {
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-semibold);
-    color: var(--color-text-primary);
+    color: #f8fafc;
+    text-align: center;
 }
 
 .upload-hint {
     font-size: var(--font-size-sm);
-    color: var(--color-text-tertiary);
-    font-weight: var(--font-weight-normal);
+    color: rgba(226, 232, 240, 0.7);
+    text-align: center;
 }
 
 .image-preview {
@@ -342,14 +342,6 @@ body {
 
 .remove-image svg {
     transition: stroke var(--transition-fast);
-}
-
-/* Upload Zone Drag Over State */
-.upload-zone.drag-over .upload-label {
-    border-color: var(--color-focus);
-    background: var(--color-focus-light);
-    transform: scale(1.01);
-    box-shadow: var(--shadow-md);
 }
 
 /* Configuration Section */
@@ -745,11 +737,10 @@ body {
 /* Progress Tracker - GitHub Style */
 .progress-tracker {
     background: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     padding: var(--spacing-lg);
     margin: var(--spacing-lg) 0;
-    box-shadow: var(--shadow-sm);
-    animation: slideIn var(--transition-slow);
 }
 
 .progress-tracker-title {
@@ -766,126 +757,87 @@ body {
     list-style: none;
     padding: 0;
     margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
 }
 
 .progress-step {
     display: flex;
     align-items: flex-start;
-    gap: var(--spacing-md);
-    padding: var(--spacing-sm) 0;
-    position: relative;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    background: rgba(15, 23, 42, 0.8);
 }
 
-.progress-step:not(:last-child)::before {
-    content: '';
-    position: absolute;
-    left: 10px;
-    top: 32px;
-    width: 2px;
-    height: calc(100% - 12px);
-    background: var(--color-border);
+.progress-step.empty-state {
+    border-style: dashed;
+    color: rgba(226, 232, 240, 0.7);
 }
 
 .progress-step-indicator {
-    flex-shrink: 0;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
+    width: 2rem;
+    height: 2rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
-    z-index: 1;
-    transition: all var(--transition-fast);
 }
 
-/* Pending state - gray/white circle */
+.progress-step-indicator .progress-icon {
+    width: 2rem;
+    height: 2rem;
+}
+
 .progress-step.pending .progress-step-indicator {
-    background: var(--color-bg);
-    border: 2px solid var(--color-border-dark);
+    color: rgba(148, 163, 184, 0.7);
 }
 
-/* Processing state - yellow spinner */
 .progress-step.processing .progress-step-indicator {
-    background: #fbbf24;
-    border: 2px solid #f59e0b;
-    animation: pulse 1.5s ease-in-out infinite;
+    color: #fbbf24;
 }
 
-.progress-step.processing .progress-step-indicator::after {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    border: 2px solid transparent;
-    border-top-color: #ffffff;
-    animation: spin 0.8s linear infinite;
-}
-
-/* Completed state - green checkmark */
 .progress-step.completed .progress-step-indicator {
-    background: #10b981;
-    border: 2px solid #059669;
+    color: #22c55e;
 }
 
-.progress-step.completed .progress-step-indicator::after {
-    content: '✓';
-    color: #ffffff;
-    font-size: 12px;
-    font-weight: bold;
+.progress-spinner {
+    animation: spin 1s linear infinite;
+    transform-origin: 50% 50%;
 }
 
 .progress-step-content {
     flex: 1;
-    padding-top: 1px;
 }
 
 .progress-step-title {
     font-size: var(--font-size-base);
     font-weight: var(--font-weight-medium);
-    color: var(--color-text-primary);
-    margin-bottom: var(--spacing-xs);
+    color: #f8fafc;
 }
 
 .progress-step.pending .progress-step-title {
-    color: var(--color-text-tertiary);
+    color: rgba(226, 232, 240, 0.65);
 }
 
 .progress-step.processing .progress-step-title {
-    color: var(--color-text-primary);
+    color: #fde047;
     font-weight: var(--font-weight-semibold);
 }
 
 .progress-step.completed .progress-step-title {
-    color: var(--color-text-secondary);
+    color: rgba(148, 163, 184, 0.85);
 }
 
 .progress-step-details {
     font-size: var(--font-size-sm);
-    color: var(--color-text-tertiary);
-    margin-top: var(--spacing-xs);
+    color: rgba(226, 232, 240, 0.7);
+    margin-top: 0.35rem;
 }
 
 .progress-step.processing .progress-step-details {
-    color: #f59e0b;
-}
-
-/* Pulse animation for processing state */
-@keyframes pulse {
-    0%, 100% {
-        box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7);
-    }
-    50% {
-        box-shadow: 0 0 0 6px rgba(251, 191, 36, 0);
-    }
-}
-
-/* Overall progress bar */
-.progress-overall {
-    margin-top: var(--spacing-lg);
-    padding-top: var(--spacing-lg);
-    border-top: 1px solid var(--color-border);
+    color: #fde047;
 }
 
 .progress-overall-bar {

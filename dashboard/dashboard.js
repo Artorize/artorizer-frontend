@@ -667,74 +667,141 @@ class ArtorizeDashboard {
   }
 
   /**
-   * Show progress tracker (GitHub style) in left sidebar
+   * Show progress tracker with GitHub Actions inspired styling
    * @param {Object} statusData - Job status data from API
    */
   showProgressTracker(statusData) {
-    // Show progress section in left sidebar
     const progressSection = document.getElementById('progress-section');
     if (progressSection && progressSection.style.display === 'none') {
       progressSection.style.display = 'block';
       progressSection.style.animation = 'fadeInUp 0.3s ease-out';
     }
 
-    // Get the progress content container
-    let progressContainer = document.getElementById('progress-tracker-content');
-
+    const progressContainer = document.getElementById('progress-tracker-content');
     if (!progressContainer) {
       console.warn('Progress tracker content container not found');
       return;
     }
 
-    // Build steps from processor config
+    const toStepKey = (value) => {
+      if (value === undefined || value === null) return null;
+      return String(value);
+    };
+
     const steps = statusData.processor_config
       ? this.buildProcessingSteps(statusData.processor_config)
       : [];
 
-    // Get current progress
     const progress = statusData.progress || {};
     const currentStepNumber = progress.step_number || 0;
-    const totalSteps = progress.total_steps || steps.length;
-    const percentage = progress.percentage || 0;
+    const completedSteps = new Set();
+    const explicitStateById = {};
+    const detailsByStep = {};
 
-    // Build HTML with chevrons
-    const stepsHtml = steps.map((step, index) => {
-      const stepNumber = index + 1;
-      let state = 'pending';
-      let details = '';
+    if (progress.step_details) {
+      Object.entries(progress.step_details).forEach(([key, value]) => {
+        detailsByStep[toStepKey(key)] = value;
+      });
+    }
 
-      if (stepNumber < currentStepNumber) {
-        state = 'completed';
-      } else if (stepNumber === currentStepNumber) {
-        state = 'processing';
-        details = progress.details ? this.formatProgressDetails(progress.details) : '';
+    (progress.completed_steps || []).forEach((id) => {
+      const key = toStepKey(id);
+      if (key) completedSteps.add(key);
+    });
+
+    (progress.completed_step_ids || []).forEach((id) => {
+      const key = toStepKey(id);
+      if (key) completedSteps.add(key);
+    });
+
+    const normalizeState = (value) => {
+      if (!value || typeof value !== 'string') return null;
+      const normalized = value.toLowerCase();
+      if (normalized.includes('complete')) return 'completed';
+      if (normalized.includes('process') || normalized.includes('run') || normalized.includes('active')) {
+        return 'processing';
       }
+      if (normalized.includes('pending') || normalized.includes('queue')) return 'pending';
+      return null;
+    };
 
-      // Chevron icon (right-pointing triangle)
-      const chevronSvg = `<svg class="progress-step-chevron" viewBox="0 0 12 12" fill="currentColor">
-        <path d="M4.5 2L8.5 6L4.5 10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-      </svg>`;
+    if (Array.isArray(progress.steps)) {
+      progress.steps.forEach((stepState) => {
+        if (!stepState) return;
+        const stepKey = toStepKey(stepState.id || stepState.step_id || stepState.step || stepState.name);
+        if (!stepKey) return;
+        const normalized = normalizeState(stepState.state || stepState.status);
+        if (normalized) {
+          explicitStateById[stepKey] = normalized;
+          if (normalized === 'completed') {
+            completedSteps.add(stepKey);
+          }
+        }
+        if (!detailsByStep[stepKey] && stepState.details) {
+          detailsByStep[stepKey] = stepState.details;
+        }
+      });
+    }
 
-      return `
-        <li class="progress-step ${state}" data-step-id="${step.id}">
-          ${chevronSvg}
-          <div class="progress-step-indicator"></div>
+    const activeStepId =
+      toStepKey(progress.current_step_id || progress.current_step) ||
+      (steps[currentStepNumber - 1]?.id ? toStepKey(steps[currentStepNumber - 1].id) : null);
+
+    const formatDetails = (detail) => {
+      if (!detail) return '';
+      return typeof detail === 'string' ? detail : this.formatProgressDetails(detail);
+    };
+
+    const stepsHtml = steps.length > 0
+      ? steps.map((step, index) => {
+        const stepNumber = index + 1;
+        const safeId = step.id || `step-${index}`;
+        const stepKey = toStepKey(safeId);
+        let state = explicitStateById[stepKey] || 'pending';
+
+        if (completedSteps.has(stepKey)) {
+          state = 'completed';
+        } else if (activeStepId && stepKey === activeStepId) {
+          state = 'processing';
+        } else if (state === 'pending' && currentStepNumber) {
+          if (stepNumber < currentStepNumber) {
+            state = 'completed';
+          } else if (stepNumber === currentStepNumber) {
+            state = 'processing';
+          }
+        }
+
+        const detailSource =
+          detailsByStep[stepKey] || (state === 'processing' ? progress.details : null);
+        const details = formatDetails(detailSource);
+        const indicatorIcon = this.renderProgressIndicator(state);
+
+        return `
+            <li class="progress-step ${state}" data-step-id="${safeId}">
+              <div class="progress-step-indicator" aria-hidden="true">
+                ${indicatorIcon}
+              </div>
+              <div class="progress-step-content">
+                <div class="progress-step-title">${step.title}</div>
+                ${details ? `<div class="progress-step-details">${details}</div>` : ''}
+              </div>
+            </li>
+          `;
+        }).join('')
+      : `
+        <li class="progress-step empty-state">
           <div class="progress-step-content">
-            <div class="progress-step-title">${step.title}</div>
-            ${details ? `<div class="progress-step-details">${details}</div>` : ''}
+            <div class="progress-step-title">Awaiting processor updates...</div>
+            <div class="progress-step-details">We'll refresh this list as soon as the job reports its stages.</div>
           </div>
         </li>
       `;
-    }).join('');
 
     progressContainer.innerHTML = `
       <ul class="progress-steps">
         ${stepsHtml}
       </ul>
     `;
-
-    // Add click handlers for chevrons to make steps collapsible
-    this.attachProgressChevronListeners();
   }
 
   /**
@@ -759,55 +826,65 @@ class ArtorizeDashboard {
     // Build steps from current form configuration (all pending)
     const steps = this.buildProcessingSteps();
 
-    // Build HTML with all steps in pending state
-    const stepsHtml = steps.map((step, index) => {
-      // Chevron icon (right-pointing triangle)
-      const chevronSvg = `<svg class="progress-step-chevron" viewBox="0 0 12 12" fill="currentColor">
-        <path d="M4.5 2L8.5 6L4.5 10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-      </svg>`;
-
-      return `
-        <li class="progress-step pending" data-step-id="${step.id}">
-          ${chevronSvg}
-          <div class="progress-step-indicator"></div>
+    const stepsHtml = steps.length > 0
+      ? steps.map((step, index) => {
+        const safeId = step.id || `step-${index}`;
+        return `
+          <li class="progress-step pending" data-step-id="${safeId}">
+            <div class="progress-step-indicator" aria-hidden="true">
+              ${this.renderProgressIndicator('pending')}
+            </div>
+            <div class="progress-step-content">
+              <div class="progress-step-title">${step.title}</div>
+            </div>
+          </li>
+        `;
+      }).join('')
+      : `
+        <li class="progress-step empty-state">
           <div class="progress-step-content">
-            <div class="progress-step-title">${step.title}</div>
+            <div class="progress-step-title">No processors selected</div>
+            <div class="progress-step-details">Toggle a protection layer to build the workflow.</div>
           </div>
         </li>
       `;
-    }).join('');
 
     progressContainer.innerHTML = `
       <ul class="progress-steps">
         ${stepsHtml}
       </ul>
     `;
-
-    // Add click handlers for chevrons
-    this.attachProgressChevronListeners();
   }
 
   /**
-   * Attach click listeners to chevrons for collapsible steps
+   * Render SVG indicator per state
+   * @param {'pending'|'processing'|'completed'} state
+   * @returns {string}
    */
-  attachProgressChevronListeners() {
-    const chevrons = document.querySelectorAll('.progress-step-chevron');
-    chevrons.forEach(chevron => {
-      chevron.addEventListener('click', (e) => {
-        e.stopPropagation();
+  renderProgressIndicator(state) {
+    if (state === 'completed') {
+      return `
+        <svg class="progress-icon" viewBox="0 0 16 16" role="img" aria-label="completed">
+          <path d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16Zm3.78-9.72a.751.751 0 0 0-.018-1.042.751.751 0 0 0-1.042-.018L6.75 9.19 5.28 7.72a.751.751 0 0 0-1.042.018.751.751 0 0 0-.018 1.042l2 2a.75.75 0 0 0 1.06 0Z" fill="currentColor"></path>
+        </svg>
+      `;
+    }
 
-        const step = chevron.closest('.progress-step');
-        const detailsEl = step.querySelector('.progress-step-details');
+    if (state === 'processing') {
+      return `
+        <svg class="progress-icon progress-spinner" viewBox="0 0 16 16" role="img" aria-label="processing">
+          <path fill="none" stroke="currentColor" stroke-width="2" d="M3.05 3.05a7 7 0 1 1 9.9 9.9 7 7 0 0 1-9.9-9.9Z" opacity=".5"></path>
+          <path fill="currentColor" fill-rule="evenodd" d="M8 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z" clip-rule="evenodd"></path>
+          <path fill="currentColor" d="M14 8a6 6 0 0 0-6-6V0a8 8 0 0 1 8 8h-2Z"></path>
+        </svg>
+      `;
+    }
 
-        // Toggle chevron rotation
-        chevron.classList.toggle('expanded');
-
-        // Toggle details visibility
-        if (detailsEl) {
-          detailsEl.classList.toggle('expanded');
-        }
-      });
-    });
+    return `
+      <svg class="progress-icon" viewBox="0 0 16 16" role="img" aria-label="pending">
+        <path fill="none" stroke="currentColor" stroke-width="1.5" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13Z"></path>
+      </svg>
+    `;
   }
 
   /**
@@ -872,39 +949,6 @@ class ArtorizeDashboard {
   }
 
   /**
-   * Show progress (legacy - for upload progress)
-   */
-  showProgress(percent, message) {
-    // For upload progress, show a simple bar
-    let progressContainer = document.getElementById('upload-progress-container');
-    if (!progressContainer) {
-      progressContainer = document.createElement('div');
-      progressContainer.id = 'upload-progress-container';
-      progressContainer.style.cssText = 'margin: 20px 0;';
-      this.generateButton.parentElement.appendChild(progressContainer);
-    }
-
-    progressContainer.innerHTML = `
-      <div style="margin-bottom: 10px; text-align: center; font-size: 1rem;">${message}</div>
-      <div style="width: 100%; background: var(--color-surface-recessed); border-radius: 10px; overflow: hidden; height: 30px; box-shadow: var(--shadow-inset-recessed);">
-        <div style="width: ${percent}%; background: linear-gradient(90deg, #10b981, #059669); height: 100%; transition: width 0.3s ease; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
-          ${percent}%
-        </div>
-      </div>
-    `;
-  }
-
-  /**
-   * Hide progress
-   */
-  hideProgress() {
-    const uploadProgress = document.getElementById('upload-progress-container');
-    if (uploadProgress) {
-      uploadProgress.remove();
-    }
-  }
-
-  /**
    * Hide progress tracker
    */
   hideProgressTracker() {
@@ -929,20 +973,19 @@ class ArtorizeDashboard {
 
     try {
       // Download all image variants
-      this.showProgress(25, 'Downloading original image...');
+      this.showStatus('Downloading original image...', 'info');
       this.images.original = await this.uploader.downloadVariant(result.job_id, 'original');
 
-      this.showProgress(50, 'Downloading protected image...');
+      this.showStatus('Downloading protected image...', 'info');
       this.images.protected = await this.uploader.downloadVariant(result.job_id, 'protected');
 
-      this.showProgress(75, 'Downloading mask...');
+      this.showStatus('Downloading protection mask...', 'info');
       this.images.mask = await this.uploader.downloadVariant(result.job_id, 'mask');
 
       // Reconstruct image from CDN
-      this.showProgress(90, 'Reconstructing from CDN...');
+      this.showStatus('Reconstructing preview from CDN...', 'info');
       await this.reconstructFromCDN(result);
 
-      this.hideProgress();
       this.hideProgressTracker(); // Also hide progress tracker if still visible
       this.showStatus('All images loaded successfully!', 'success');
 
@@ -959,7 +1002,6 @@ class ArtorizeDashboard {
       this.switchView('comparison');
 
     } catch (error) {
-      this.hideProgress();
       this.showStatus(`Failed to load images: ${error.message}`, 'error');
       console.error('Display error:', error);
     }
@@ -1278,10 +1320,14 @@ class ArtorizeDashboard {
 
       // Submit artwork
       this.showStatus('Preparing upload...', 'info');
-      this.showProgress(0, 'Uploading artwork...');
 
       const submitResult = await this.uploader.submitArtwork(formData, (percent) => {
-        this.showProgress(percent, 'Uploading artwork...');
+        if (typeof percent === 'number' && !Number.isNaN(percent)) {
+          const rounded = Math.max(0, Math.min(100, Math.round(percent)));
+          this.showStatus(`Uploading artwork... ${rounded}%`, 'info');
+        } else {
+          this.showStatus('Uploading artwork...', 'info');
+        }
       });
 
       this.currentJobId = submitResult.job_id;
@@ -1289,7 +1335,6 @@ class ArtorizeDashboard {
       // Check if already exists
       if (submitResult.status === 'exists') {
         this.showStatus('Artwork already exists in the system', 'warning');
-        this.hideProgress();
 
         // You could display the existing artwork here
         console.log('Existing artwork:', submitResult.artwork);
@@ -1300,7 +1345,6 @@ class ArtorizeDashboard {
       }
 
       // Poll for completion
-      this.hideProgress(); // Hide upload progress
       this.showStatus('Processing your artwork with protection layers...', 'info');
 
       const result = await this.uploader.pollJobUntilComplete(
@@ -1335,7 +1379,6 @@ class ArtorizeDashboard {
     } catch (error) {
       console.error('Submission error:', error);
       this.showStatus(`Error: ${error.message}`, 'error');
-      this.hideProgress();
       this.hideProgressTracker();
     } finally {
       this.generateButton.disabled = false;
