@@ -253,6 +253,12 @@ class ArtorizeDashboard {
       // Animate in
       uploadSection.style.animation = 'fadeInUp 0.3s ease-out';
     }
+
+    // Show initial progress tracker with all pending steps
+    this.showInitialProgressTracker();
+
+    // Add listeners to rebuild tracker when config changes
+    this.setupConfigChangeListeners();
   }
 
   /**
@@ -261,6 +267,7 @@ class ArtorizeDashboard {
   clearImagePreview() {
     this.selectedFile = null;
     this.imageUploadInput.value = '';
+    this.currentJobId = null;
 
     // Hide split layout
     if (this.dashboardContentSplit) {
@@ -278,6 +285,9 @@ class ArtorizeDashboard {
     if (uploadSection) {
       uploadSection.style.display = 'none';
     }
+
+    // Hide progress tracker
+    this.hideProgressTracker();
 
     // Show initial upload section in sidebar (for when we're back in split mode)
     const uploadSectionInitial = document.getElementById('upload-section-initial');
@@ -516,60 +526,134 @@ class ArtorizeDashboard {
   }
 
   /**
-   * Build processing steps from processor config
-   * @param {Object} config - Processor configuration from API
+   * Build processing steps from current form configuration
+   * @param {Object} config - Optional processor configuration from API (if available)
    * @returns {Array} Array of step objects
    */
-  buildProcessingSteps(config) {
+  buildProcessingSteps(config = null) {
     const steps = [];
 
-    // Add enabled processors
-    if (config.processors && config.processors.length > 0) {
-      config.processors.forEach(processor => {
-        steps.push({
-          id: `processor-${processor}`,
-          title: `Processing ${processor}`,
-          type: 'processor',
-          processor: processor
-        });
-      });
-    }
-
-    // Add protection layers
-    if (config.protection_layers) {
-      Object.entries(config.protection_layers).forEach(([layer, enabled]) => {
-        if (enabled) {
-          const layerNames = {
-            fawkes: 'Fawkes Protection',
-            photoguard: 'PhotoGuard Protection',
-            mist: 'MIST Protection',
-            nightshade: 'Nightshade Protection',
-            stegano_embed: 'Steganography Embedding',
-            c2pa_manifest: 'C2PA Manifest'
-          };
+    // If config is provided (from API), use it
+    if (config) {
+      // Add enabled processors
+      if (config.processors && config.processors.length > 0) {
+        config.processors.forEach(processor => {
           steps.push({
-            id: `layer-${layer}`,
-            title: `Applying ${layerNames[layer] || layer}`,
-            type: 'protection',
-            layer: layer
+            id: `processor-${processor}`,
+            title: `Processing ${processor}`,
+            type: 'processor',
+            processor: processor
           });
-        }
-      });
-    }
+        });
+      }
 
-    // Add watermark step if configured
-    if (config.watermark_strategy && config.watermark_strategy !== 'none') {
-      const strategyNames = {
-        'invisible-watermark': 'Invisible Watermark',
-        'tree-ring': 'Tree Ring Watermark',
-        'visible-watermark': 'Visible Watermark'
+      // Add protection layers from API config
+      if (config.protection_layers) {
+        Object.entries(config.protection_layers).forEach(([layer, enabled]) => {
+          if (enabled) {
+            const layerNames = {
+              fawkes: 'Fawkes Protection',
+              photoguard: 'PhotoGuard Protection',
+              mist: 'MIST Protection',
+              nightshade: 'Nightshade Protection',
+              stegano_embed: 'Steganography Embedding',
+              c2pa_manifest: 'C2PA Manifest'
+            };
+            steps.push({
+              id: `layer-${layer}`,
+              title: `Applying ${layerNames[layer] || layer}`,
+              type: 'protection',
+              layer: layer
+            });
+          }
+        });
+      }
+
+      // Add watermark step if configured
+      if (config.watermark_strategy && config.watermark_strategy !== 'none') {
+        const strategyNames = {
+          'invisible-watermark': 'Invisible Watermark',
+          'tree-ring': 'Tree Ring Watermark',
+          'visible-watermark': 'Visible Watermark'
+        };
+        steps.push({
+          id: 'watermark',
+          title: `Applying ${strategyNames[config.watermark_strategy] || config.watermark_strategy}`,
+          type: 'watermark',
+          strategy: config.watermark_strategy
+        });
+      }
+    } else {
+      // Build from current form state (before submission)
+      const layerNames = {
+        fawkes: 'Fawkes Protection',
+        photoguard: 'PhotoGuard Protection',
+        mist: 'MIST Protection',
+        nightshade: 'Nightshade Protection',
+        c2pa_manifest: 'C2PA Manifest'
       };
-      steps.push({
-        id: 'watermark',
-        title: `Applying ${strategyNames[config.watermark_strategy] || config.watermark_strategy}`,
-        type: 'watermark',
-        strategy: config.watermark_strategy
-      });
+
+      // Check each protection option checkbox
+      if (this.enableFawkesCheckbox?.checked) {
+        steps.push({
+          id: 'layer-fawkes',
+          title: `Applying ${layerNames.fawkes}`,
+          type: 'protection',
+          layer: 'fawkes'
+        });
+      }
+
+      if (this.enablePhotoguardCheckbox?.checked) {
+        steps.push({
+          id: 'layer-photoguard',
+          title: `Applying ${layerNames.photoguard}`,
+          type: 'protection',
+          layer: 'photoguard'
+        });
+      }
+
+      if (this.enableMistCheckbox?.checked) {
+        steps.push({
+          id: 'layer-mist',
+          title: `Applying ${layerNames.mist}`,
+          type: 'protection',
+          layer: 'mist'
+        });
+      }
+
+      if (this.enableNightshadeCheckbox?.checked) {
+        steps.push({
+          id: 'layer-nightshade',
+          title: `Applying ${layerNames.nightshade}`,
+          type: 'protection',
+          layer: 'nightshade'
+        });
+      }
+
+      if (this.enableC2paCheckbox?.checked) {
+        steps.push({
+          id: 'layer-c2pa_manifest',
+          title: `Applying ${layerNames.c2pa_manifest}`,
+          type: 'protection',
+          layer: 'c2pa_manifest'
+        });
+      }
+
+      // Add watermark step
+      const watermarkStrategy = this.watermarkStrategySelect?.value || 'invisible-watermark';
+      if (watermarkStrategy && watermarkStrategy !== 'none') {
+        const strategyNames = {
+          'invisible-watermark': 'Invisible Watermark',
+          'tree-ring': 'Tree Ring Watermark',
+          'visible-watermark': 'Visible Watermark'
+        };
+        steps.push({
+          id: 'watermark',
+          title: `Applying ${strategyNames[watermarkStrategy] || watermarkStrategy}`,
+          type: 'watermark',
+          strategy: watermarkStrategy
+        });
+      }
     }
 
     // Add final upload step
@@ -647,18 +731,59 @@ class ArtorizeDashboard {
       <ul class="progress-steps">
         ${stepsHtml}
       </ul>
-      <div class="progress-overall">
-        <div class="progress-overall-bar">
-          <div class="progress-overall-fill" style="width: ${percentage}%"></div>
-        </div>
-        <div class="progress-overall-text">
-          <span style="font-size: 0.75rem;">${currentStepNumber}/${totalSteps}</span>
-          <span class="progress-overall-percentage" style="font-size: 0.75rem;">${percentage}%</span>
-        </div>
-      </div>
     `;
 
     // Add click handlers for chevrons to make steps collapsible
+    this.attachProgressChevronListeners();
+  }
+
+  /**
+   * Show initial progress tracker with all pending steps (after file upload, before processing)
+   */
+  showInitialProgressTracker() {
+    // Show progress section in left sidebar
+    const progressSection = document.getElementById('progress-section');
+    if (progressSection) {
+      progressSection.style.display = 'block';
+      progressSection.style.animation = 'fadeInUp 0.3s ease-out';
+    }
+
+    // Get the progress content container
+    let progressContainer = document.getElementById('progress-tracker-content');
+
+    if (!progressContainer) {
+      console.warn('Progress tracker content container not found');
+      return;
+    }
+
+    // Build steps from current form configuration (all pending)
+    const steps = this.buildProcessingSteps();
+
+    // Build HTML with all steps in pending state
+    const stepsHtml = steps.map((step, index) => {
+      // Chevron icon (right-pointing triangle)
+      const chevronSvg = `<svg class="progress-step-chevron" viewBox="0 0 12 12" fill="currentColor">
+        <path d="M4.5 2L8.5 6L4.5 10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      </svg>`;
+
+      return `
+        <li class="progress-step pending" data-step-id="${step.id}">
+          ${chevronSvg}
+          <div class="progress-step-indicator"></div>
+          <div class="progress-step-content">
+            <div class="progress-step-title">${step.title}</div>
+          </div>
+        </li>
+      `;
+    }).join('');
+
+    progressContainer.innerHTML = `
+      <ul class="progress-steps">
+        ${stepsHtml}
+      </ul>
+    `;
+
+    // Add click handlers for chevrons
     this.attachProgressChevronListeners();
   }
 
@@ -683,6 +808,40 @@ class ArtorizeDashboard {
         }
       });
     });
+  }
+
+  /**
+   * Setup listeners on config checkboxes to rebuild step list
+   */
+  setupConfigChangeListeners() {
+    // Only setup once
+    if (this._configListenersSetup) return;
+    this._configListenersSetup = true;
+
+    const checkboxes = [
+      this.enableFawkesCheckbox,
+      this.enablePhotoguardCheckbox,
+      this.enableMistCheckbox,
+      this.enableNightshadeCheckbox,
+      this.enableC2paCheckbox
+    ];
+
+    const rebuildSteps = () => {
+      // Only rebuild if we haven't started processing yet
+      if (!this.currentJobId) {
+        this.showInitialProgressTracker();
+      }
+    };
+
+    checkboxes.forEach(checkbox => {
+      if (checkbox) {
+        checkbox.addEventListener('change', rebuildSteps);
+      }
+    });
+
+    if (this.watermarkStrategySelect) {
+      this.watermarkStrategySelect.addEventListener('change', rebuildSteps);
+    }
   }
 
   /**
