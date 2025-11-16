@@ -66,6 +66,15 @@ class ArtorizeDashboard {
     // Global drop overlay
     this.globalDropOverlay = document.getElementById('global-drop-overlay');
     this.appBody = document.getElementById('app-body');
+
+    // Dashboard header for scroll effect
+    this.dashboardHeader = document.querySelector('.dashboard-header');
+
+    // CTA container for scroll effect
+    this.ctaContainer = document.querySelector('.cta-container');
+
+    // Main sections for scroll effect
+    this.sections = document.querySelectorAll('.section');
   }
 
   /**
@@ -93,6 +102,12 @@ class ArtorizeDashboard {
 
     // Global drag and drop - anywhere on page
     this.setupGlobalDragAndDrop();
+
+    // Make config-option divs clickable
+    this.setupClickableConfigOptions();
+
+    // Header scroll effect
+    this.setupHeaderScrollEffect();
 
     // Drag and drop functionality for upload zone
     if (this.uploadZone) {
@@ -204,15 +219,7 @@ class ArtorizeDashboard {
     const dd = String(today.getDate()).padStart(2, '0');
     this.creationDateInput.value = `${yyyy}-${mm}-${dd}`;
 
-    // Visual feedback
-    this.todayBtn.style.background = 'var(--color-success)';
-    this.todayBtn.style.color = 'white';
-    this.todayBtn.style.borderColor = 'var(--color-success)';
-    setTimeout(() => {
-      this.todayBtn.style.background = '';
-      this.todayBtn.style.color = '';
-      this.todayBtn.style.borderColor = '';
-    }, 500);
+
   }
 
   /**
@@ -277,6 +284,100 @@ class ArtorizeDashboard {
     this.globalDropOverlay.addEventListener('dragover', (e) => {
       e.preventDefault();
       e.stopPropagation();
+    });
+  }
+
+  /**
+   * Setup clickable config options
+   */
+  setupClickableConfigOptions() {
+    const configOptions = document.querySelectorAll('.config-option');
+
+    configOptions.forEach(option => {
+      option.addEventListener('click', (e) => {
+        // Don't toggle if clicking on:
+        // - the info button
+        // - the checkbox itself (it handles its own toggle)
+        // - the label or its children (label handles the toggle via 'for' attribute)
+        if (e.target.closest('.info-btn') ||
+            e.target.classList.contains('option-checkbox') ||
+            e.target.closest('.option-label')) {
+          return;
+        }
+
+        // Find the checkbox within this config option
+        const checkbox = option.querySelector('.option-checkbox');
+        if (checkbox) {
+          checkbox.checked = !checkbox.checked;
+
+          // Trigger a change event in case there are listeners
+          checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      });
+    });
+  }
+
+  /**
+   * Setup header scroll slide-up effect
+   */
+  setupHeaderScrollEffect() {
+    if (!this.dashboardHeader) return;
+
+    // Set initial state for CTA container
+    if (this.ctaContainer) {
+      this.ctaContainer.style.transform = 'translateY(120px)';
+      this.ctaContainer.style.opacity = '0.3';
+    }
+
+    // Set initial state for sections (subtle fade)
+    this.sections.forEach(section => {
+      section.style.opacity = '0.5';
+      section.style.transform = 'translateY(50px)';
+    });
+
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+      const maxScroll = 200; // Distance to scroll before fully hidden
+
+      // Header: slide up and fade out
+      const headerProgress = Math.min(scrollY / maxScroll, 1);
+      const headerTranslateY = -headerProgress * 100; // Slide up 100px
+      const headerOpacity = 1 - headerProgress;
+
+      this.dashboardHeader.style.transform = `translateY(${headerTranslateY}px)`;
+      this.dashboardHeader.style.opacity = headerOpacity;
+
+      // CTA: slide up into view and fade in
+      if (this.ctaContainer) {
+        const ctaProgress = Math.min(scrollY / maxScroll, 1);
+        const ctaTranslateY = 120 - (ctaProgress * 120); // Slide up from 120px to 0
+        const ctaOpacity = 0.3 + (ctaProgress * 0.7); // Fade in from 0.3 to 1 (more subtle)
+
+        this.ctaContainer.style.transform = `translateY(${ctaTranslateY}px)`;
+        this.ctaContainer.style.opacity = ctaOpacity;
+      }
+
+      // Sections: subtle fade-in and slide-up effect
+      this.sections.forEach(section => {
+        const rect = section.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+
+        // Check if section is in viewport
+        if (rect.top < windowHeight && rect.bottom > 0) {
+          // Calculate visibility progress (0 to 1)
+          const visibilityProgress = Math.min(
+            Math.max((windowHeight - rect.top) / windowHeight, 0),
+            1
+          );
+
+          // Apply subtle effects
+          const opacity = 0.5 + (visibilityProgress * 0.5); // 0.5 to 1 (more subtle fade)
+          const translateY = 50 - (visibilityProgress * 50); // 50px to 0
+
+          section.style.opacity = opacity;
+          section.style.transform = `translateY(${translateY}px)`;
+        }
+      });
     });
   }
 

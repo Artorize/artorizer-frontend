@@ -1,6 +1,6 @@
 /* ===================================
    Artorizer Dashboard - Design System
-   Minimalistic White Theme - 2025
+   Minimalistic Dark Theme - 2025
    =================================== */
 
 /* CSS Reset & Base */
@@ -11,37 +11,37 @@
 }
 
 :root {
-    /* Color Palette - Layered depth system */
-    --color-bg: #f8f8f8;           /* Darkest - Page background */
-    --color-surface: #fcfcfc;       /* Base layer - Cards */
-    --color-surface-elevated: #ffffff; /* Elevated - Interactive elements */
-    --color-surface-recessed: #f4f4f4; /* Recessed - Tables, inputs */
+    /* Color Palette - Layered depth system (Dark) */
+    --color-bg: #0a0a0a;
+    --color-surface: #1a1a1a;
+    --color-surface-elevated: #232323;
+    --color-surface-recessed: #141414;
 
-    /* Borders - Minimal use, prefer shadows */
-    --color-border: #e8e8e8;
-    --color-border-light: rgba(255, 255, 255, 0.8);
-    --color-border-dark: #232323;
-    --color-border-hover: rgba(35, 35, 35, 0.08);
-    --color-border-section: #f0f0f0;
+    /* Borders */
+    --color-border: #2a2a2a;
+    --color-border-light: rgba(255, 255, 255, 0.1);
+    --color-border-dark: #3a3a3a;
+    --color-border-hover: rgba(255, 255, 255, 0.08);
+    --color-border-section: #252525;
 
     /* Text with opacity hierarchy */
-    --color-text-primary: #0a0a0a;
-    --color-text-secondary: rgba(10, 10, 10, 0.7);
-    --color-text-tertiary: rgba(10, 10, 10, 0.5);
-    --color-text-quaternary: rgba(10, 10, 10, 0.4);
+    --color-text-primary: #f5f5f5;
+    --color-text-secondary: rgba(245, 245, 245, 0.7);
+    --color-text-tertiary: rgba(245, 245, 245, 0.5);
+    --color-text-quaternary: rgba(245, 245, 245, 0.4);
 
     /* Interactive elements */
-    --color-interactive: #232323;
-    --color-interactive-hover: #404040;
-    --color-interactive-active: #1a1a1a;
-    --color-disabled-bg: #e8e8e8;
-    --color-disabled-text: rgba(10, 10, 10, 0.3);
+    --color-interactive: #e8e8e8;
+    --color-interactive-hover: #f5f5f5;
+    --color-interactive-active: #d0d0d0;
+    --color-disabled-bg: #2a2a2a;
+    --color-disabled-text: rgba(245, 245, 245, 0.3);
 
-    /* Focus and selection colors */
-    --color-focus: #b4c9ed;          /* Blue for focus states */
-    --color-focus-light: rgba(59, 130, 246, 0.1);
-    --color-selection-bg: #dbeafe;   /* Light blue selection background */
-    --color-selection-text: #1e40af; /* Dark blue selection text */
+    /* Focus and selection colors - keeping blue for consistency */
+    --color-focus: #3b82f6;
+    --color-focus-light: rgba(59, 130, 246, 0.2);
+    --color-selection-bg: #1e3a8a;
+    --color-selection-text: #dbeafe;
 
     /* Semantic Colors (Messages Only) */
     --color-success: #10b981;
@@ -50,8 +50,8 @@
     --color-info: #3b82f6;
 
     /* Interactive State Backgrounds */
-    --color-hover-bg: #f5f5f5;
-    --color-active-bg: #f0f0f0;
+    --color-hover-bg: #2a2a2a;
+    --color-active-bg: #323232;
 
     /* Spacing */
     --spacing-xs: 0.5rem;   /* 8px */
@@ -90,22 +90,22 @@
     --transition-normal: 0.3s ease-out;
     --transition-slow: 0.4s ease-out;
 
-    /* Shadows - Layered depth (light top + dark bottom) */
+    /* Shadows - Layered depth (dark mode) */
     --shadow-sm:
-        0 -1px 0 0 rgba(255, 255, 255, 0.8) inset,
-        0 1px 2px rgba(0, 0, 0, 0.06),
-        0 2px 4px rgba(0, 0, 0, 0.04);
+        0 -1px 0 0 rgba(255, 255, 255, 0.05) inset,
+        0 1px 2px rgba(0, 0, 0, 0.3),
+        0 2px 4px rgba(0, 0, 0, 0.2);
     --shadow-md:
-        0 -1px 0 0 rgba(255, 255, 255, 0.8) inset,
-        0 2px 4px rgba(0, 0, 0, 0.06),
-        0 4px 8px rgba(0, 0, 0, 0.08);
+        0 -1px 0 0 rgba(255, 255, 255, 0.05) inset,
+        0 2px 4px rgba(0, 0, 0, 0.3),
+        0 4px 8px rgba(0, 0, 0, 0.4);
     --shadow-lg:
-        0 -1px 0 0 rgba(255, 255, 255, 0.9) inset,
-        0 4px 8px rgba(0, 0, 0, 0.08),
-        0 8px 16px rgba(0, 0, 0, 0.12);
+        0 -1px 0 0 rgba(255, 255, 255, 0.08) inset,
+        0 4px 8px rgba(0, 0, 0, 0.4),
+        0 8px 16px rgba(0, 0, 0, 0.5);
     --shadow-inset-recessed:
-        0 1px 2px rgba(0, 0, 0, 0.08) inset,
-        0 -1px 0 rgba(255, 255, 255, 0.5) inset;
+        0 1px 2px rgba(0, 0, 0, 0.4) inset,
+        0 -1px 0 rgba(255, 255, 255, 0.05) inset;
 }
 
 /* Base Styles */
