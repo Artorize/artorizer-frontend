@@ -1,17 +1,20 @@
 <!DOCTYPE html>
-<html lang=en
-      style=--eleven-sidebar-width:16rem;--eleven-sidebar-collapsed:0;--eleven-player-height:0rem;color-scheme:light
-      data-theme=light><meta charset=utf-8>
-<!-- Production Note: dashboard-v2.css contains compiled Tailwind CSS + custom styles.
-     For production optimization, consider using Tailwind CLI or PostCSS build process.
-     See: https://tailwindcss.com/docs/installation -->
-<link rel="stylesheet" href="dashboard-v2.css">
-<meta name=mobile-web-app-capable content=yes>
-<meta name=apple-mobile-web-app-capable content=yes>
-<meta name=msapplication-TileColor content=#da532c>
-<meta name=theme-color content=#ffffff>
-<meta name=viewport content="width=device-width, initial-scale=1">
-<title>Artorizer Dashboard</title>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="dashboard-v2-styles.css">
+
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+    <title>Artorizer Dashboard</title>
 <meta name=description
       content="Artorizer Dashboard - Transform your creative vision into stunning 3D art with our AI-powered platform.">
 <link rel=icon
@@ -731,13 +734,13 @@
                                 <div class="shrink-0 relative group-aria-expanded/sidebar:translate-x-1 -translate-x-1 transition-transform duration-150">
                                     <div class=relative>
                                         <div class=flex style=opacity:1>
-                                            <div class="opacity-100 transition-opacity duration-300 css-2c8lkk"
+                                            <div class="opacity-100 transition-opacity duration-300 progress-avatar"
                                                  aria-valuemax=100 aria-valuemin=0 aria-valuenow=0 role=progressbar>
-                                                <svg viewBox="0 0 100 100" class=css-bj12qo>
+                                                <svg viewBox="0 0 100 100" class="progress-svg">
                                                     <circle cx=50 cy=50 r=42 stroke-width=4px
-                                                            class="chakra-progress__track css-131d71n"></circle>
+                                                            class="chakra-progress__track progress-track"></circle>
                                                     <circle cx=50 cy=50 r=42 stroke-width=4px
-                                                            class="chakra-progress__indicator css-osbmls"
+                                                            class="chakra-progress__indicator progress-indicator"
                                                             stroke-linecap=round stroke-dashoffset=66
                                                             stroke-dasharray="0 264"></circle>
                                                 </svg>
@@ -929,13 +932,13 @@
                                                     <div class="text-xs text-subtle font-normal min-w-0">
                                                         <div class="hstack gap-1 md:gap-2 items-center whitespace-nowrap min-w-0">
                                                             <div class=flex style=opacity:1>
-                                                                <div class=css-o6x0z7 aria-valuemax=100 aria-valuemin=0
+                                                                <div class="progress-credits" aria-valuemax=100 aria-valuemin=0
                                                                      aria-valuenow=0 role=progressbar>
-                                                                    <svg viewBox="0 0 100 100" class=css-r94w0k>
+                                                                    <svg viewBox="0 0 100 100" class="progress-svg">
                                                                         <circle cx=50 cy=50 r=42 stroke-width=10px
-                                                                                class="chakra-progress__track css-131d71n"></circle>
+                                                                                class="chakra-progress__track progress-track"></circle>
                                                                         <circle cx=50 cy=50 r=42 stroke-width=10px
-                                                                                class="chakra-progress__indicator css-osbmls"
+                                                                                class="chakra-progress__indicator progress-indicator"
                                                                                 stroke-linecap=round
                                                                                 stroke-dashoffset=66
                                                                                 stroke-dasharray="0 264"></circle>
