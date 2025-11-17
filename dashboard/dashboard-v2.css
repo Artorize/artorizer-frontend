@@ -1,3 +1,6 @@
+/* Import Inter font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 /* style block 1 */
 /* font reset */
 :root {
@@ -6,6 +9,202 @@
 
 body {
     font-family: var(--dashboard-font-family);
+}
+
+/* Ensure all elements use Inter font */
+* {
+    font-family: var(--dashboard-font-family) !important;
+}
+
+/* Ensure overflow is visible */
+html, body {
+    overflow: visible !important;
+}
+
+/* Remove outline on focus and keep border color the same */
+input:focus,
+textarea:focus,
+select:focus,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+input:hover,
+textarea:hover,
+select:hover {
+    border-color: hsl(0, 0%, 82%) !important;
+}
+
+/* Tab Styling */
+.tab-button {
+    color: hsl(240, 4%, 46%) !important;
+    border-color: transparent !important;
+}
+
+.tab-button[data-state="active"] {
+    color: hsl(240, 3%, 6%) !important;
+    border-color: hsl(240, 3%, 6%) !important;
+}
+
+.tab-button:hover {
+    color: hsl(240, 3%, 6%) !important;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane[data-state="active"] {
+    display: block;
+}
+
+/* Progress Steps Styling */
+.CheckStep {
+    margin-bottom: 0.5rem;
+}
+
+.CheckStep-header {
+    background-color: transparent;
+    transition: background-color 0.2s ease;
+}
+
+.CheckStep-header:hover {
+    background-color: hsl(240, 5%, 96%);
+}
+
+/* Flex utilities */
+.d-flex {
+    display: flex;
+}
+
+.flex-items-center {
+    align-items: center;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.flex-shrink-0 {
+    flex-shrink: 0;
+}
+
+.float-right {
+    float: right;
+}
+
+/* Margin utilities */
+.mr-2 {
+    margin-right: 0.5rem;
+}
+
+.mr-3 {
+    margin-right: 0.75rem;
+}
+
+.ml-1 {
+    margin-left: 0.25rem;
+}
+
+.ml-n1 {
+    margin-left: -0.25rem;
+}
+
+.mb-1 {
+    margin-bottom: 0.25rem;
+}
+
+/* Padding utilities */
+.p-2 {
+    padding: 0.5rem;
+}
+
+.px-2 {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+.mx-2 {
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+}
+
+/* Text utilities */
+.text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
+.text-xs {
+    font-size: 0.75rem;
+    line-height: 1rem;
+}
+
+.text-mono {
+    font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+}
+
+.text-normal {
+    font-weight: 400;
+}
+
+.text-small {
+    font-size: 0.875rem;
+}
+
+.user-select-none {
+    user-select: none;
+}
+
+.css-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.css-truncate-overflow {
+    overflow: hidden;
+}
+
+/* Border utilities */
+.rounded-2 {
+    border-radius: 6px;
+}
+
+/* Rotate animation for spinner */
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.anim-rotate {
+    animation: rotate 1s linear infinite;
+}
+
+/* Protection Card Selection Styling */
+.protection-card {
+    position: relative;
+}
+
+.protection-card.selected {
+    border-color: hsl(240, 3%, 6%) !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+    background-color: hsl(240, 5%, 98%);
+}
+
+.protection-card:active {
+    transform: scale(0.98);
+}
+
+.cursor-pointer {
+    cursor: pointer;
 }
 
 :root {
@@ -461,8 +660,7 @@ img {
     --tw-ring-color: hsl(var(--blue-600));
     --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
     --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);
-    box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-    border-color: hsl(var(--blue-600))
+    box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow)
 }
 
 input::-moz-placeholder, textarea::-moz-placeholder {
@@ -7919,4 +8117,177 @@ button:focus, input:focus, select:focus, textarea:focus {
 /* style block 22 */
 .sf-hidden {
     display: none !important
+}
+
+/* Dropdown menu styling */
+select:not(.flatpickr-monthDropdown-months) {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    border: 1px solid hsl(var(--gray-200));
+    border-radius: 10px;
+    padding-right: 2.5rem;
+    background-image: linear-gradient(45deg, transparent 50%, hsl(var(--foreground)) 50%), linear-gradient(135deg, hsl(var(--foreground)) 50%, transparent 50%), linear-gradient(to bottom, hsl(var(--background)), hsl(var(--background)));
+    background-position: calc(100% - 1.4rem) 55%, calc(100% - .9rem) 55%, 0 0;
+    background-size: 6px 6px, 6px 6px, 100% 100%;
+    background-repeat: no-repeat;
+    transition: border-color .2s ease, background-color .2s ease, color .2s ease, box-shadow .2s ease;
+}
+
+select:not(.flatpickr-monthDropdown-months):hover {
+    border-color: hsl(var(--gray-300));
+}
+
+select:not(.flatpickr-monthDropdown-months):focus,
+select:not(.flatpickr-monthDropdown-months):focus-visible {
+    border-color: hsl(var(--gray-200));
+    box-shadow: 0 0 0 2px var(--gray-alpha-100);
+    outline: none;
+}
+
+select:not(.flatpickr-monthDropdown-months) option {
+    color: hsl(var(--foreground));
+    background-color: hsl(var(--background));
+}
+
+/* Flatpickr Custom Styling */
+.flatpickr-calendar {
+    background: hsl(0, 0%, 100%);
+    border: 1px solid hsl(0, 0%, 89%);
+    border-radius: 10px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    font-family: var(--dashboard-font-family) !important;
+    padding: 8px;
+}
+
+.flatpickr-months {
+    padding: 8px 0;
+}
+
+.flatpickr-month {
+    color: hsl(240, 3%, 6%);
+    font-weight: 500;
+}
+
+.flatpickr-current-month {
+    font-size: 14px;
+    color: hsl(240, 3%, 6%);
+    padding: 0;
+}
+
+.flatpickr-current-month .flatpickr-monthDropdown-months {
+    background: hsl(0, 0%, 100%);
+    border: 1px solid hsl(0, 0%, 89%);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-weight: 500;
+}
+
+.flatpickr-current-month .numInputWrapper {
+    background: hsl(0, 0%, 100%);
+    border: 1px solid hsl(0, 0%, 89%);
+    border-radius: 6px;
+    padding: 4px;
+}
+
+.flatpickr-prev-month,
+.flatpickr-next-month {
+    color: hsl(240, 4%, 46%);
+    fill: hsl(240, 4%, 46%);
+}
+
+.flatpickr-prev-month:hover,
+.flatpickr-next-month:hover {
+    color: hsl(240, 3%, 6%);
+    fill: hsl(240, 3%, 6%);
+}
+
+.flatpickr-weekdays {
+    margin-top: 8px;
+}
+
+.flatpickr-weekday {
+    color: hsl(240, 4%, 46%);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.flatpickr-days {
+    border: none;
+}
+
+.flatpickr-day {
+    color: hsl(240, 3%, 6%);
+    border-radius: 6px;
+    font-size: 13px;
+    line-height: 32px;
+    height: 32px;
+    margin: 2px;
+    border: none;
+}
+
+.flatpickr-day:hover {
+    background: hsl(240, 5%, 96%);
+    border-color: transparent;
+}
+
+.flatpickr-day.prevMonthDay,
+.flatpickr-day.nextMonthDay {
+    color: hsl(240, 4%, 70%);
+}
+
+.flatpickr-day.today {
+    border: 1px solid hsl(240, 3%, 6%);
+    background: transparent;
+}
+
+.flatpickr-day.today:hover {
+    background: hsl(240, 5%, 96%);
+    border-color: hsl(240, 3%, 6%);
+}
+
+.flatpickr-day.selected {
+    background: hsl(240, 3%, 6%);
+    color: hsl(0, 0%, 100%);
+    border-color: hsl(240, 3%, 6%);
+}
+
+.flatpickr-day.selected:hover {
+    background: hsl(240, 3%, 15%);
+    border-color: hsl(240, 3%, 15%);
+}
+
+.flatpickr-time {
+    border-top: 1px solid hsl(0, 0%, 89%);
+    margin-top: 8px;
+    padding-top: 8px;
+}
+
+.flatpickr-time input {
+    background: hsl(0, 0%, 100%);
+    border: 1px solid hsl(0, 0%, 89%);
+    border-radius: 6px;
+    color: hsl(240, 3%, 6%);
+    font-family: var(--dashboard-font-family) !important;
+}
+
+.flatpickr-time input:hover {
+    border-color: hsl(0, 0%, 82%);
+}
+
+.flatpickr-time input:focus {
+    border-color: hsl(0, 0%, 89%);
+    outline: none;
+}
+
+/* Arrow positioning */
+.flatpickr-calendar.arrowTop:before,
+.flatpickr-calendar.arrowTop:after {
+    border-bottom-color: hsl(0, 0%, 89%);
+}
+
+.flatpickr-calendar.arrowBottom:before,
+.flatpickr-calendar.arrowBottom:after {
+    border-top-color: hsl(0, 0%, 89%);
 }

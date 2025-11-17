@@ -6,6 +6,8 @@
      For production optimization, consider using Tailwind CLI or PostCSS build process.
      See: https://tailwindcss.com/docs/installation -->
 <link rel="stylesheet" href="dashboard-v2.css">
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <meta name=mobile-web-app-capable content=yes>
 <meta name=apple-mobile-web-app-capable content=yes>
 <meta name=msapplication-TileColor content=#da532c>
@@ -382,7 +384,7 @@
                                                         </div>
                                                         <div class="flex items-center justify-between flex-1 h-8 transition-all duration-150 group-aria-expanded/sidebar:opacity-100 opacity-0 translate-x-1 group-aria-expanded/sidebar:translate-x-0">
                                                             <p class="text-sm font-medium whitespace-nowrap max-w-[168px] truncate">
-                                                                Voice Changer</p></div>
+                                                                Export protector</p></div>
                                                     </div>
                                                 </div>
                                             </a></div>
@@ -814,7 +816,7 @@
                     <div class="h-[var(--eleven-header-height)] w-full mx-auto hstack items-center gap-3.5 bg-background/90 backdrop-blur-[8px] border-b max-w-[100vw] px-5"
                          style=opacity:1;visibility:visible>
                         <div><h3 data-testid=page-title
-                                 class="font-waldenburg-ht text-lg text-foreground font-semibold">Voice Changer</h3>
+                                 class="font-waldenburg-ht text-lg text-foreground font-semibold">Export protector</h3>
                         </div>
                         <nav class="inline-flex text-subtle border border-subtle items-center justify-center rounded-[10px] bg-none h-9 p-1 border-none"></nav>
                         <div class=flex-1></div>
@@ -896,8 +898,7 @@
                                                         </div>
                                                         <p class="text-sm text-foreground font-medium mt-2.5">Click to
                                                             upload, or drag and drop
-                                                        <p class="text-sm text-subtle font-normal mt-0.5">Audio or video
-                                                            files up to 50MB each
+                                                        <p class="text-sm text-subtle font-normal mt-0.5"> PNG, JPG and RAW files up to 50MB each
                                                         <div class="inline-flex items-center text-xs px-2.5 h-6 rounded-full font-medium transition-colors whitespace-nowrap focus-ring border border-transparent bg-gray-alpha-100 text-foreground my-2.5">
                                                             or
                                                         </div>
@@ -911,7 +912,7 @@
                                                                 <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
                                                                 <line x1=12 x2=12 y1=19 y2=22></line>
                                                             </svg>
-                                                            Record audio
+                                                            Take a screenshot
                                                         </button>
                                                     </div>
                                                 </div>
@@ -1001,285 +1002,134 @@
                                                     <div role=tablist aria-orientation=horizontal
                                                          class="inline-flex text-subtle gap-3.5 w-full h-11 pt-0.5 border-b border-gray-alpha-200"
                                                          tabindex=0 data-orientation=horizontal style=outline:none>
-                                                        <button type=button role=tab aria-selected=false
-                                                                aria-controls=radix-:r1h3:-content-settings
-                                                                data-state=inactive id=radix-:r1h3:-trigger-settings
-                                                                class="whitespace-nowrap ring-offset-background transition-all focus-ring disabled:pointer-events-none disabled:opacity-50 inline-flex -mb-[1px] items-center justify-center border-b-[1.5px] px-0 py-1 text-sm font-medium border-transparent data-[state=active]:border-gray-alpha-800 data-[state=active]:text-foreground"
-                                                                data-testid=tts-settings-tab tabindex=-1
-                                                                data-orientation=horizontal data-radix-collection-item>
-                                                            Settings
+                                                        <button type=button role=tab data-tab=configuration aria-selected=true
+                                                                aria-controls=tab-configuration
+                                                                data-state=active id=tab-trigger-configuration
+                                                                class="tab-button whitespace-nowrap transition-all focus-ring inline-flex -mb-[1px] items-center justify-center border-b-[1.5px] px-0 py-1 text-sm">
+                                                            Configuration
                                                         </button>
-                                                        <button type=button role=tab aria-selected=true
-                                                                aria-controls=radix-:r1h3:-content-history
-                                                                data-state=active id=radix-:r1h3:-trigger-history
-                                                                class="whitespace-nowrap ring-offset-background transition-all focus-ring disabled:pointer-events-none disabled:opacity-50 inline-flex -mb-[1px] items-center justify-center border-b-[1.5px] px-0 py-1 text-sm font-medium border-transparent data-[state=active]:border-gray-alpha-800 data-[state=active]:text-foreground"
-                                                                data-testid=tts-history-tab tabindex=-1
-                                                                data-orientation=horizontal data-radix-collection-item>
-                                                            History
+                                                        <button type=button role=tab data-tab=progress aria-selected=false
+                                                                aria-controls=tab-progress
+                                                                data-state=inactive id=tab-trigger-progress
+                                                                class="tab-button whitespace-nowrap transition-all focus-ring inline-flex -mb-[1px] items-center justify-center border-b-[1.5px] px-0 py-1 text-sm">
+                                                            Progress
                                                         </button>
                                                     </div>
                                                 </div>
                                                 <div class="relative flex-1 min-h-0 mt-2">
-                                                    <div class="h-full absolute top-0 left-0 right-0"
-                                                         style=opacity:1;transform:none>
+                                                    <!-- Configuration Tab -->
+                                                    <div id="tab-configuration" role="tabpanel" class="tab-pane h-full absolute top-0 left-0 right-0" data-state="active" style="opacity:1; transform:none">
                                                         <div class="stack h-full overflow-hidden">
-                                                            <div class="block md:hidden sf-hidden"></div>
-                                                            <div class="stack h-full gap-3.5">
-                                                                <div class="stack gap-1">
-                                                                    <div class="hstack gap-2 items-center"><input
-                                                                            class="flex border border-gray-alpha-200 bg-transparent shadow-none transition-colors file:border-0 file:bg-transparent file:font-medium placeholder:text-subtle focus-ring focus-visible:border-foreground hover:border-gray-alpha-300 focus-visible:ring-[0.5px] focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50 [&amp;:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_hsl(var(--background))] [&amp;:-webkit-autofill]:[-webkit-text-fill-color:hsl(var(--foreground))] [&amp;:-webkit-autofill]:border-gray-200 [&amp;:-webkit-autofill]:focus:border-foreground [&amp;_input:-moz-autofill]:shadow-[inset_0_0_0px_1000px_hsl(var(--background))] [&amp;_input:-moz-autofill]:text-fill-color-[hsl(var(--foreground))] [&amp;_input:-moz-autofill]:border-gray-200 [&amp;_input:-moz-autofill]:focus:border-foreground h-9 px-3 py-1 file:text-sm w-full rounded-[10px] text-base md:text-sm placeholder:text-sm"
-                                                                            placeholder="Search history..." value>
-                                                                        <div class="hstack gap-2">
-                                                                            <button aria-label=Download
-                                                                                    data-state=closed data-loading=false
-                                                                                    disabled
-                                                                                    class="relative inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent bg-background border border-gray-alpha-200 hover:bg-gray-alpha-50 active:bg-gray-alpha-100 radix-state-open:bg-gray-alpha-50 hover:border-gray-alpha-300 text-foreground shadow-none active:border-gray-alpha-300 disabled:bg-background disabled:text-gray-300 disabled:border-gray-alpha-200 radix-state-open:border-gray-alpha-300 rounded-[10px] center p-0 h-9 w-9 tabular-nums">
-                                                                                <svg width=1.2rem height=1.2rem
-                                                                                     class="w-[18px] h-[18px]"
-                                                                                     viewBox="0 0 16 16" fill=none
-                                                                                     xmlns=http://www.w3.org/2000/svg>
-                                                                                    <path d="M8.66677 1.99986C8.66677 1.63167 8.36829 1.33319 8.0001 1.33319C7.63191 1.33319 7.33344 1.63167 7.33344 1.99986V8.39038L5.13817 6.19512C4.87782 5.93477 4.45571 5.93477 4.19536 6.19512C3.93501 6.45547 3.93501 6.87758 4.19536 7.13793L7.5287 10.4713C7.78905 10.7316 8.21116 10.7316 8.47151 10.4713L11.8048 7.13793C12.0652 6.87758 12.0652 6.45547 11.8048 6.19512C11.5445 5.93477 11.1224 5.93477 10.862 6.19512L8.66677 8.39038V1.99986Z"
-                                                                                          fill=currentColor></path>
-                                                                                    <path d="M2.0001 9.33319C2.36829 9.33319 2.66677 9.63167 2.66677 9.99986V12.6665C2.66677 12.8433 2.73701 13.0129 2.86203 13.1379C2.98705 13.263 3.15662 13.3332 3.33344 13.3332H12.6668C12.8436 13.3332 13.0131 13.263 13.1382 13.1379C13.2632 13.0129 13.3334 12.8433 13.3334 12.6665V9.99986C13.3334 9.63167 13.6319 9.33319 14.0001 9.33319C14.3683 9.33319 14.6668 9.63167 14.6668 9.99986V12.6665C14.6668 13.197 14.4561 13.7057 14.081 14.0807C13.7059 14.4558 13.1972 14.6665 12.6668 14.6665H3.33344C2.803 14.6665 2.29429 14.4558 1.91922 14.0807C1.54415 13.7057 1.33344 13.197 1.33344 12.6665V9.99986C1.33344 9.63167 1.63191 9.33319 2.0001 9.33319Z"
-                                                                                          fill=currentColor></path>
-                                                                                </svg>
-                                                                            </button>
-                                                                            <button aria-label=Delete data-state=closed
-                                                                                    data-loading=false disabled
-                                                                                    class="relative inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent bg-background border border-gray-alpha-200 hover:bg-gray-alpha-50 active:bg-gray-alpha-100 radix-state-open:bg-gray-alpha-50 hover:border-gray-alpha-300 text-foreground shadow-none active:border-gray-alpha-300 disabled:bg-background disabled:text-gray-300 disabled:border-gray-alpha-200 radix-state-open:border-gray-alpha-300 rounded-[10px] center p-0 h-9 w-9">
-                                                                                <svg xmlns=http://www.w3.org/2000/svg
-                                                                                     width=24 height=24
-                                                                                     viewBox="0 0 24 24" fill=none
-                                                                                     stroke=currentColor stroke-width=2
-                                                                                     stroke-linecap=round
-                                                                                     stroke-linejoin=round
-                                                                                     class="lucide lucide-trash w-[18px] h-[18px]">
-                                                                                    <path d="M3 6h18"></path>
-                                                                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                                                                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                                                                                </svg>
-                                                                            </button>
-                                                                            <button aria-label="Select all"
-                                                                                    data-state=closed
-                                                                                    class="relative inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent bg-background border border-gray-alpha-200 hover:bg-gray-alpha-50 active:bg-gray-alpha-100 radix-state-open:bg-gray-alpha-50 hover:border-gray-alpha-300 text-foreground shadow-none active:border-gray-alpha-300 disabled:bg-background disabled:text-gray-300 disabled:border-gray-alpha-200 radix-state-open:border-gray-alpha-300 rounded-[10px] center p-0 h-9 w-9">
-                                                                                <svg xmlns=http://www.w3.org/2000/svg
-                                                                                     width=24 height=24
-                                                                                     viewBox="0 0 24 24" fill=none
-                                                                                     stroke=currentColor stroke-width=2
-                                                                                     stroke-linecap=round
-                                                                                     stroke-linejoin=round
-                                                                                     class="lucide lucide-check-check w-[18px] h-[18px]">
-                                                                                    <path d="M18 6 7 17l-5-5"></path>
-                                                                                    <path d="m22 10-7.5 7.5L13 16"></path>
-                                                                                </svg>
-                                                                            </button>
-                                                                            <button aria-label="Stop managing"
-                                                                                    data-state=closed
-                                                                                    class="relative inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent bg-foreground text-background shadow-none hover:bg-gray-800 radix-state-open:bg-gray-700 active:bg-gray-700 disabled:bg-gray-400 disabled:text-gray-100 rounded-[10px] center p-0 h-9 w-9">
-                                                                                <svg xmlns=http://www.w3.org/2000/svg
-                                                                                     width=24 height=24
-                                                                                     viewBox="0 0 24 24" fill=none
-                                                                                     stroke=currentColor stroke-width=2
-                                                                                     stroke-linecap=round
-                                                                                     stroke-linejoin=round
-                                                                                     class="lucide lucide-list-x w-[18px] h-[18px] translate-x-0.5">
-                                                                                    <path d="M11 12H3"></path>
-                                                                                    <path d="M16 6H3"></path>
-                                                                                    <path d="M16 18H3"></path>
-                                                                                    <path d="m19 10-4 4"></path>
-                                                                                    <path d="m15 10 4 4"></path>
-                                                                                </svg>
-                                                                            </button>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="hstack gap-2 py-1 -mb-2 items-center overflow-x-auto w-[calc(100%+2.5rem)] -mx-5 px-5 no-scrollbar">
-                                                                        <div tabindex=0
-                                                                             class="flex items-center justify-center h-6 rounded-lg whitespace-nowrap text-xs font-medium transition-colors duration-200 cursor-pointer select-none focus-ring px-[calc(theme(space.1)-1px)] border text-foreground bg-background hover:bg-gray-alpha-50 active:bg-gray-alpha-100 inset-ring shrink-0"
-                                                                             role=button type=button
-                                                                             aria-haspopup=dialog aria-expanded=false
-                                                                             aria-controls=radix-:r1hr:
-                                                                             data-state=closed>
-                                                                            <div class="w-4 h-4 relative focus-ring rounded-full">
-                                                                                <svg xmlns=http://www.w3.org/2000/svg
-                                                                                     width=24 height=24
-                                                                                     viewBox="0 0 24 24" fill=none
-                                                                                     stroke=currentColor stroke-width=2
-                                                                                     stroke-linecap=round
-                                                                                     stroke-linejoin=round
-                                                                                     class="lucide lucide-x absolute w-3 h-3 inset-0.5 transition-transform duration-200 opacity-0 rotate-45">
-                                                                                    <path d="M18 6 6 18"></path>
-                                                                                    <path d="m6 6 12 12"></path>
-                                                                                </svg>
-                                                                                <svg xmlns=http://www.w3.org/2000/svg
-                                                                                     width=24 height=24
-                                                                                     viewBox="0 0 24 24" fill=none
-                                                                                     stroke=currentColor stroke-width=2
-                                                                                     stroke-linecap=round
-                                                                                     stroke-linejoin=round
-                                                                                     class="lucide lucide-plus absolute w-3 h-3 inset-0.5 transition-transform duration-200">
-                                                                                    <path d="M5 12h14"></path>
-                                                                                    <path d="M12 5v14"></path>
-                                                                                </svg>
+                                                            <div class="-mx-5 flex-1 stack px-5 scroll-py-12" style="position:relative; overflow-y:auto; overflow-x:visible">
+
+                                                                <!-- Protection Layers -->
+                                                                <div class="stack gap-4 mb-6">
+                                                                    <h3 class="text-sm font-medium text-foreground">Protection Layers</h3>
+
+                                                                    <div class="stack gap-3">
+                                                                        <!-- Fawkes -->
+                                                                        <div class="protection-card cursor-pointer p-3 border border-gray-200 rounded-[10px] transition-all duration-200 hover:border-gray-300 hover:shadow-sm"
+                                                                             data-protection="fawkes"
+                                                                             onclick="toggleProtection(this)">
+                                                                            <div class="flex-1">
+                                                                                <div class="text-sm font-medium text-foreground">Fawkes</div>
+                                                                                <p class="text-xs text-subtle mt-0.5">Privacy protection against facial recognition</p>
                                                                             </div>
-                                                                            <div class="pl-0.5 pr-1">Voice</div>
                                                                         </div>
-                                                                        <div tabindex=0
-                                                                             class="flex items-center justify-center h-6 rounded-lg whitespace-nowrap text-xs font-medium transition-colors duration-200 cursor-pointer select-none focus-ring px-[calc(theme(space.1)-1px)] border text-foreground bg-background hover:bg-gray-alpha-50 active:bg-gray-alpha-100 inset-ring shrink-0"
-                                                                             role=button type=button
-                                                                             aria-haspopup=dialog aria-expanded=false
-                                                                             aria-controls=radix-:r1ht:
-                                                                             data-state=closed>
-                                                                            <div class="w-4 h-4 relative focus-ring rounded-full">
-                                                                                <svg xmlns=http://www.w3.org/2000/svg
-                                                                                     width=24 height=24
-                                                                                     viewBox="0 0 24 24" fill=none
-                                                                                     stroke=currentColor stroke-width=2
-                                                                                     stroke-linecap=round
-                                                                                     stroke-linejoin=round
-                                                                                     class="lucide lucide-x absolute w-3 h-3 inset-0.5 transition-transform duration-200 opacity-0 rotate-45">
-                                                                                    <path d="M18 6 6 18"></path>
-                                                                                    <path d="m6 6 12 12"></path>
-                                                                                </svg>
-                                                                                <svg xmlns=http://www.w3.org/2000/svg
-                                                                                     width=24 height=24
-                                                                                     viewBox="0 0 24 24" fill=none
-                                                                                     stroke=currentColor stroke-width=2
-                                                                                     stroke-linecap=round
-                                                                                     stroke-linejoin=round
-                                                                                     class="lucide lucide-plus absolute w-3 h-3 inset-0.5 transition-transform duration-200">
-                                                                                    <path d="M5 12h14"></path>
-                                                                                    <path d="M12 5v14"></path>
-                                                                                </svg>
+
+                                                                        <!-- PhotoGuard -->
+                                                                        <div class="protection-card cursor-pointer p-3 border border-gray-200 rounded-[10px] transition-all duration-200 hover:border-gray-300 hover:shadow-sm"
+                                                                             data-protection="photoguard"
+                                                                             onclick="toggleProtection(this)">
+                                                                            <div class="flex-1">
+                                                                                <div class="text-sm font-medium text-foreground">PhotoGuard</div>
+                                                                                <p class="text-xs text-subtle mt-0.5">Adversarial protection against image manipulation</p>
                                                                             </div>
-                                                                            <div class="pl-0.5 pr-1">Model</div>
                                                                         </div>
-                                                                        <div tabindex=0
-                                                                             class="flex items-center justify-center h-6 rounded-lg whitespace-nowrap text-xs font-medium transition-colors duration-200 cursor-pointer select-none focus-ring px-[calc(theme(space.1)-1px)] border text-foreground bg-background hover:bg-gray-alpha-50 active:bg-gray-alpha-100 inset-ring shrink-0"
-                                                                             role=button type=button
-                                                                             aria-haspopup=dialog aria-expanded=false
-                                                                             aria-controls=radix-:r1hv:
-                                                                             data-state=closed>
-                                                                            <div class="w-4 h-4 relative focus-ring rounded-full">
-                                                                                <svg xmlns=http://www.w3.org/2000/svg
-                                                                                     width=24 height=24
-                                                                                     viewBox="0 0 24 24" fill=none
-                                                                                     stroke=currentColor stroke-width=2
-                                                                                     stroke-linecap=round
-                                                                                     stroke-linejoin=round
-                                                                                     class="lucide lucide-x absolute w-3 h-3 inset-0.5 transition-transform duration-200 opacity-0 rotate-45">
-                                                                                    <path d="M18 6 6 18"></path>
-                                                                                    <path d="m6 6 12 12"></path>
-                                                                                </svg>
-                                                                                <svg xmlns=http://www.w3.org/2000/svg
-                                                                                     width=24 height=24
-                                                                                     viewBox="0 0 24 24" fill=none
-                                                                                     stroke=currentColor stroke-width=2
-                                                                                     stroke-linecap=round
-                                                                                     stroke-linejoin=round
-                                                                                     class="lucide lucide-plus absolute w-3 h-3 inset-0.5 transition-transform duration-200">
-                                                                                    <path d="M5 12h14"></path>
-                                                                                    <path d="M12 5v14"></path>
-                                                                                </svg>
+
+                                                                        <!-- MIST -->
+                                                                        <div class="protection-card cursor-pointer p-3 border border-gray-200 rounded-[10px] transition-all duration-200 hover:border-gray-300 hover:shadow-sm"
+                                                                             data-protection="mist"
+                                                                             onclick="toggleProtection(this)">
+                                                                            <div class="flex-1">
+                                                                                <div class="text-sm font-medium text-foreground">MIST</div>
+                                                                                <p class="text-xs text-subtle mt-0.5">Prevents AI model training on your artwork</p>
                                                                             </div>
-                                                                            <div class="pl-0.5 pr-1">Date</div>
+                                                                        </div>
+
+                                                                        <!-- Nightshade -->
+                                                                        <div class="protection-card cursor-pointer p-3 border border-gray-200 rounded-[10px] transition-all duration-200 hover:border-gray-300 hover:shadow-sm"
+                                                                             data-protection="nightshade"
+                                                                             onclick="toggleProtection(this)">
+                                                                            <div class="flex-1">
+                                                                                <div class="text-sm font-medium text-foreground">Nightshade</div>
+                                                                                <p class="text-xs text-subtle mt-0.5">Data poisoning protection for AI datasets</p>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <!-- C2PA Manifest -->
+                                                                        <div class="protection-card cursor-pointer p-3 border border-gray-200 rounded-[10px] transition-all duration-200 hover:border-gray-300 hover:shadow-sm"
+                                                                             data-protection="c2pa"
+                                                                             onclick="toggleProtection(this)">
+                                                                            <div class="flex-1">
+                                                                                <div class="text-sm font-medium text-foreground">C2PA Manifest</div>
+                                                                                <p class="text-xs text-subtle mt-0.5">Content authenticity and provenance metadata</p>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <!-- Watermark Strategy -->
+                                                                        <div class="stack gap-2">
+                                                                            <label for="watermark-strategy" class="text-sm font-medium text-foreground">Watermark Strategy</label>
+                                                                            <select id="watermark-strategy"
+                                                                                    class="flex h-9 w-full rounded-[10px] border border-gray-200 bg-background px-3 py-2 text-sm transition-colors file:border-0 file:bg-transparent file:font-medium placeholder:text-subtle focus:outline-none focus:ring-1 focus:ring-foreground hover:border-gray-300">
+                                                                                <option value="invisible-watermark">Invisible Watermark</option>
+                                                                                <option value="visible-watermark">Tree Ring Watermark</option>
+                                                                            </select>
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                                <div class="-mx-5 flex-1 stack px-2 md:px-5 scroll-py-12 !overflow-x-hidden"
-                                                                     style=position:relative;overflow:auto>
-                                                                    <div class="sticky top-[-1px] h-0 z-10 pointer-events-none -mx-5">
-                                                                        <div class="h-12 bg-background"
-                                                                             style="mask-image:linear-gradient(rgb(255,255,255) 0%,rgba(255,255,255,0) 100%);opacity:0;height:3rem"></div>
-                                                                    </div>
-                                                                    <div class=flex-1 style=opacity:1>
-                                                                        <ul class=eleven-list>
-                                                                            <div role=none style=opacity:1;height:auto>
-                                                                                <li data-expanded=true
-                                                                                    aria-hidden=false>
-                                                                                    <div class="eleven-list-item-group hstack items-center gap-3 p-3 border-b text-start w-full outline-gray-alpha-950 py-2 border-transparent top-0 z-10 overflow-visible relative"
-                                                                                         aria-labelledby=list-item-group-label-:r1i6:
-                                                                                         data-expanded=true
-                                                                                         data-group=:r1i3:>
-                                                                                        <div class=-mr-3></div>
-                                                                                        <div class=flex-1
-                                                                                             id=list-item-group-label-:r1i6:>
-                                                                                            <div class="hstack justify-center">
-                                                                                                <div class="inline-flex items-center text-xs px-2.5 h-6 rounded-full font-medium transition-colors whitespace-nowrap focus-ring border border-transparent text-gray-alpha-950 bg-gray-100">
-                                                                                                    January 22, 2025
-                                                                                                </div>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    <ul class="stack overflow-visible"
-                                                                                        id=list-item-group-section-:r1i6:
-                                                                                        aria-labelledby=list-item-group-label-:r1i6:
-                                                                                        data-expanded=true
-                                                                                        style=height:auto;opacity:1;display:block>
-                                                                                        <ul class="relative pl-[1px] group">
-                                                                                            <div role=none
-                                                                                                 style=opacity:1;height:auto>
-                                                                                                <li id=:r1ia:
-                                                                                                    class="eleven-list-item hstack items-center p-3 gap-3 transition-colors duration-75 relative [&amp;:has([data-type='list-item-trigger']:focus)]:bg-gray-alpha-100 cursor-pointer group/item rounded-lg --hover:shadow-[0_0_0_4px_rgba(255,255,255,1)] --focus-visible:shadow-[0_0_0_4px_rgba(255,255,255,1)] hover:bg-transparent">
-                                                                                                    <div class=-mr-3>
-                                                                                                        <div style=width:auto;opacity:1;transform:none>
-                                                                                                            <button type=button
-                                                                                                                    role=checkbox
-                                                                                                                    aria-checked=false
-                                                                                                                    data-state=unchecked
-                                                                                                                    value=on
-                                                                                                                    class="relative peer shrink-0 rounded-md border border-subtle shadow focus-ring disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-gray-alpha-900 data-[state=checked]:text-background h-5 w-5 z-10 block mr-3">
-                                                                                                                <div class="checkbox-hitarea overlay -inset-1.5"></div>
-                                                                                                            </button>
-                                                                                                        </div>
-                                                                                                    </div>
-                                                                                                    <button id=:r1ic:
-                                                                                                            class="text-left absolute inset-0 focus:outline-none focus-visible:ring-[1.5px] ring-inset ring-gray-alpha-950 rounded-lg transition-colors duration-150 md:group-hover/item:bg-gray-alpha-100 max-md:group-hover/item:bg-transparent hover:bg-transparent"
-                                                                                                            aria-labelledby=:r1ia:
-                                                                                                            data-history-item=SNMbUk1OjChJ2HO69Frz
-                                                                                                            data-group=:r1i6:
-                                                                                                            data-type=list-item-trigger-overlay></button>
-                                                                                                    <div class="relative flex-1 min-w-0 -mt-1">
-                                                                                                        <div class="relative w-fit line-clamp-1">
-                                                                                                            <span class="text-sm text-subtle font-normal break-all">No transcript available</span>
-                                                                                                        </div>
-                                                                                                        <div class="flex items-center gap-1 mt-1">
-                                                                                                            <div class="relative w-full h-full rounded-full overflow-hidden bg-background"
-                                                                                                                 style=width:0.75rem;min-width:0.75rem;height:0.75rem;min-height:0.75rem>
-                                                                                                                <div class="absolute top-0 right-0 bottom-0 left-0 bg-gray-alpha-200 animate-pulse"></div>
-                                                                                                                <img alt=Grandpa
-                                                                                                                     loading=lazy
-                                                                                                                     width=60
-                                                                                                                     height=60
-                                                                                                                     decoding=async
-                                                                                                                     data-nimg=1
-                                                                                                                     class="w-full h-full max-w-full max-h-full"
-                                                                                                                     style="color:transparent;filter:hue-rotate(125deg) saturate(120%);transform:rotate(125deg);object-fit:cover;object-position:center center"
-                                                                                                                     srcset
-                                                                                                                     src="data:image/webp;base64,UklGRl4CAABXRUJQVlA4IFICAADwDgCdASpAAEAAPoU6lkelI6IhMfcdsKAQiWoAqo9yDblDOMXybtYYfbnc71ploPYqyZMLH4LvvucXANErQmAnWkPEpZ7VQmfgVwm7Y/8ad3X40tMEwTr8shwNTp1f29pQqZb5Y2lxoimreR2Clt5kbYY1MQAE6kvUZLOAT1fxAAD+/sImsoq2nsKbuDeLgcRHY4NXwdBuFE1C2yD7rLg3i6B3S/Z5mz7WT0ugAcPdfD2KnkqX0Uq+jyJXAOzYY9vndlnTEQCBB7zJ2FsA3GEpNLm/vjc1mlzTLwuELvij5Pqn2OJJ8cujZsbTtUD2O348DjDW0XqI6b1N1jdA+Qmsl4UhTmHwvRIPge+SPeKGXemUTOgtchR6UaXPniXEU1dtDFmUtVRy7LPf8L/rtU4xNeb3aZw5hSM1ieH2Y3eFmV+XOnrx/ssNLipkatrsaJz290jpaY6hjki/RYq2hc5fQUT3VpR6QVD+QLQNi4eHH6tsCuwW0E/7uwDwKZcbC5bPAeTvCUMY2CCFZ8XDbd08z6kCbGJbqvkK48pVr98iaxqlktLHKF8QFr9Gkygh2dTCYM41PPJcHLbeV1Bh3sclFatNoGfifX+b1o4TZlmEewyE7W1vKoTwUAt1kLKTzvQ0Qavsc6472YyI4EGapKIfUtvqss/oGcXqCjYTP2gexrxOnnm1krXtcZ9yLBOevHeaJhZaVKv4gZyR9jlpjVbNxUROWzkiciP4+SttQR9c4numixaleDE8zNFmj92OX7f4f4cFrzYb9J/JIa6HVP6BoAA="
-                                                                                                                     sizes>
-                                                                                                            </div>
-                                                                                                            <p class="text-xs text-subtle font-normal line-clamp-1 items-center">
-                                                                                                                Grandpa
-                                                                                                                ·
-                                                                                                            <p class="text-xs text-subtle font-normal line-clamp-1 items-center">
-                                                                                                                <span data-state=closed>10 months ago</span>
-                                                                                                            </p></div>
-                                                                                                    </div>
-                                                                                                    <div class="relative hstack items-center w-fit md:hidden md:group-hover/item:flex group-focus-within/item:flex gap-2 md:gap-1 sf-hidden"></div>
-                                                                                                </li>
-                                                                                            </div>
-                                                                                        </ul>
-                                                                                        <div class="mx-3 border-b border-subtle hidden sf-hidden"
-                                                                                             aria-hidden=true></div>
-                                                                                    </ul>
-                                                                                </li>
+
+                                                                <!-- Artwork Metadata -->
+                                                                <div class="stack gap-4">
+                                                                    <h3 class="text-sm font-medium text-foreground">Artwork Metadata</h3>
+
+                                                                    <div class="stack gap-3">
+                                                                        <div class="stack gap-2">
+                                                                            <label for="author-name" class="text-sm font-medium text-foreground">Author Name</label>
+                                                                            <input type="text" id="author-name" placeholder="Artist name"
+                                                                                   class="flex h-9 w-full rounded-[10px] border border-gray-200 bg-background px-3 py-2 text-sm transition-colors placeholder:text-subtle focus:outline-none focus:ring-1 focus:ring-foreground hover:border-gray-300">
+                                                                        </div>
+
+                                                                        <div class="stack gap-2">
+                                                                            <label for="creation-date" class="text-sm font-medium text-foreground">Creation Date</label>
+                                                                            <div class="hstack gap-2">
+                                                                                <input type="text" id="creation-date" placeholder="Select date..."
+                                                                                       class="flex h-9 flex-1 rounded-[10px] border border-gray-alpha-200 bg-background px-3 py-2 text-sm transition-colors duration-75 placeholder:text-subtle hover:border-gray-alpha-300 focus:outline-none focus:border-gray-alpha-200"
+                                                                                       style="color-scheme: light;" readonly>
+                                                                                <button type="button" id="today-btn" title="Set to today"
+                                                                                        class="inline-flex items-center justify-center whitespace-nowrap text-xs font-medium transition-colors duration-75 focus-ring bg-background border border-gray-alpha-200 hover:bg-gray-alpha-50 active:bg-gray-alpha-100 h-9 px-3 rounded-[10px]">
+                                                                                    Today
+                                                                                </button>
                                                                             </div>
-                                                                        </ul>
+                                                                        </div>
+
+                                                                        <div class="stack gap-2">
+                                                                            <label for="description" class="text-sm font-medium text-foreground">Description (Optional)</label>
+                                                                            <textarea id="description" rows="3" placeholder="Describe your artwork..."
+                                                                                      class="flex min-h-[80px] w-full rounded-[10px] border border-gray-200 bg-background px-3 py-2 text-sm transition-colors placeholder:text-subtle focus:outline-none focus:ring-1 focus:ring-foreground hover:border-gray-300 resize-none"></textarea>
+                                                                        </div>
                                                                     </div>
-                                                                    <div class="sticky bottom-[-1px] h-0 z-10 pointer-events-none -mx-5">
-                                                                        <div class="relative -translate-y-full bg-background"
-                                                                             style="mask-image:linear-gradient(rgba(255,255,255,0) 0%,rgb(255,255,255) 100%);opacity:0;height:3rem"></div>
-                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Progress Tab -->
+                                                    <div id="tab-progress" role="tabpanel" class="tab-pane h-full absolute top-0 left-0 right-0" data-state="inactive" style="opacity:0; transform:none; display:none">
+                                                        <div class="stack h-full overflow-hidden">
+                                                            <div class="-mx-5 flex-1 stack px-5 scroll-py-12" style="position:relative; overflow-y:auto; overflow-x:visible">
+                                                                <div id="progress-tracker-content" class="stack gap-3">
+                                                                    <!-- Progress steps will be dynamically added here based on selected protections -->
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -1299,4 +1149,243 @@
     <span id=__chakra_env hidden class=sf-hidden></span>
     <div class="hidden sf-hidden"></div>
 </div>
+
+<script>
+// State management
+const selectedProtections = new Set();
+
+// Protection name mapping
+const protectionNames = {
+  'fawkes': 'Fawkes Protection',
+  'photoguard': 'PhotoGuard Protection',
+  'mist': 'MIST Protection',
+  'nightshade': 'Nightshade Protection',
+  'c2pa': 'C2PA Manifest',
+  'watermark': 'Apply Watermark'
+};
+
+// Toggle protection card selection
+function toggleProtection(card) {
+  const protection = card.getAttribute('data-protection');
+
+  if (card.classList.contains('selected')) {
+    card.classList.remove('selected');
+    selectedProtections.delete(protection);
+  } else {
+    card.classList.add('selected');
+    selectedProtections.add(protection);
+  }
+
+  updateProgressTracker();
+}
+
+// Update progress tracker based on selected protections
+function updateProgressTracker() {
+  const container = document.getElementById('progress-tracker-content');
+
+  // Check if watermark is selected
+  const watermarkSelect = document.getElementById('watermark-strategy');
+  const hasWatermark = watermarkSelect && watermarkSelect.value;
+
+  // Build array of selected protections
+  const protections = Array.from(selectedProtections);
+  if (hasWatermark) {
+    protections.push('watermark');
+  }
+
+  if (protections.length === 0) {
+    // Show empty state
+    container.innerHTML = `
+      <div class="flex flex-col items-center justify-center py-12 text-center">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-300 mb-4">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+        <p class="text-sm text-subtle">Select protection layers to begin</p>
+      </div>
+    `;
+    return;
+  }
+
+  // Generate progress steps - all start as pending
+  let stepsHTML = '';
+  protections.forEach((protection, index) => {
+    const name = protectionNames[protection] || protection;
+
+    // All steps start as pending (will be updated by API callback)
+    const iconHTML = `<svg class="mr-3 flex-shrink-0 ml-1" height="16" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true">
+      <path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13Z" fill="currentColor"></path>
+    </svg>`;
+    const timeHTML = `<div class="text-mono text-normal text-small float-right text-xs text-subtle">-</div>`;
+    const textClass = 'text-subtle';
+
+    stepsHTML += `
+      <div class="CheckStep rounded-2 px-2" data-step-number="${index + 1}" data-conclusion="pending" data-protection="${protection}">
+        <div class="CheckStep-header p-2 mb-1 rounded-2 mx-2">
+          <div class="d-flex flex-items-center">
+            ${iconHTML}
+            <span class="flex-1 ml-n1 mr-1 css-truncate css-truncate-overflow user-select-none text-sm ${textClass}">${name}</span>
+            ${timeHTML}
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = stepsHTML;
+}
+
+// Update progress step status (to be called by API callback)
+// Usage: updateProgressStep('fawkes', 'in-progress') - start processing
+//        updateProgressStep('fawkes', 'success', '2.5s') - mark complete
+//        updateProgressStep('fawkes', 'error', 'Failed') - mark failed
+// Supported status: 'pending', 'in-progress'/'processing', 'success'/'completed', 'error'/'failed'
+function updateProgressStep(protection, status, time) {
+  const step = document.querySelector(`[data-protection="${protection}"]`);
+  if (!step) return;
+
+  const header = step.querySelector('.CheckStep-header .d-flex');
+  const name = protectionNames[protection] || protection;
+
+  let iconHTML = '';
+  let timeHTML = '';
+  let textClass = '';
+
+  if (status === 'success' || status === 'completed') {
+    iconHTML = `<svg class="mr-3 flex-shrink-0 ml-1" title="This step passed" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true">
+      <path d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16Zm3.78-9.72a.751.751 0 0 0-.018-1.042.751.751 0 0 0-1.042-.018L6.75 9.19 5.28 7.72a.751.751 0 0 0-1.042.018.751.751 0 0 0-.018 1.042l2 2a.75.75 0 0 0 1.06 0Z" fill="currentColor"></path>
+    </svg>`;
+    timeHTML = `<div class="text-mono text-normal text-small float-right text-xs">${time || '0.0s'}</div>`;
+    step.setAttribute('data-conclusion', 'success');
+  } else if (status === 'in-progress' || status === 'processing') {
+    iconHTML = `<svg width="16" height="16" fill="none" class="anim-rotate mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" aria-label="In progress">
+      <path opacity=".5" d="M8 15A7 7 0 108 1a7 7 0 000 14v0z" stroke="currentColor" stroke-width="2"></path>
+      <path d="M15 8a7 7 0 01-7 7" stroke="currentColor" stroke-width="2"></path>
+      <path d="M8 12a4 4 0 100-8 4 4 0 000 8z" fill="currentColor"></path>
+    </svg>`;
+    timeHTML = `<div class="text-mono text-normal text-small float-right text-xs">...</div>`;
+    step.setAttribute('data-conclusion', 'in-progress');
+  } else if (status === 'error' || status === 'failed') {
+    iconHTML = `<svg class="mr-3 flex-shrink-0 ml-1" title="This step failed" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true">
+      <path d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16ZM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646Z" fill="currentColor"></path>
+    </svg>`;
+    timeHTML = `<div class="text-mono text-normal text-small float-right text-xs text-red-600">${time || 'Failed'}</div>`;
+    step.setAttribute('data-conclusion', 'failure');
+  } else {
+    // pending
+    iconHTML = `<svg class="mr-3 flex-shrink-0 ml-1" height="16" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true">
+      <path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13Z" fill="currentColor"></path>
+    </svg>`;
+    timeHTML = `<div class="text-mono text-normal text-small float-right text-xs text-subtle">-</div>`;
+    textClass = 'text-subtle';
+    step.setAttribute('data-conclusion', 'pending');
+  }
+
+  header.innerHTML = `
+    ${iconHTML}
+    <span class="flex-1 ml-n1 mr-1 css-truncate css-truncate-overflow user-select-none text-sm ${textClass}">${name}</span>
+    ${timeHTML}
+  `;
+}
+
+// Initialize tab switching functionality
+function initializeTabs() {
+  const tabButtons = document.querySelectorAll('.tab-button');
+  const tabPanes = document.querySelectorAll('.tab-pane');
+
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const tabName = button.getAttribute('data-tab');
+
+      // Update all buttons
+      tabButtons.forEach(btn => {
+        if (btn.getAttribute('data-tab') === tabName) {
+          btn.setAttribute('aria-selected', 'true');
+          btn.setAttribute('data-state', 'active');
+        } else {
+          btn.setAttribute('aria-selected', 'false');
+          btn.setAttribute('data-state', 'inactive');
+        }
+      });
+
+      // Update all tab panes
+      tabPanes.forEach(pane => {
+        if (pane.id === `tab-${tabName}`) {
+          pane.style.display = 'block';
+          pane.style.opacity = '1';
+          pane.setAttribute('data-state', 'active');
+        } else {
+          pane.style.display = 'none';
+          pane.style.opacity = '0';
+          pane.setAttribute('data-state', 'inactive');
+        }
+      });
+    });
+  });
+}
+
+// Initialize watermark change listener
+function initializeWatermarkListener() {
+  const watermarkSelect = document.getElementById('watermark-strategy');
+  if (watermarkSelect) {
+    watermarkSelect.addEventListener('change', updateProgressTracker);
+  }
+}
+
+// Flatpickr instance
+let datePickerInstance = null;
+
+// Initialize flatpickr date picker
+function initializeDatePicker() {
+  const dateInput = document.getElementById('creation-date');
+  if (dateInput && typeof flatpickr !== 'undefined') {
+    datePickerInstance = flatpickr(dateInput, {
+      dateFormat: 'Y-m-d',
+      defaultDate: new Date(),
+      disableMobile: true, // Force custom picker on mobile
+      onChange: function(selectedDates, dateStr, instance) {
+        // Optional: handle date change
+      }
+    });
+  }
+}
+
+// Set today's date
+function setTodayDate() {
+  if (datePickerInstance) {
+    datePickerInstance.setDate(new Date(), true);
+  }
+}
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    initializeTabs();
+    initializeWatermarkListener();
+    updateProgressTracker();
+    initializeDatePicker();
+
+    // Set up today button
+    const todayBtn = document.getElementById('today-btn');
+    if (todayBtn) {
+      todayBtn.addEventListener('click', setTodayDate);
+    }
+  });
+} else {
+  initializeTabs();
+  initializeWatermarkListener();
+  updateProgressTracker();
+  initializeDatePicker();
+
+  // Set up today button
+  const todayBtn = document.getElementById('today-btn');
+  if (todayBtn) {
+    todayBtn.addEventListener('click', setTodayDate);
+  }
+}
+</script>
+
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
 <script data-template-shadow-root src="dashboard-v2.js"></script>
