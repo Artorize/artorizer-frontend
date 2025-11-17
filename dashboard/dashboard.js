@@ -1,4 +1,135 @@
 /**
+ * Process History Manager
+ *
+ * Handles localStorage persistence for previous protection processes
+ */
+class ProcessHistoryManager {
+  constructor() {
+    this.storageKey = 'artorize_process_history';
+    this.maxHistoryItems = 50; // Limit history to 50 items
+  }
+
+  /**
+   * Save a new process to history
+   * @param {Object} processData - Process data to save
+   * @returns {string} Process ID
+   */
+  saveProcess(processData) {
+    const processes = this.getAllProcesses();
+    const processId = Date.now().toString();
+
+    const newProcess = {
+      id: processId,
+      filename: processData.filename,
+      date: new Date().toISOString(),
+      config: processData.config,
+      metadata: processData.metadata,
+      results: processData.results,
+      jobInfo: processData.jobInfo,
+      timestamp: processId
+    };
+
+    // Add to beginning of array
+    processes.unshift(newProcess);
+
+    // Limit history size
+    if (processes.length > this.maxHistoryItems) {
+      processes.splice(this.maxHistoryItems);
+    }
+
+    // Save to localStorage
+    try {
+      localStorage.setItem(this.storageKey, JSON.stringify(processes));
+      return processId;
+    } catch (error) {
+      console.error('Failed to save process to localStorage:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Load a specific process by ID
+   * @param {string} processId - ID of process to load
+   * @returns {Object|null} Process data or null if not found
+   */
+  loadProcess(processId) {
+    const processes = this.getAllProcesses();
+    return processes.find(p => p.id === processId) || null;
+  }
+
+  /**
+   * Get all processes from history
+   * @returns {Array} Array of process objects
+   */
+  getAllProcesses() {
+    try {
+      const data = localStorage.getItem(this.storageKey);
+      return data ? JSON.parse(data) : [];
+    } catch (error) {
+      console.error('Failed to load processes from localStorage:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Delete a specific process
+   * @param {string} processId - ID of process to delete
+   * @returns {boolean} Success status
+   */
+  deleteProcess(processId) {
+    const processes = this.getAllProcesses();
+    const filteredProcesses = processes.filter(p => p.id !== processId);
+
+    if (filteredProcesses.length === processes.length) {
+      return false; // Process not found
+    }
+
+    try {
+      localStorage.setItem(this.storageKey, JSON.stringify(filteredProcesses));
+      return true;
+    } catch (error) {
+      console.error('Failed to delete process from localStorage:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Clear all history
+   * @returns {boolean} Success status
+   */
+  clearHistory() {
+    try {
+      localStorage.removeItem(this.storageKey);
+      return true;
+    } catch (error) {
+      console.error('Failed to clear history:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Format date for display
+   * @param {string} isoDate - ISO date string
+   * @returns {string} Formatted date
+   */
+  formatDate(isoDate) {
+    const date = new Date(isoDate);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} min ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+
+    return date.toLocaleDateString();
+  }
+}
+
+/**
  * Artorize Dashboard Controller
  *
  * Main controller for the Artorize dashboard UI.
@@ -11,6 +142,10 @@ class ArtorizeDashboard {
     this.currentJobId = null;
     this.selectedFile = null;
     this.currentResult = null;
+    this.currentProcessId = null; // Currently loaded process ID
+
+    // History manager
+    this.historyManager = new ProcessHistoryManager();
 
     // Image blobs for comparison
     this.images = {
@@ -138,6 +273,9 @@ class ArtorizeDashboard {
     // Header scroll effect
     this.setupHeaderScrollEffect();
 
+    // Sidebar toggle buttons
+    this.setupSidebarToggle();
+
     // Drag and drop functionality for upload zone (standalone)
     if (this.uploadZoneStandalone) {
       this.uploadZoneStandalone.addEventListener('dragover', (e) => {
@@ -208,6 +346,49 @@ class ArtorizeDashboard {
     document.getElementById('download-protected-btn').addEventListener('click', () => this.downloadImage('protected'));
     document.getElementById('download-mask-btn').addEventListener('click', () => this.downloadImage('mask'));
     document.getElementById('download-reconstructed-btn').addEventListener('click', () => this.downloadImage('reconstructed'));
+
+    // Protect New button
+    const protectNewBtn = document.getElementById('protect-new-btn');
+    if (protectNewBtn) {
+      protectNewBtn.addEventListener('click', () => this.handleProtectNew());
+    }
+
+    // Render process list on page load
+    this.renderProcessList();
+  }
+
+  /**
+   * Setup sidebar toggle functionality
+   */
+  setupSidebarToggle() {
+    // Sidebar toggle button (in left panel)
+    const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
+    if (sidebarToggleBtn) {
+      sidebarToggleBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.toggleSidebar();
+      });
+    }
+
+    // Collapsed sidebar toggle button (in collapsed column)
+    const collapsedSidebarToggleBtn = document.getElementById('collapsed-sidebar-toggle-btn');
+    if (collapsedSidebarToggleBtn) {
+      collapsedSidebarToggleBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.toggleSidebar();
+      });
+    }
+
+    // Restore sidebar state from localStorage
+    const sidebarHidden = localStorage.getItem('sidebar_hidden') === 'true';
+    if (sidebarHidden) {
+      const wrapper = document.querySelector('.dashboard-wrapper');
+      if (wrapper) {
+        wrapper.classList.add('sidebar-hidden');
+      }
+    }
   }
 
   /**
@@ -1259,6 +1440,9 @@ class ArtorizeDashboard {
       // this.hideProgressTracker(); // Commented out to keep checkmarks visible
       this.showStatus('All images loaded successfully!', 'success');
 
+      // Save the completed process to history
+      this.saveCurrentProcess();
+
       // Show comparison section
       const comparisonSection = document.getElementById('comparison-section');
       comparisonSection.style.display = 'block';
@@ -1705,6 +1889,261 @@ class ArtorizeDashboard {
       this.generateButton.disabled = false;
       this.generateButton.classList.remove('loading');
     }
+  }
+
+  /**
+   * Render the list of previous processes in the left panel
+   */
+  renderProcessList() {
+    const processList = document.getElementById('process-list');
+    if (!processList) return;
+
+    const processes = this.historyManager.getAllProcesses();
+
+    if (processes.length === 0) {
+      processList.innerHTML = '<div class="process-list-empty">No previous processes yet</div>';
+      return;
+    }
+
+    processList.innerHTML = processes.map((process, index) => `
+      <div class="process-item ${this.currentProcessId === process.id ? 'active' : ''}"
+           data-process-id="${process.id}"
+           style="animation-delay: ${index * 0.05}s">
+        <svg class="process-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+        <div class="process-item-content">
+          <div class="process-item-name">${this.escapeHtml(process.filename)}</div>
+          <div class="process-item-date">${this.historyManager.formatDate(process.date)}</div>
+        </div>
+        <div class="process-item-delete" data-delete-id="${process.id}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+        </div>
+      </div>
+    `).join('');
+
+    // Attach event listeners to process items
+    processList.querySelectorAll('.process-item').forEach(item => {
+      const processId = item.dataset.processId;
+      const deleteBtn = item.querySelector('.process-item-delete');
+
+      // Click on item to load process
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.target.closest('.process-item-delete')) return;
+        this.handleProcessClick(processId);
+      });
+
+      // Click on delete button
+      if (deleteBtn) {
+        deleteBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.handleProcessDelete(processId, e);
+        });
+      }
+    });
+  }
+
+  /**
+   * Handle "Protect New" button click - reset to fresh state
+   */
+  handleProtectNew() {
+    // Reset current process ID
+    this.currentProcessId = null;
+
+    // Clear file selection
+    this.clearImagePreview();
+
+    // Reset all form fields
+    document.getElementById('enable-fawkes').checked = false;
+    document.getElementById('enable-photoguard').checked = false;
+    document.getElementById('enable-mist').checked = false;
+    document.getElementById('enable-nightshade').checked = false;
+    document.getElementById('enable-c2pa-manifest').checked = false;
+    document.getElementById('watermark-strategy').value = 'invisible-watermark';
+    document.getElementById('author-name').value = '';
+    document.getElementById('creation-date').value = '';
+    document.getElementById('description').value = '';
+
+    // Hide results section
+    document.getElementById('comparison-section').style.display = 'none';
+
+    // Hide progress tracker
+    this.hideProgressTracker();
+
+    // Hide status banner
+    document.getElementById('status-banner').style.display = 'none';
+
+    // Scroll to top of center panel
+    document.querySelector('.center-panel')?.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Re-render process list to clear active state
+    this.renderProcessList();
+
+    console.log('Reset to fresh state for new protection');
+  }
+
+  /**
+   * Handle click on a process item - load process details
+   */
+  handleProcessClick(processId) {
+    const process = this.historyManager.loadProcess(processId);
+    if (!process) {
+      this.showStatus('Failed to load process', 'error');
+      return;
+    }
+
+    this.currentProcessId = processId;
+
+    // Populate configuration
+    document.getElementById('enable-fawkes').checked = process.config.enableFawkes || false;
+    document.getElementById('enable-photoguard').checked = process.config.enablePhotoguard || false;
+    document.getElementById('enable-mist').checked = process.config.enableMist || false;
+    document.getElementById('enable-nightshade').checked = process.config.enableNightshade || false;
+    document.getElementById('enable-c2pa-manifest').checked = process.config.enableC2paManifest || false;
+    document.getElementById('watermark-strategy').value = process.config.watermarkStrategy || 'invisible-watermark';
+
+    // Populate metadata
+    document.getElementById('author-name').value = process.metadata.authorName || '';
+    document.getElementById('creation-date').value = process.metadata.creationDate || '';
+    document.getElementById('description').value = process.metadata.description || '';
+
+    // Load and display results if available
+    if (process.results) {
+      this.currentResult = {
+        job_id: process.jobInfo.job_id,
+        status: process.jobInfo.status,
+        timestamp: process.jobInfo.timestamp,
+        original_url: process.results.originalUrl,
+        protected_url: process.results.protectedUrl,
+        mask_url: process.results.maskUrl,
+        reconstructed_url: process.results.reconstructedUrl
+      };
+
+      // Display the results
+      this.displayResult(this.currentResult).then(() => {
+        // Scroll to results
+        setTimeout(() => {
+          document.getElementById('comparison-section')?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }, 300);
+      });
+    }
+
+    // Update process list UI to show active state
+    this.renderProcessList();
+
+    console.log('Loaded process:', processId);
+  }
+
+  /**
+   * Handle delete button click on a process item
+   */
+  handleProcessDelete(processId, event) {
+    event.stopPropagation();
+
+    if (!confirm('Delete this process from history?')) {
+      return;
+    }
+
+    const success = this.historyManager.deleteProcess(processId);
+
+    if (success) {
+      // If we deleted the currently loaded process, reset
+      if (this.currentProcessId === processId) {
+        this.handleProtectNew();
+      }
+
+      // Re-render the list
+      this.renderProcessList();
+
+      this.showStatus('Process deleted', 'success');
+      setTimeout(() => {
+        document.getElementById('status-banner').style.display = 'none';
+      }, 2000);
+    } else {
+      this.showStatus('Failed to delete process', 'error');
+    }
+  }
+
+  /**
+   * Save the current process to history after successful completion
+   */
+  saveCurrentProcess() {
+    if (!this.selectedFile || !this.currentResult) {
+      console.log('Cannot save process: missing file or result');
+      return;
+    }
+
+    const processData = {
+      filename: this.selectedFile.name,
+      config: {
+        enableFawkes: document.getElementById('enable-fawkes').checked,
+        enablePhotoguard: document.getElementById('enable-photoguard').checked,
+        enableMist: document.getElementById('enable-mist').checked,
+        enableNightshade: document.getElementById('enable-nightshade').checked,
+        enableC2paManifest: document.getElementById('enable-c2pa-manifest').checked,
+        watermarkStrategy: document.getElementById('watermark-strategy').value
+      },
+      metadata: {
+        authorName: document.getElementById('author-name').value,
+        creationDate: document.getElementById('creation-date').value,
+        description: document.getElementById('description').value
+      },
+      results: {
+        originalUrl: this.currentResult.original_url,
+        protectedUrl: this.currentResult.protected_url,
+        maskUrl: this.currentResult.mask_url,
+        reconstructedUrl: this.currentResult.reconstructed_url
+      },
+      jobInfo: {
+        job_id: this.currentResult.job_id,
+        status: this.currentResult.status,
+        timestamp: this.currentResult.timestamp
+      }
+    };
+
+    const processId = this.historyManager.saveProcess(processData);
+
+    if (processId) {
+      this.currentProcessId = processId;
+      this.renderProcessList();
+      console.log('Process saved to history:', processId);
+    }
+  }
+
+  /**
+   * Toggle left sidebar visibility
+   */
+  toggleSidebar() {
+    console.log('toggleSidebar called');
+    const wrapper = document.querySelector('.dashboard-wrapper');
+    if (wrapper) {
+      wrapper.classList.toggle('sidebar-hidden');
+      console.log('Sidebar hidden:', wrapper.classList.contains('sidebar-hidden'));
+
+      // Store preference in localStorage
+      const isHidden = wrapper.classList.contains('sidebar-hidden');
+      localStorage.setItem('sidebar_hidden', isHidden ? 'true' : 'false');
+    } else {
+      console.error('Dashboard wrapper not found');
+    }
+  }
+
+  /**
+   * Escape HTML to prevent XSS
+   */
+  escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 }
 

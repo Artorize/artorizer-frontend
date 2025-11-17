@@ -172,22 +172,351 @@ body {
 
 /* Dashboard Container */
 .dashboard-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: var(--spacing-xl) var(--spacing-lg);
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
 }
 
-/* Split Layout - Left Sidebar + Right Main */
-.dashboard-content-split {
-    display: grid; /* Visible by default */
-    grid-template-columns: 420px 1fr; /* Increased from 320px to 420px for wider progress boxes */
-    gap: var(--spacing-xl);
-    align-items: start;
-    animation: fadeInUp var(--anim-slow) var(--ease-out);
-}
-
-.dashboard-content-split.active {
+/* Three-Panel Layout - ElevenLabs Style */
+.dashboard-wrapper {
     display: grid;
+    grid-template-columns: 280px 0 1fr 720px; /* Left: 280px | Collapsed: 0 (hidden) | Center: flex | Right: 720px */
+    grid-template-areas: "left collapsed center right";
+    min-height: 100vh;
+    background: var(--color-bg);
+    gap: 0;
+}
+
+.dashboard-wrapper.sidebar-hidden {
+    grid-template-columns: 0 60px 1fr 720px; /* Hide left panel, show collapsed column */
+}
+
+.dashboard-wrapper.sidebar-hidden .left-panel {
+    overflow: hidden;
+    width: 0;
+    padding: 0;
+    border: none;
+}
+
+.dashboard-wrapper.sidebar-hidden .collapsed-sidebar-column {
+    display: flex;
+}
+
+/* Left Panel */
+.left-panel {
+    grid-area: left;
+    position: fixed; /* Changed from sticky to fixed for smooth glide */
+    left: 0; /* Start from left edge */
+    top: 0;
+    height: 100vh;
+    width: 280px;
+    overflow-y: auto;
+    overflow-x: hidden; /* Prevent horizontal scroll */
+    background: var(--color-surface);
+    border-right: 1px solid var(--color-border);
+    padding: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    box-sizing: border-box; /* Include padding in height calculation */
+    z-index: 100; /* Above other content */
+    transform: translateX(0); /* Default position - visible */
+    transition: transform 350ms cubic-bezier(0.4, 0, 0.2, 1); /* Smooth glide */
+}
+
+/* Slide sidebar out when hidden */
+.dashboard-wrapper.sidebar-hidden .left-panel {
+    transform: translateX(-280px); /* Slide completely off screen */
+    overflow: visible; /* Show content during transition */
+    width: 280px; /* Maintain width during transition */
+    padding: var(--spacing-lg); /* Maintain padding during transition */
+    border: 1px solid var(--color-border); /* Maintain border during transition */
+}
+
+/* Collapsed Sidebar Column (skinny column with shield icon) */
+.collapsed-sidebar-column {
+    grid-area: collapsed;
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 60px;
+    background: var(--color-surface);
+    border-right: 1px solid var(--color-border);
+    display: flex; /* Always flex, use opacity/visibility for hiding */
+    flex-direction: column;
+    align-items: center;
+    padding: var(--spacing-md) 0; /* Less padding, align to top */
+    box-sizing: border-box;
+    z-index: 99; /* Below sidebar but above content */
+    opacity: 0; /* Hidden by default */
+    pointer-events: none; /* Don't capture clicks when hidden */
+    transition: opacity 350ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Show collapsed sidebar when main sidebar is hidden */
+.dashboard-wrapper.sidebar-hidden .collapsed-sidebar-column {
+    opacity: 1;
+    pointer-events: auto; /* Enable clicks when visible */
+}
+
+.collapsed-sidebar-toggle-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-tertiary);
+    transition: all var(--transition-fast);
+    border-radius: var(--radius-md);
+    position: relative; /* For absolute positioning of icons */
+}
+
+.collapsed-sidebar-toggle-btn:hover {
+    background: var(--color-hover-bg);
+    color: var(--color-accent-primary);
+}
+
+/* Shield icon - visible by default, hidden on hover */
+.collapsed-sidebar-toggle-btn .shield-icon {
+    flex-shrink: 0;
+    opacity: 1;
+    transition: opacity var(--transition-fast);
+}
+
+.collapsed-sidebar-toggle-btn:hover .shield-icon {
+    opacity: 0;
+}
+
+/* Panel icon - hidden by default, visible on hover */
+.collapsed-sidebar-toggle-btn .panel-icon {
+    flex-shrink: 0;
+    position: absolute;
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.collapsed-sidebar-toggle-btn:hover .panel-icon {
+    opacity: 1;
+}
+
+/* Center Panel */
+.center-panel {
+    grid-area: center;
+    padding: var(--spacing-2xl) var(--spacing-xl); /* Standard padding */
+    padding-left: var(--spacing-xl); /* Minimal left padding - content close to sidebar */
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+    align-items: flex-start; /* Left alignment */
+    max-width: none; /* Remove max-width to allow full expansion */
+    margin: 0;
+    margin-left: 280px; /* Offset for fixed sidebar */
+    width: calc(100% - 280px); /* Account for sidebar width */
+    box-sizing: border-box;
+    transition: margin-left 350ms cubic-bezier(0.4, 0, 0.2, 1), width 350ms cubic-bezier(0.4, 0, 0.2, 1); /* Smooth transition */
+}
+
+/* Adjust when sidebar is hidden */
+.dashboard-wrapper.sidebar-hidden .center-panel {
+    margin-left: 60px; /* Offset for collapsed sidebar */
+    width: calc(100% - 60px); /* Account for collapsed sidebar width */
+}
+
+/* Right Panel */
+.right-panel {
+    grid-area: right;
+    position: sticky;
+    top: 0;
+    max-height: 100vh; /* Use max-height instead of height */
+    overflow-y: auto;
+    overflow-x: hidden; /* Prevent horizontal scroll */
+    background: var(--color-surface);
+    border-left: 1px solid var(--color-border);
+    padding: calc(var(--spacing-2xl) * 1.5) var(--spacing-2xl); /* Very generous padding: 72px 48px */
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing-2xl) * 1.5); /* Even more space between sections: 72px */
+    box-sizing: border-box; /* Include padding in height calculation */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
+
+/* Custom Scrollbar Styling for Panels */
+.left-panel::-webkit-scrollbar,
+.right-panel::-webkit-scrollbar {
+    width: 8px;
+}
+
+.left-panel::-webkit-scrollbar-track,
+.right-panel::-webkit-scrollbar-track {
+    background: var(--color-surface);
+}
+
+.left-panel::-webkit-scrollbar-thumb,
+.right-panel::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 4px;
+}
+
+.left-panel::-webkit-scrollbar-thumb:hover,
+.right-panel::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-muted);
+}
+
+/* Firefox scrollbar */
+.left-panel,
+.right-panel {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) var(--color-surface);
+}
+
+/* Left Panel Sections */
+.panel-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.panel-section-title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--spacing-xs);
+}
+
+/* Protect New Button */
+.protect-new-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    background: var(--color-accent-primary);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-sm);
+}
+
+.protect-new-btn:hover {
+    background: var(--color-accent-hover);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.protect-new-btn:active {
+    transform: scale(0.98);
+}
+
+/* Previous Processes List */
+.process-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    max-height: calc(100vh - 300px);
+    overflow-y: auto;
+}
+
+.process-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+    animation: fadeInSlide 0.3s ease-out backwards;
+}
+
+@keyframes fadeInSlide {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.process-item:hover {
+    background: var(--color-hover-bg);
+    border-color: var(--color-border-hover);
+}
+
+.process-item.active {
+    background: var(--color-accent-light);
+    border-color: var(--color-accent-primary);
+}
+
+.process-item-icon {
+    flex-shrink: 0;
+    color: var(--color-text-secondary);
+}
+
+.process-item-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.process-item-name {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.process-item-date {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-tertiary);
+}
+
+.process-item-delete {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    opacity: 0;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+}
+
+.process-item:hover .process-item-delete {
+    opacity: 1;
+}
+
+.process-item-delete:hover {
+    background: var(--color-error-light);
+    color: var(--color-error);
+}
+
+.process-list-empty {
+    padding: var(--spacing-xl) var(--spacing-md);
+    text-align: center;
+    color: var(--color-text-tertiary);
+    font-size: var(--font-size-sm);
 }
 
 @keyframes fadeInUp {
@@ -241,34 +570,68 @@ body {
     }
 }
 
-/* Header - ElevenLabs Clean Style */
-.dashboard-header {
-    text-align: center;
-    margin-bottom: 2.25rem; /* 36px - 3/4 of original 48px */
-    padding: 2.25rem; /* 36px - 3/4 of original 48px */
-    background: var(--color-surface);
+/* Sidebar Toggle Button (in left panel, top right corner) */
+.sidebar-toggle-btn {
+    position: absolute;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    width: 2rem; /* 32px - smaller, more compact */
+    height: 2rem; /* 32px */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-surface-alt);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    color: var(--color-text-secondary);
+    z-index: 10; /* Above other sidebar content */
+}
+
+.sidebar-toggle-btn:hover {
+    background: var(--color-surface-elevated);
+    border-color: var(--color-border-hover);
+    color: var(--color-text-primary);
+}
+
+.sidebar-toggle-btn:active {
+    transform: scale(0.95);
+}
+
+.sidebar-toggle-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Header - No box, positioned top left, aligned with center panel edge */
+.dashboard-header {
+    margin-bottom: var(--spacing-xl);
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
     box-shadow: none;
-    transition: all var(--transition-normal);
+    text-align: left; /* Left aligned */
+    margin-left: 0;
+    width: 100%; /* Full width to align to left */
+    align-self: flex-start; /* Ensure left alignment */
 }
 
 .dashboard-title {
-    font-size: 2.5rem; /* 40px */
-    font-weight: var(--font-weight-bold);
+    font-size: 1.25rem; /* 20px */
+    font-weight: var(--font-weight-bold); /* Bold as requested */
     color: var(--color-text-primary);
-    margin-bottom: 0.75rem; /* 12px - 3/4 of original 16px */
-    letter-spacing: -0.02em;
-    line-height: 1.1;
+    margin-bottom: 0.25rem;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
 }
 
 .dashboard-subtitle {
-    font-size: 1.125rem; /* 18px */
+    font-size: 0.875rem; /* 14px */
     font-weight: var(--font-weight-normal);
     color: var(--color-text-secondary);
-    max-width: 43.75rem; /* 700px */
-    margin: 0 auto;
-    line-height: 1.6;
+    line-height: 1.5;
 }
 
 /* Dashboard Content */
@@ -289,6 +652,7 @@ body {
 
 .upload-section {
     grid-column: 1 / -1;
+    padding: var(--spacing-xl); /* Medium-large padding */
 }
 
 .right-column {
@@ -303,6 +667,11 @@ body {
     padding: var(--spacing-lg);
     box-shadow: none; /* Cleaner, no shadow by default */
     transition: all var(--transition-normal);
+    position: relative; /* Ensure proper stacking context */
+    overflow: visible; /* Allow content to be visible */
+    width: 100%; /* Expand to full width of center panel */
+    max-width: 1200px; /* Match center panel max-width */
+    align-self: flex-start; /* Align to left edge */
 }
 
 .section:hover {
@@ -368,16 +737,16 @@ body {
 
 /* Upload Section */
 .upload-section-initial {
-    padding: var(--spacing-lg);
+    padding: var(--spacing-xl); /* Increased padding */
 }
 
 .upload-section-initial .section-header {
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
 }
 
 .upload-zone {
     position: relative;
-    min-height: 11rem;
+    min-height: 18rem; /* Increased from 14rem for more prominence */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -438,6 +807,7 @@ body {
     border-color: var(--color-border);
     box-shadow: none;
     color: var(--color-text-primary);
+    padding: var(--spacing-xl); /* Increased padding */
 }
 
 .progress-section .section-header {
@@ -463,6 +833,8 @@ body {
     gap: var(--spacing-md);
     margin-bottom: var(--spacing-xl);
     padding-bottom: 0;
+    width: 100%; /* Ensure full width */
+    box-sizing: border-box; /* Include padding in width */
 }
 
 .section-icon {
@@ -544,17 +916,27 @@ body {
 
 /* Configuration Section */
 .config-section {
-    min-height: 18.75rem; /* 300px */
+    /* Remove fixed min-height to allow natural sizing */
+}
+
+.right-panel .section {
+    padding: var(--spacing-xl); /* Reduced from var(--spacing-lg) for more breathing room */
+    border: 1px solid var(--color-border);
+    flex-shrink: 0; /* Prevent sections from shrinking */
+    width: 100%; /* Ensure full width */
+    box-sizing: border-box; /* Include padding and border in width */
 }
 
 .config-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-md);
+    grid-template-columns: 1fr; /* Single column for less clutter */
+    gap: var(--spacing-lg); /* More vertical spacing */
+    width: 100%; /* Ensure grid doesn't overflow */
+    box-sizing: border-box; /* Include padding in width */
 }
 
 .config-option {
-    padding: var(--spacing-md);
+    padding: var(--spacing-lg); /* More padding for comfort */
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
@@ -563,6 +945,8 @@ body {
     user-select: none;
     position: relative;
     overflow: hidden;
+    width: 100%; /* Ensure full width */
+    box-sizing: border-box; /* Include padding and border in width */
 }
 
 .config-option::before {
@@ -602,8 +986,9 @@ body {
 .option-header {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-xs);
+    gap: var(--spacing-md); /* More space between elements */
+    margin-bottom: var(--spacing-md); /* More space before description */
+    flex-wrap: wrap; /* Allow wrapping if needed */
 }
 
 .option-checkbox {
@@ -613,12 +998,17 @@ body {
 .option-label {
     display: flex;
     align-items: center;
-    gap: var(--spacing-xs);
+    gap: var(--spacing-sm); /* More space between icon and text */
     font-size: var(--font-size-base);
     font-weight: var(--font-weight-semibold);
     color: var(--color-text-primary);
     cursor: pointer;
     flex: 1;
+    min-width: 0; /* Allow flex shrinking */
+}
+
+.option-label span {
+    white-space: nowrap; /* Prevent label text from wrapping */
 }
 
 .option-icon {
@@ -639,6 +1029,7 @@ body {
 .info-btn {
     width: 1.5rem;  /* 24px */
     height: 1.5rem; /* 24px */
+    min-width: 1.5rem; /* Prevent shrinking */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -648,6 +1039,7 @@ body {
     color: var(--color-text-secondary);
     transition: color var(--transition-fast);
     padding: 0;
+    flex-shrink: 0; /* Don't shrink the info button */
 }
 
 .info-btn:hover {
@@ -657,26 +1049,29 @@ body {
 .option-description {
     font-size: var(--font-size-sm);
     color: var(--color-text-tertiary);
-    margin-left: 1.75rem; /* 28px */
+    margin-left: 0; /* Remove margin to prevent overflow */
     font-weight: var(--font-weight-normal);
-    line-height: 1.5;
+    line-height: 1.6;
+    word-wrap: break-word; /* Allow long words to break */
 }
 
 /* Metadata Section */
 .metadata-section {
-    min-height: 11.25rem; /* 180px */
+    /* Remove fixed min-height to allow natural sizing */
 }
 
 .metadata-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: var(--spacing-lg);
+    gap: var(--spacing-xl); /* More spacing between form fields */
+    width: 100%; /* Ensure grid doesn't overflow */
+    box-sizing: border-box; /* Include padding in width */
 }
 
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-md); /* More space between label and input */
 }
 
 .form-group-full {
@@ -695,7 +1090,7 @@ body {
 .form-textarea,
 .select-input {
     width: 100%;
-    padding: var(--spacing-sm) var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg); /* More generous padding */
     font-size: var(--font-size-base);
     font-family: var(--font-family);
     font-weight: var(--font-weight-normal);
@@ -734,18 +1129,20 @@ body {
 /* Date Input Group with Today Button */
 .date-input-group {
     display: flex;
-    gap: var(--spacing-xs);
+    gap: var(--spacing-md); /* More space between input and button */
+    align-items: stretch;
 }
 
 .date-input-group .form-input {
     flex: 1;
+    min-width: 0; /* Allow shrinking if needed */
 }
 
 .today-btn {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
-    padding: var(--spacing-sm) var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg); /* More padding to match inputs */
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-medium);
     font-family: var(--font-family);
@@ -757,6 +1154,7 @@ body {
     transition: all var(--transition-fast);
     white-space: nowrap;
     box-shadow: none;
+    flex-shrink: 0; /* Prevent button from shrinking */
 }
 
 .today-btn:hover {
@@ -778,6 +1176,8 @@ body {
 .cta-container {
     margin-top: var(--spacing-lg);
     animation: fadeInUp var(--anim-slow) var(--ease-out) 200ms;
+    flex-shrink: 0; /* Prevent shrinking */
+    width: 100%; /* Full width */
 }
 
 .cta-button {
@@ -804,6 +1204,7 @@ body {
 .cta-button:hover {
     background: var(--color-cta-hover);
     box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
 }
 
 .cta-button:active {
@@ -902,15 +1303,15 @@ body {
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    padding: var(--spacing-lg);
-    margin: var(--spacing-lg) 0;
+    padding: var(--spacing-2xl); /* Larger padding for prominence */
+    margin: var(--spacing-2xl) 0; /* More vertical spacing */
 }
 
 .progress-tracker-title {
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-xl); /* Larger title */
     font-weight: var(--font-weight-semibold);
     color: var(--color-text-primary);
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-lg); /* More spacing */
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
@@ -929,10 +1330,10 @@ body {
     display: flex;
     align-items: center; /* Changed from flex-start to center for vertical alignment */
     gap: var(--spacing-md);
-    padding: 0.625rem 1rem; /* Box includes everything now */
+    padding: 1rem 1.25rem; /* Larger padding for prominence */
     margin-left: 0.5rem; /* 8px - matches GitHub mx-2 */
     margin-right: 0.5rem; /* 8px - matches GitHub mx-2 */
-    margin-bottom: 0.25rem; /* 4px - matches GitHub mb-1 */
+    margin-bottom: 0.5rem; /* Increased spacing between steps */
     border-radius: 0.375rem; /* 6px - matches GitHub rounded-2 */
     background: var(--color-surface);
     border: 1px solid var(--color-border-light);
@@ -1392,32 +1793,58 @@ body {
     }
 }
 
-/* Responsive Design */
-@media (max-width: 1200px) {
-    /* Stack columns on smaller screens */
-    .dashboard-content-split {
-        grid-template-columns: 360px 1fr; /* Adjusted for wider sidebar */
-        gap: var(--spacing-lg);
+/* Responsive Design - Three-Panel Layout */
+@media (max-width: 1800px) {
+    .dashboard-wrapper {
+        grid-template-columns: 260px 1fr 640px; /* Slightly narrower panels */
+    }
+}
+
+@media (max-width: 1600px) {
+    .dashboard-wrapper {
+        grid-template-columns: 240px 1fr 560px; /* Narrower panels */
+    }
+
+    .center-panel {
+        padding: var(--spacing-xl) var(--spacing-md);
     }
 }
 
 @media (max-width: 1024px) {
-    /* Stack sidebar above main content on tablets */
-    .dashboard-content-split {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-lg);
+    /* Tablet: Hide left panel, show only center + right */
+    .dashboard-wrapper {
+        grid-template-columns: 1fr 300px;
+        grid-template-areas: "center right";
     }
 
-    .left-sidebar {
+    .left-panel {
+        display: none; /* Hidden on tablet */
+    }
+
+    .right-panel {
         position: static;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: var(--spacing-md);
+        max-height: none; /* Remove height constraint on tablet */
+        height: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Mobile: Single column, stack everything */
+    .dashboard-wrapper {
+        grid-template-columns: 1fr;
+        grid-template-areas: "center";
     }
 
-    .progress-section {
-        grid-column: 1 / -1;
+    .left-panel,
+    .right-panel {
+        display: none; /* Hidden on mobile */
     }
+
+    .center-panel {
+        padding: var(--spacing-md);
+    }
+
+    /* TODO: Add mobile menu/drawer for panels */
 }
 
 @media (max-width: 1024px) {
@@ -1700,5 +2127,162 @@ select:focus-visible {
     /* Global Drop Overlay - Dark mode */
     .global-drop-overlay {
         background: rgba(18, 18, 18, 0.95);
+    }
+
+    /* Three-Panel Layout - Dark mode */
+    .left-panel,
+    .right-panel {
+        background: var(--color-surface);
+        border-color: var(--gray-alpha-150);
+    }
+
+    .panel-section {
+        border-color: var(--gray-alpha-100);
+    }
+
+    .panel-section-title {
+        color: var(--color-text-secondary);
+    }
+
+    /* Protect New Button - Dark mode */
+    .protect-new-btn {
+        background: var(--color-accent-primary);
+        color: #121212;
+        border-color: transparent;
+    }
+
+    .protect-new-btn:hover {
+        background: var(--color-accent-hover);
+        color: #121212;
+        box-shadow: var(--shadow-md);
+    }
+
+    .protect-new-btn:active {
+        background: var(--color-cta-active);
+    }
+
+    /* Sidebar Toggle Button (in left panel) - Dark mode */
+    .sidebar-toggle-btn {
+        background: var(--color-surface-elevated);
+        border-color: var(--gray-alpha-150);
+        color: var(--color-text-secondary);
+    }
+
+    .sidebar-toggle-btn:hover {
+        background: var(--color-surface);
+        border-color: var(--gray-alpha-200);
+        color: var(--color-text-primary);
+    }
+
+    /* Collapsed Sidebar Column - Dark mode */
+    .collapsed-sidebar-column {
+        background: var(--color-surface);
+        border-color: var(--gray-alpha-150);
+    }
+
+    .collapsed-sidebar-toggle-btn {
+        color: var(--color-text-tertiary);
+    }
+
+    .collapsed-sidebar-toggle-btn:hover {
+        background: var(--color-hover-bg);
+        color: var(--color-accent-primary);
+    }
+
+    /* Shield and chevron icons - dark mode */
+    .collapsed-sidebar-toggle-btn .shield-icon {
+        color: var(--color-text-tertiary);
+    }
+
+    .collapsed-sidebar-toggle-btn:hover .shield-icon {
+        opacity: 0;
+    }
+
+    .collapsed-sidebar-toggle-btn .panel-icon {
+        color: var(--color-accent-primary);
+    }
+
+    .collapsed-sidebar-toggle-btn:hover .panel-icon {
+        opacity: 1;
+    }
+
+    /* Process List - Dark mode */
+    .process-list-empty {
+        color: var(--color-text-muted);
+    }
+
+    .process-item {
+        background: var(--color-surface-alt);
+        border-color: var(--gray-alpha-150);
+    }
+
+    .process-item:hover {
+        background: var(--color-surface-elevated);
+        border-color: var(--gray-alpha-200);
+    }
+
+    .process-item.active {
+        background: var(--color-accent-light);
+        border-color: var(--color-accent-primary);
+    }
+
+    .process-item-name {
+        color: var(--color-text-primary);
+    }
+
+    .process-item-date {
+        color: var(--color-text-tertiary);
+    }
+
+    .process-item-delete {
+        color: var(--color-text-muted);
+    }
+
+    .process-item-delete:hover {
+        color: var(--color-error);
+        background: var(--color-error-light);
+    }
+
+    /* Upload Area - Dark mode */
+    .upload-area {
+        background: var(--gray-alpha-50);
+        border-color: var(--gray-alpha-200);
+    }
+
+    .upload-area:hover {
+        background: var(--gray-alpha-100);
+        border-color: var(--color-accent-primary);
+    }
+
+    /* Configuration Boxes - Dark mode */
+    .protection-config,
+    .artwork-metadata {
+        background: var(--color-surface-alt);
+    }
+
+    .config-group,
+    .metadata-group {
+        background: var(--color-surface);
+    }
+
+    /* Scrollbar - Dark mode */
+    .left-panel::-webkit-scrollbar-track,
+    .right-panel::-webkit-scrollbar-track {
+        background: var(--color-surface);
+    }
+
+    .left-panel::-webkit-scrollbar-thumb,
+    .right-panel::-webkit-scrollbar-thumb {
+        background: var(--gray-alpha-200);
+    }
+
+    .left-panel::-webkit-scrollbar-thumb:hover,
+    .right-panel::-webkit-scrollbar-thumb:hover {
+        background: var(--gray-alpha-300);
+    }
+
+    .left-panel,
+    .right-panel {
+        scrollbar-color: var(--gray-alpha-200) var(--color-surface);
     }
 }
