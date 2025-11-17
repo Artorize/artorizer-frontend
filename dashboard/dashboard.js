@@ -1260,7 +1260,16 @@ class ArtorizeDashboard {
       this.showStatus('All images loaded successfully!', 'success');
 
       // Show comparison section
-      document.getElementById('comparison-section').style.display = 'block';
+      const comparisonSection = document.getElementById('comparison-section');
+      comparisonSection.style.display = 'block';
+
+      // Smooth scroll to results section with offset for better visibility
+      setTimeout(() => {
+        comparisonSection.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }, 300); // Small delay to ensure section is rendered
 
       // Initialize comparison controls
       this.initializeComparisonControls();

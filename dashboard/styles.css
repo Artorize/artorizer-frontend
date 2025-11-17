@@ -11,52 +11,76 @@
 }
 
 :root {
-    /* Modern Light Theme Color Palette - 2025 Design Trends */
-    /* 60% - Base neutrals */
-    --color-bg: #FAFAFA;              /* Page background - soft white */
+    /* ElevenLabs-Inspired Design System - 2025 */
+    /* Base Colors */
+    --color-bg: #FFFFFF;              /* Pure white background */
     --color-surface: #FFFFFF;          /* Card surface - pure white */
-    --color-surface-alt: #F5F7FA;     /* Alternative surface */
+    --color-surface-alt: #FAFAFA;     /* Alternative surface - gray-50 */
+    --color-surface-elevated: #FFFFFF; /* Elevated surface */
 
-    /* 30% - Accent colors (Soft blue/lavender) */
-    --color-accent-primary: #5C6BC0;   /* Indigo - Primary accent */
-    --color-accent-light: #E8EAF6;     /* Light indigo background */
-    --color-accent-lighter: #F3F4FB;   /* Lighter indigo background */
-    --color-accent-hover: #7986CB;     /* Hover state */
+    /* Gray Scale - ElevenLabs palette */
+    --gray-50: #FAFAFA;
+    --gray-100: #F4F4F5;
+    --gray-200: #E5E5E8;
+    --gray-300: #D6D6DA;
+    --gray-400: #A6A6AE;
+    --gray-500: #787881;
+    --gray-600: #5B5B64;
+    --gray-700: #494950;
+    --gray-800: #323235;
+    --gray-900: #242426;
+    --gray-950: #1C1C1D;
 
-    /* 10% - CTA and highlights */
-    --color-cta: #5C6BC0;              /* Call-to-action color */
-    --color-cta-hover: #4E5AB5;        /* CTA hover */
-    --color-cta-active: #3F4AA0;       /* CTA active */
+    /* Alpha Colors - Semi-transparent overlays */
+    --gray-alpha-50: rgba(0, 0, 0, 0.04);
+    --gray-alpha-100: rgba(0, 0, 0, 0.06);
+    --gray-alpha-150: rgba(0, 0, 0, 0.08);
+    --gray-alpha-200: rgba(0, 0, 0, 0.08);
+    --gray-alpha-300: rgba(0, 0, 0, 0.16);
+    --gray-alpha-400: rgba(0, 0, 0, 0.24);
+    --gray-alpha-500: rgba(0, 0, 0, 0.36);
 
-    /* Text hierarchy - Clean and minimal */
-    --color-text-primary: #1A202C;     /* Deep charcoal */
-    --color-text-secondary: #4A5568;   /* Medium gray */
-    --color-text-tertiary: #718096;    /* Light gray */
-    --color-text-muted: #A0AEC0;       /* Very light gray */
+    /* Accent colors - Custom blue #357ABD */
+    --color-accent-primary: #357ABD;   /* Primary blue accent */
+    --color-accent-light: #EBF8FF;     /* Light blue background */
+    --color-accent-lighter: #BEE3F8;   /* Lighter blue background */
+    --color-accent-hover: #4A8FD6;     /* Hover state - lighter */
 
-    /* Borders - Subtle and minimal */
-    --color-border: #E2E8F0;           /* Soft border */
-    --color-border-light: #EDF2F7;     /* Lighter border */
-    --color-border-hover: #CBD5E0;     /* Border on hover */
+    /* CTA and highlights */
+    --color-cta: #357ABD;              /* Call-to-action color */
+    --color-cta-hover: #4A8FD6;        /* CTA hover */
+    --color-cta-active: #2C6199;       /* CTA active */
+
+    /* Text hierarchy - Professional and clean */
+    --color-text-primary: #323235;     /* Gray-800 - primary text */
+    --color-text-secondary: #5B5B64;   /* Gray-600 - secondary text */
+    --color-text-tertiary: #787881;    /* Gray-500 - tertiary text */
+    --color-text-muted: #A6A6AE;       /* Gray-400 - muted text */
+
+    /* Borders - Subtle ElevenLabs style */
+    --color-border: var(--gray-alpha-150);     /* Subtle border */
+    --color-border-light: var(--gray-alpha-100); /* Lighter border */
+    --color-border-hover: var(--gray-alpha-200); /* Border on hover */
 
     /* Interactive states */
-    --color-hover-bg: #F7FAFC;         /* Hover background */
-    --color-active-bg: #EDF2F7;        /* Active background */
-    --color-selected-bg: #E8EAF6;      /* Selected background */
+    --color-hover-bg: var(--gray-alpha-50);    /* Subtle hover */
+    --color-active-bg: var(--gray-alpha-100);  /* Active background */
+    --color-selected-bg: #EBF8FF;              /* Selected background */
 
     /* Focus states */
-    --color-focus: #5C6BC0;
-    --color-focus-ring: rgba(92, 107, 192, 0.3);
+    --color-focus: #357ABD;
+    --color-focus-ring: rgba(53, 122, 189, 0.3);
+    --color-focus-light: #EBF8FF;
 
-    /* Semantic colors - Refined palette */
-    --color-success: #48BB78;          /* Softer green */
-    --color-success-light: #F0FFF4;
-    --color-error: #F56565;            /* Softer red */
-    --color-error-light: #FFF5F5;
-    --color-warning: #ECC94B;          /* Softer yellow */
-    --color-warning-light: #FFFAF0;
-    --color-info: #4299E1;             /* Softer blue */
-    --color-info-light: #EBF8FF;
+    /* Semantic colors - ElevenLabs inspired */
+    --color-success: #38A169;          /* Green-500 */
+    --color-success-light: #F0FFF4;    /* Green-50 */
+    --color-error: #E53E3E;            /* Red-500 */
+    --color-error-light: #FFF5F5;      /* Red-50 */
+    --color-warning: #ECC94B;          /* Yellow-400 */
+    --color-warning-light: #FFFAF0;    /* Yellow-50 */
+    --color-info: #3182CE;             /* Blue-500 */
+    --color-info-light: #EBF8FF;       /* Blue-50 */
 
     /* Spacing */
     --spacing-xs: 0.5rem;   /* 8px */
@@ -84,23 +108,27 @@
     --font-weight-semibold: 600;
     --font-weight-bold: 700;
 
-    /* Border Radius */
+    /* Border Radius - ElevenLabs standard */
     --radius-sm: 0.375rem;  /* 6px */
-    --radius-md: 0.5rem;    /* 8px */
-    --radius-lg: 0.75rem;   /* 12px */
-    --radius-xl: 1rem;      /* 16px */
+    --radius-md: 0.5rem;    /* 8px - ElevenLabs standard */
+    --radius-lg: 0.5rem;    /* 8px - keeping consistent */
+    --radius-xl: 0.75rem;   /* 12px */
 
-    /* Transitions */
-    --transition-fast: 0.2s ease-out;
-    --transition-normal: 0.3s ease-out;
-    --transition-slow: 0.4s ease-out;
+    /* Transitions - ElevenLabs style */
+    --transition-fast: 150ms ease-out;
+    --transition-normal: 200ms ease-out;
+    --transition-slow: 300ms ease-out;
 
-    /* Modern Shadows - Soft and subtle */
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.03);
-    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.08), 0 4px 6px rgba(0, 0, 0, 0.04);
-    --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
-    --shadow-hover: 0 8px 12px rgba(92, 107, 192, 0.1), 0 4px 6px rgba(0, 0, 0, 0.04);
+    /* Shadows - ElevenLabs Chakra UI system */
+    --shadow-xs: 0 0 0 1px rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+    --shadow-hover: 0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -1px rgba(0, 0, 0, 0.08);
 
     /* Animation Timings */
     --anim-fast: 150ms;
@@ -152,7 +180,7 @@ body {
 /* Split Layout - Left Sidebar + Right Main */
 .dashboard-content-split {
     display: grid; /* Visible by default */
-    grid-template-columns: 320px 1fr;
+    grid-template-columns: 420px 1fr; /* Increased from 320px to 420px for wider progress boxes */
     gap: var(--spacing-xl);
     align-items: start;
     animation: fadeInUp var(--anim-slow) var(--ease-out);
@@ -213,16 +241,16 @@ body {
     }
 }
 
-/* Header */
+/* Header - ElevenLabs Clean Style */
 .dashboard-header {
     text-align: center;
     margin-bottom: 2.25rem; /* 36px - 3/4 of original 48px */
     padding: 2.25rem; /* 36px - 3/4 of original 48px */
     background: var(--color-surface);
-    border: none;
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
-    transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: none;
+    transition: all var(--transition-normal);
 }
 
 .dashboard-title {
@@ -230,9 +258,8 @@ body {
     font-weight: var(--font-weight-bold);
     color: var(--color-text-primary);
     margin-bottom: 0.75rem; /* 12px - 3/4 of original 16px */
-    letter-spacing: -0.0625rem;
+    letter-spacing: -0.02em;
     line-height: 1.1;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .dashboard-subtitle {
@@ -268,19 +295,19 @@ body {
     display: contents;
 }
 
-/* Section Styles - Minimalist Design */
+/* Section Styles - ElevenLabs Minimalist Design */
 .section {
     background: var(--color-surface);
-    border: 1px solid var(--color-border-light);
-    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
     padding: var(--spacing-lg);
-    box-shadow: var(--shadow-sm);
-    transition: all var(--anim-normal) var(--ease-out);
+    box-shadow: none; /* Cleaner, no shadow by default */
+    transition: all var(--transition-normal);
 }
 
 .section:hover {
-    border-color: var(--color-border);
-    box-shadow: var(--shadow-hover);
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-sm);
     transform: translateY(-1px);
 }
 
@@ -369,17 +396,17 @@ body {
     width: 100%;
     height: 100%;
     padding: var(--spacing-lg);
-    border: 1px dashed var(--color-border);
-    border-radius: var(--radius-lg);
-    background: var(--color-surface);
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--gray-50); /* Subtle shaded background */
     cursor: pointer;
     transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 
 .upload-label:hover,
 .upload-zone.drag-over .upload-label {
-    border-color: var(--color-focus);
-    background: var(--color-hover-bg);
+    border-color: var(--color-accent-primary);
+    background: var(--color-accent-light);
 }
 
 .upload-icon {
@@ -451,6 +478,23 @@ body {
     letter-spacing: -0.01875rem;
 }
 
+/* Results Section Header - Extra Prominent */
+.results-section .section-header {
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 2px solid var(--color-accent-primary);
+}
+
+.results-section .section-icon {
+    color: var(--color-accent-primary);
+    opacity: 1;
+}
+
+.results-section .section-title {
+    font-size: var(--font-size-2xl);
+    color: var(--color-accent-primary);
+}
+
 .image-preview {
     position: relative;
     width: 100%;
@@ -512,9 +556,9 @@ body {
 .config-option {
     padding: var(--spacing-md);
     background: var(--color-surface);
-    border: 1px solid var(--color-border-light);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    transition: all var(--anim-normal) var(--ease-out);
+    transition: all var(--transition-fast);
     cursor: pointer;
     user-select: none;
     position: relative;
@@ -530,24 +574,21 @@ body {
     height: 100%;
     background: var(--color-accent-primary);
     transform: scaleY(0);
-    transition: transform var(--anim-normal) var(--ease-out);
+    transition: transform var(--transition-normal);
 }
 
 .config-option:hover {
     background: var(--color-hover-bg);
     border-color: var(--color-border-hover);
-    transform: translateX(4px);
-    box-shadow: var(--shadow-md);
 }
 
 .config-option:active {
-    transform: translateX(2px) scale(0.98);
+    transform: scale(0.98);
 }
 
 .config-option:has(.option-checkbox:checked) {
-    background: var(--color-accent-lighter);
+    background: var(--color-accent-light);
     border-color: var(--color-accent-primary);
-    box-shadow: 0 0 0 1px var(--color-accent-primary) inset;
 }
 
 .config-option:has(.option-checkbox:checked)::before {
@@ -706,28 +747,27 @@ body {
     gap: var(--spacing-xs);
     padding: var(--spacing-sm) var(--spacing-md);
     font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-semibold);
+    font-weight: var(--font-weight-medium);
     font-family: var(--font-family);
     color: var(--color-text-primary);
-    background: var(--color-surface-elevated);
-    border: none;
-    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
     cursor: pointer;
     transition: all var(--transition-fast);
     white-space: nowrap;
-    box-shadow: var(--shadow-sm);
+    box-shadow: none;
 }
 
 .today-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
+    background: var(--color-hover-bg);
+    border-color: var(--color-border-hover);
 }
 
 .today-btn:active {
-    background: #9ae39a;
-    color: #0a0a0a;
-    transform: scale(0.95);
-    box-shadow: none;
+    background: var(--color-success);
+    color: #ffffff;
+    transform: scale(0.98);
 }
 
 .today-btn svg {
@@ -749,56 +789,34 @@ body {
     gap: var(--spacing-sm);
     padding: 0 var(--spacing-xl);
     font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-bold);
+    font-weight: var(--font-weight-semibold);
     font-family: var(--font-family);
     color: #ffffff;
-    background: linear-gradient(135deg, var(--color-cta) 0%, var(--color-cta-hover) 100%);
+    background: var(--color-cta);
     border: none;
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md);
     cursor: pointer;
-    transition: all var(--anim-normal) var(--ease-out);
-    box-shadow: var(--shadow-md), 0 4px 12px rgba(92, 107, 192, 0.3);
+    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-sm);
     position: relative;
-    overflow: hidden;
-}
-
-.cta-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.1) 100%);
-    opacity: 0;
-    transition: opacity var(--anim-normal) var(--ease-out);
 }
 
 .cta-button:hover {
-    background: linear-gradient(135deg, var(--color-cta-hover) 0%, var(--color-cta) 100%);
-    transform: translateY(-2px) scale(1.01);
-    box-shadow: var(--shadow-lg), 0 8px 20px rgba(92, 107, 192, 0.4);
-}
-
-.cta-button:hover::before {
-    opacity: 1;
+    background: var(--color-cta-hover);
+    box-shadow: var(--shadow-md);
 }
 
 .cta-button:active {
-    transform: translateY(0) scale(0.99);
+    transform: scale(0.98);
     box-shadow: var(--shadow-sm);
 }
 
 .cta-button:disabled {
-    background: var(--color-border);
+    background: var(--gray-200);
     color: var(--color-text-muted);
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
-}
-
-.cta-button:disabled::before {
-    display: none;
 }
 
 .button-icon {
@@ -832,6 +850,7 @@ body {
     align-items: center;
     gap: var(--spacing-sm);
     padding: var(--spacing-md) var(--spacing-lg);
+    margin-top: var(--spacing-2xl); /* 48px - increased spacing above status banner */
     margin-bottom: var(--spacing-xl);
     border-radius: var(--radius-md);
     font-size: var(--font-size-base);
@@ -908,15 +927,15 @@ body {
 
 .progress-step {
     display: flex;
-    align-items: flex-start;
-    gap: var(--spacing-sm);
-    padding-left: 0.5rem; /* 8px - matches GitHub px-2 */
-    padding-right: 0.5rem; /* 8px - matches GitHub px-2 */
-    padding-top: 0;
-    padding-bottom: 0;
-    border-radius: 0;
-    border: none;
-    background: transparent;
+    align-items: center; /* Changed from flex-start to center for vertical alignment */
+    gap: var(--spacing-md);
+    padding: 0.625rem 1rem; /* Box includes everything now */
+    margin-left: 0.5rem; /* 8px - matches GitHub mx-2 */
+    margin-right: 0.5rem; /* 8px - matches GitHub mx-2 */
+    margin-bottom: 0.25rem; /* 4px - matches GitHub mb-1 */
+    border-radius: 0.375rem; /* 6px - matches GitHub rounded-2 */
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-light);
 }
 
 .progress-step.empty-state {
@@ -949,15 +968,15 @@ body {
 }
 
 .progress-step.pending .progress-step-indicator {
-    color: #94a3b8; /* Gray for pending - no animation */
+    color: var(--gray-400); /* Gray for pending - no animation */
 }
 
 .progress-step.processing .progress-step-indicator {
-    color: #f59e0b; /* Orange for processing - with spinning animation */
+    color: #ED8936; /* Orange-400 for processing - with spinning animation */
 }
 
 .progress-step.completed .progress-step-indicator {
-    color: #10b981; /* Green for completed - solid checkmark */
+    color: var(--color-success); /* Green for completed - solid checkmark */
 }
 
 .progress-spinner {
@@ -967,20 +986,17 @@ body {
 
 .progress-step-content {
     flex: 1;
-    padding: 0.5rem; /* 8px - matches GitHub p-2 */
-    margin-left: 0.5rem; /* 8px - matches GitHub mx-2 */
-    margin-right: 0.5rem; /* 8px - matches GitHub mx-2 */
-    margin-bottom: 0.25rem; /* 4px - matches GitHub mb-1 */
-    border-radius: 0.375rem; /* 6px - matches GitHub rounded-2 */
-    background: var(--color-surface);
-    border: 1px solid var(--color-border-light);
+    display: flex;
+    flex-direction: column;
+    /* No border/background - moved to parent .progress-step */
 }
 
 .progress-step-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: var(--spacing-md);
+    gap: var(--spacing-lg); /* Increased gap to prevent wrapping */
+    white-space: nowrap; /* Prevent text wrapping */
 }
 
 .progress-step-title {
@@ -988,6 +1004,8 @@ body {
     font-weight: var(--font-weight-medium);
     color: var(--color-text-primary);
     flex: 1;
+    white-space: nowrap; /* Prevent text wrapping */
+    overflow: visible; /* Allow text to be fully visible */
 }
 
 .progress-step-elapsed {
@@ -995,7 +1013,8 @@ body {
     font-weight: var(--font-weight-medium);
     color: var(--color-text-tertiary);
     font-variant-numeric: tabular-nums;
-    white-space: nowrap;
+    white-space: nowrap; /* Prevent wrapping */
+    flex-shrink: 0; /* Prevent shrinking */
     font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
 }
 
@@ -1004,7 +1023,7 @@ body {
 }
 
 .progress-step.processing .progress-step-title {
-    color: var(--color-warning);
+    color: #ED8936; /* Orange-400 */
     font-weight: var(--font-weight-semibold);
 }
 
@@ -1019,11 +1038,11 @@ body {
 }
 
 .progress-step.processing .progress-step-details {
-    color: var(--color-warning);
+    color: #ED8936; /* Orange-400 */
 }
 
 .progress-step.processing .progress-step-elapsed {
-    color: var(--color-warning);
+    color: #ED8936; /* Orange-400 */
     font-weight: var(--font-weight-semibold);
 }
 
@@ -1031,20 +1050,61 @@ body {
     color: var(--color-success);
 }
 
-/* Results Section */
+/* Results Section - Prominent and Centered */
 .results-section {
-    animation: slideUp var(--transition-slow);
+    margin-top: var(--spacing-2xl); /* 48px - increased spacing above results section */
+    padding: var(--spacing-2xl); /* Extra padding for prominence */
+    background: var(--color-surface);
+    border: 2px solid var(--color-accent-primary); /* Blue border to draw attention */
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg); /* Stronger shadow for depth */
+    position: relative;
 }
 
-@keyframes slideUp {
-    from {
+.results-section::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(135deg, var(--color-accent-primary), var(--color-accent-hover));
+    border-radius: var(--radius-md);
+    z-index: -1;
+    opacity: 0.1;
+}
+
+@keyframes slideUpBounce {
+    0% {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(40px) scale(0.95);
     }
-    to {
+    60% {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(-5px) scale(1.01);
     }
+    80% {
+        transform: translateY(2px) scale(0.99);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Pulse border animation for extra attention */
+@keyframes pulseBorder {
+    0%, 100% {
+        box-shadow: var(--shadow-lg), 0 0 0 0 rgba(53, 122, 189, 0.4);
+    }
+    50% {
+        box-shadow: var(--shadow-xl), 0 0 0 8px rgba(53, 122, 189, 0);
+    }
+}
+
+.results-section {
+    animation: slideUpBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+               pulseBorder 2s ease-in-out 0.6s 2; /* Pulse twice after slide in */
 }
 
 /* View Controls */
@@ -1059,32 +1119,30 @@ body {
 .view-btn {
     padding: var(--spacing-sm) var(--spacing-lg);
     font-size: var(--font-size-base);
-    font-weight: var(--font-weight-semibold);
+    font-weight: var(--font-weight-medium);
     font-family: var(--font-family);
     color: var(--color-text-secondary);
-    background: var(--color-surface-elevated);
-    border: 1px solid transparent;
-    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
     cursor: pointer;
     transition: all var(--transition-fast);
     box-shadow: none;
 }
 
 .view-btn:hover {
-    transform: translate(-1px, -1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background: var(--color-hover-bg);
+    border-color: var(--color-border-hover);
 }
 
 .view-btn:active {
-    transform: scale(0.95);
-    box-shadow: none;
+    transform: scale(0.98);
 }
 
 .view-btn.active {
-    background: var(--color-focus);
+    background: var(--color-accent-primary);
     color: #ffffff;
-    border-color: var(--color-focus);
-    box-shadow: none;
+    border-color: var(--color-accent-primary);
 }
 
 /* Comparison Mode */
@@ -1239,30 +1297,28 @@ body {
     gap: var(--spacing-xs);
     padding: var(--spacing-sm) var(--spacing-lg);
     font-size: var(--font-size-base);
-    font-weight: var(--font-weight-semibold);
+    font-weight: var(--font-weight-medium);
     font-family: var(--font-family);
     color: var(--color-text-primary);
-    background: var(--color-surface-elevated);
-    border: none;
-    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
     cursor: pointer;
     transition: all var(--transition-fast);
-    box-shadow: var(--shadow-sm);
+    box-shadow: none;
 }
 
 .download-btn:hover {
-    background: var(--color-focus-light);
-    color: var(--color-focus);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+    background: var(--color-hover-bg);
+    border-color: var(--color-border-hover);
 }
 
 .download-btn:active {
-    transform: translateY(0);
+    transform: scale(0.98);
 }
 
 .download-btn.success {
-    background: rgba(16, 185, 129, 0.1);
+    background: var(--color-success-light);
     border-color: var(--color-success);
     color: var(--color-success);
 }
@@ -1272,11 +1328,12 @@ body {
     margin: var(--spacing-xl) auto;
     max-width: 43.75rem; /* 700px */
     padding: var(--spacing-lg);
-    background: var(--color-bg);
+    background: var(--color-surface-alt);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     font-size: var(--font-size-sm);
     line-height: 1.8;
+    color: var(--color-text-secondary);
 }
 
 .job-info strong {
@@ -1339,7 +1396,7 @@ body {
 @media (max-width: 1200px) {
     /* Stack columns on smaller screens */
     .dashboard-content-split {
-        grid-template-columns: 280px 1fr;
+        grid-template-columns: 360px 1fr; /* Adjusted for wider sidebar */
         gap: var(--spacing-lg);
     }
 }
@@ -1526,5 +1583,122 @@ select:focus-visible {
     .section {
         border: none;
         box-shadow: none;
+    }
+}
+
+/* ===================================
+   Dark Mode - 2025 Design
+   =================================== */
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* ElevenLabs Dark Theme - #121212 Background */
+        --color-bg: #121212;               /* Page background - ElevenLabs dark */
+        --color-surface: #1C1C1D;          /* Card surface - gray-950 */
+        --color-surface-alt: #242426;      /* Alternative surface - gray-900 */
+        --color-surface-elevated: #323235; /* Elevated surface - gray-800 */
+
+        /* Gray Scale - Dark mode inverted */
+        --gray-50: #323235;
+        --gray-100: #242426;
+        --gray-200: #1C1C1D;
+        --gray-300: #494950;
+        --gray-400: #787881;
+        --gray-500: #A6A6AE;
+        --gray-600: #D6D6DA;
+        --gray-700: #E5E5E8;
+        --gray-800: #F4F4F5;
+        --gray-900: #FAFAFA;
+
+        /* White Alpha - for dark mode overlays */
+        --gray-alpha-50: rgba(255, 255, 255, 0.04);
+        --gray-alpha-100: rgba(255, 255, 255, 0.06);
+        --gray-alpha-150: rgba(255, 255, 255, 0.08);
+        --gray-alpha-200: rgba(255, 255, 255, 0.08);
+        --gray-alpha-300: rgba(255, 255, 255, 0.16);
+        --gray-alpha-400: rgba(255, 255, 255, 0.24);
+        --gray-alpha-500: rgba(255, 255, 255, 0.36);
+
+        /* Accent colors - #357ABD blue for dark mode */
+        --color-accent-primary: #4A8FD6;   /* Lighter blue for visibility */
+        --color-accent-light: #1A365D;     /* Dark blue background */
+        --color-accent-lighter: #2A4365;   /* Lighter blue background */
+        --color-accent-hover: #63B3ED;     /* Hover state - even lighter */
+
+        /* CTA and highlights */
+        --color-cta: #4A8FD6;              /* Lighter for visibility */
+        --color-cta-hover: #63B3ED;        /* CTA hover */
+        --color-cta-active: #357ABD;       /* CTA active */
+
+        /* Text hierarchy - Light text on dark */
+        --color-text-primary: #F4F4F5;     /* Gray-100 inverted */
+        --color-text-secondary: #D6D6DA;   /* Gray-300 inverted */
+        --color-text-tertiary: #A6A6AE;    /* Gray-400 */
+        --color-text-muted: #787881;       /* Gray-500 */
+
+        /* Borders - Subtle white alpha */
+        --color-border: var(--gray-alpha-150);
+        --color-border-light: var(--gray-alpha-100);
+        --color-border-hover: var(--gray-alpha-200);
+
+        /* Interactive states */
+        --color-hover-bg: var(--gray-alpha-50);
+        --color-active-bg: var(--gray-alpha-100);
+        --color-selected-bg: #1A365D;
+
+        /* Focus states */
+        --color-focus: #4A8FD6;
+        --color-focus-ring: rgba(74, 143, 214, 0.4);
+        --color-focus-light: #1A365D;
+
+        /* Semantic colors - Brighter for dark mode */
+        --color-success: #68D391;          /* Green-300 */
+        --color-success-light: #1C4532;    /* Green-900 */
+        --color-error: #FC8181;            /* Red-300 */
+        --color-error-light: #63171B;      /* Red-900 */
+        --color-warning: #F6E05E;          /* Yellow-300 */
+        --color-warning-light: #5F370E;    /* Yellow-900 */
+        --color-info: #63B3ED;             /* Blue-300 */
+        --color-info-light: #1A365D;       /* Blue-900 */
+
+        /* Shadows - Dark mode with subtle depth */
+        --shadow-xs: 0 0 0 1px rgba(0, 0, 0, 0.8);
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.8);
+        --shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.9);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.9);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.9);
+        --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.95);
+        --shadow-hover: 0 4px 6px -1px rgba(0, 0, 0, 0.9);
+    }
+
+    /* Text Selection - Dark mode */
+    ::selection {
+        background-color: var(--color-accent-primary);
+        color: #121212;
+    }
+
+    ::-moz-selection {
+        background-color: var(--color-accent-primary);
+        color: #121212;
+    }
+
+    /* Today Button - Dark mode special state */
+    .today-btn:active {
+        background: var(--color-success);
+        color: #121212;
+    }
+
+    /* Remove Image Button - Dark mode */
+    .remove-image {
+        background: rgba(28, 28, 29, 0.95);
+    }
+
+    /* Image Labels - Dark mode */
+    .image-label {
+        background: rgba(28, 28, 29, 0.9);
+    }
+
+    /* Global Drop Overlay - Dark mode */
+    .global-drop-overlay {
+        background: rgba(18, 18, 18, 0.95);
     }
 }
