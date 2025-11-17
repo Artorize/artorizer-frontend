@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en" style="--eleven-sidebar-width:16rem; --eleven-sidebar-collapsed:0; --eleven-player-height:0rem; color-scheme:light" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artorizer - Protect Your Artwork</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="dashboard.css">
+
+    <!-- Artorize Dashboard Scripts -->
+    <script src="config.js"></script>
+    <script src="sacParser.js"></script>
+    <script src="artworkUploader.js"></script>
+    <script src="dashboard.js"></script>
+
+    <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            foreground: 'hsl(240, 3%, 6%)',
+            background: 'hsl(0, 0%, 100%)',
+            subtle: 'hsl(240, 4%, 46%)',
+            'gray-50': 'hsl(240, 5%, 96%)',
+            'gray-100': 'hsl(240, 5%, 96%)',
+            'gray-200': 'hsl(240, 6%, 90%)',
+            'gray-300': 'hsl(240, 5%, 84%)',
+            'gray-400': 'hsl(240, 5%, 65%)',
+            'gray-500': 'hsl(240, 4%, 46%)',
+            'gray-600': 'hsl(240, 5%, 34%)',
+            'gray-700': 'hsl(240, 5%, 26%)',
+            'gray-800': 'hsl(240, 4%, 16%)',
+            'gray-900': 'hsl(240, 6%, 10%)',
+            'gray-950': 'hsl(240, 10%, 4%)',
+          }
+        }
+      }
+    }
+    </script>
+</head>
+<body class="flex flex-col min-h-screen relative bg-background text-foreground" style="--font-sans:inter; opacity:1; overscroll-behavior:none">
+
+    <!-- Global drop overlay -->
+    <div id="global-drop-overlay" class="fixed inset-0 bg-black/80 z-[9999] hidden items-center justify-center backdrop-blur-[8px]">
+        <div class="stack items-center gap-4 text-background pointer-events-none">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5-5-5 5M12 4v12"/>
+            </svg>
+            <p class="text-lg font-medium">Drop your artwork anywhere to upload</p>
+        </div>
+    </div>
+
+    <!-- App Root -->
+    <div id="app-root" class="lg:p-3 min-h-screen flex flex-col">
+
+        <!-- Main Content Area -->
+        <div class="stack min-h-screen max-w-[100vw] box-border">
+
+            <main class="relative flex-[1_1_0] overflow-hidden">
+                <div class="overlay flex flex-col">
+                    <div class="hstack flex-1 max-h-full">
+
+                        <!-- Left Panel - Upload/Content Area -->
+                        <div class="relative self-stretch stack grow h-full [--px:1rem] pb-4 xl:[--px:3rem] xl:pb-12 gap-4 2xl:[--px:5rem] 2xl:pb-20 [--max-w:1000px]">
+
+                            <div class="relative h-full flex-1 min-h-0" style="--textarea-px:calc(max(50% - 0.5*var(--max-w),0px) + var(--px))">
+
+                                <!-- Scrollable Content -->
+                                <div class="flex-1 h-full lg:flex-none relative overflow-y-auto max-h-full py-20 pb-40" style="padding-inline:calc(max(50% - 0.5*var(--max-w),0px) + var(--px))">
+
+                                    <div class="flex justify-center items-center h-full" style="opacity:1">
+
+                                        <!-- Upload Section - Initial State -->
+                                        <div id="upload-section-initial" class="w-full max-w-[560px]">
+                                            <div role="presentation" tabindex="0" id="upload-zone"
+                                                 class="stack items-center justify-center bg-gray-50 h-[248px] rounded-[14px] outline-2 -outline-offset-1 outline-dotted transition-[outline-color] duration-150 outline-gray-300 cursor-pointer w-full">
+
+                                                <div class="stack items-center py-9" style="opacity:1">
+                                                    <input accept="image/*" type="file" id="image-upload" multiple style="display:none" />
+
+                                                    <div class="h-11 w-11 rounded-[10px] bg-background border border-gray-200 flex items-center justify-center">
+                                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                            <polyline points="17 8 12 3 7 8"></polyline>
+                                                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                                                        </svg>
+                                                    </div>
+
+                                                    <p class="text-sm text-foreground font-medium mt-2.5">Click to upload, or drag and drop</p>
+                                                    <p class="text-sm text-subtle font-normal mt-0.5">Image files up to 10MB</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Upload Section - After Upload (Hidden Initially) -->
+                                        <div id="upload-section-uploaded" class="w-full max-w-[560px]" style="display: none;">
+                                            <div class="stack gap-3 bg-gray-50 border border-gray-200 rounded-[14px] p-5">
+                                                <div class="hstack items-center justify-between">
+                                                    <div class="flex-1 min-w-0">
+                                                        <div class="flex items-center gap-2">
+                                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                                <polyline points="14 2 14 8 20 8"></polyline>
+                                                            </svg>
+                                                            <span class="text-sm text-foreground font-medium overflow-hidden overflow-ellipsis whitespace-nowrap" id="uploaded-filename">artwork.jpg</span>
+                                                        </div>
+                                                    </div>
+                                                    <button type="button" id="change-file-btn" aria-label="Change file"
+                                                            class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring bg-background border border-gray-200 hover:bg-gray-50 active:bg-gray-100 h-9 w-9 rounded-[10px]">
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                            <polyline points="3 6 5 6 21 6"></polyline>
+                                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Gradient Overlay -->
+                                <div class="absolute inset-x-0 bottom-0 h-8 pointer-events-none bg-gradient-to-b from-transparent to-background"></div>
+                            </div>
+
+                            <!-- Bottom Controls Area -->
+                            <div class="mx-auto w-full bg-background stack justify-end relative duration-300 z-20"
+                                 style="max-width:var(--max-w); padding-inline:var(--px); transition-property:padding-bottom">
+
+                                <div class="stack gap-3" style="opacity:1">
+
+                                    <!-- Action Buttons -->
+                                    <div class="hidden md:grid grid-cols-1 gap-3 justify-between items-center">
+                                        <div class="hstack gap-3 items-center justify-end">
+                                            <button type="button" id="generate-button" aria-label="Protect artwork"
+                                                    class="relative inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent bg-foreground text-background shadow-none hover:bg-gray-800 active:bg-gray-700 disabled:bg-gray-400 disabled:text-gray-100 h-9 px-3 rounded-[10px]">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                                    <path d="M9 12l2 2 4-4"></path>
+                                                </svg>
+                                                Protect Artwork
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Panel - Settings/Progress -->
+                        <section class="stack hidden md:flex w-[420px] xl:w-[500px] border-l">
+                            <div class="stack h-full">
+
+                                <div class="relative flex-1 min-h-0 overflow-hidden">
+                                    <div class="w-full h-full overflow-y-auto overflow-x-hidden stack gap-4 p-5 pt-2"
+                                         style="opacity:1; visibility:visible; transform:none">
+
+                                        <!-- Tabs -->
+                                        <div dir="ltr" data-orientation="horizontal">
+                                            <div role="tablist" aria-orientation="horizontal"
+                                                 class="inline-flex text-subtle gap-3.5 w-full h-11 pt-0.5 border-b border-gray-200"
+                                                 tabindex="0" data-orientation="horizontal" style="outline:none">
+
+                                                <button type="button" role="tab" data-tab="configuration"
+                                                        aria-selected="true" aria-controls="tab-configuration"
+                                                        data-state="active" id="tab-trigger-configuration"
+                                                        class="tab-button whitespace-nowrap transition-all focus-ring inline-flex -mb-[1px] items-center justify-center border-b-[1.5px] px-0 py-1 text-sm">
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                                    </svg>
+                                                    Configuration
+                                                </button>
+
+                                                <button type="button" role="tab" data-tab="progress"
+                                                        aria-selected="false" aria-controls="tab-progress"
+                                                        data-state="inactive" id="tab-trigger-progress"
+                                                        class="tab-button whitespace-nowrap transition-all focus-ring inline-flex -mb-[1px] items-center justify-center border-b-[1.5px] px-0 py-1 text-sm">
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                                    </svg>
+                                                    Progress
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Tab Content -->
+                                        <div class="relative flex-1 min-h-0 mt-2">
+
+                                            <!-- Configuration Tab -->
+                                            <div id="tab-configuration" role="tabpanel" class="tab-pane h-full absolute top-0 left-0 right-0" style="opacity:1; transform:none">
+                                                <div class="stack h-full overflow-hidden">
+                                                    <div class="-mx-5 flex-1 stack px-5 scroll-py-12 !overflow-x-hidden" style="position:relative; overflow:auto">
+
+                                                        <!-- Protection Layers -->
+                                                        <div class="stack gap-4 mb-6">
+                                                            <h3 class="text-sm font-medium text-foreground">Protection Layers</h3>
+
+                                                            <div class="stack gap-3">
+                                                                <!-- Fawkes -->
+                                                                <div class="config-option hstack items-start gap-3 p-3 border border-gray-200 rounded-[10px] transition-colors duration-75 hover:bg-gray-50">
+                                                                    <input type="checkbox" id="enable-fawkes" class="mt-0.5 w-5 h-5 rounded border-gray-300 text-foreground focus:ring-1 focus:ring-foreground">
+                                                                    <div class="flex-1">
+                                                                        <label for="enable-fawkes" class="text-sm font-medium text-foreground cursor-pointer">Fawkes</label>
+                                                                        <p class="text-xs text-subtle mt-0.5">Privacy protection against facial recognition</p>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- PhotoGuard -->
+                                                                <div class="config-option hstack items-start gap-3 p-3 border border-gray-200 rounded-[10px] transition-colors duration-75 hover:bg-gray-50">
+                                                                    <input type="checkbox" id="enable-photoguard" class="mt-0.5 w-5 h-5 rounded border-gray-300 text-foreground focus:ring-1 focus:ring-foreground">
+                                                                    <div class="flex-1">
+                                                                        <label for="enable-photoguard" class="text-sm font-medium text-foreground cursor-pointer">PhotoGuard</label>
+                                                                        <p class="text-xs text-subtle mt-0.5">Adversarial protection against image manipulation</p>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- MIST -->
+                                                                <div class="config-option hstack items-start gap-3 p-3 border border-gray-200 rounded-[10px] transition-colors duration-75 hover:bg-gray-50">
+                                                                    <input type="checkbox" id="enable-mist" class="mt-0.5 w-5 h-5 rounded border-gray-300 text-foreground focus:ring-1 focus:ring-foreground">
+                                                                    <div class="flex-1">
+                                                                        <label for="enable-mist" class="text-sm font-medium text-foreground cursor-pointer">MIST</label>
+                                                                        <p class="text-xs text-subtle mt-0.5">Prevents AI model training on your artwork</p>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- Nightshade -->
+                                                                <div class="config-option hstack items-start gap-3 p-3 border border-gray-200 rounded-[10px] transition-colors duration-75 hover:bg-gray-50">
+                                                                    <input type="checkbox" id="enable-nightshade" class="mt-0.5 w-5 h-5 rounded border-gray-300 text-foreground focus:ring-1 focus:ring-foreground">
+                                                                    <div class="flex-1">
+                                                                        <label for="enable-nightshade" class="text-sm font-medium text-foreground cursor-pointer">Nightshade</label>
+                                                                        <p class="text-xs text-subtle mt-0.5">Data poisoning protection for AI datasets</p>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- C2PA Manifest -->
+                                                                <div class="config-option hstack items-start gap-3 p-3 border border-gray-200 rounded-[10px] transition-colors duration-75 hover:bg-gray-50">
+                                                                    <input type="checkbox" id="enable-c2pa-manifest" class="mt-0.5 w-5 h-5 rounded border-gray-300 text-foreground focus:ring-1 focus:ring-foreground">
+                                                                    <div class="flex-1">
+                                                                        <label for="enable-c2pa-manifest" class="text-sm font-medium text-foreground cursor-pointer">C2PA Manifest</label>
+                                                                        <p class="text-xs text-subtle mt-0.5">Content authenticity and provenance metadata</p>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- Watermark Strategy -->
+                                                                <div class="stack gap-2">
+                                                                    <label for="watermark-strategy" class="text-sm font-medium text-foreground">Watermark Strategy</label>
+                                                                    <select id="watermark-strategy"
+                                                                            class="flex h-9 w-full rounded-[10px] border border-gray-200 bg-background px-3 py-2 text-sm transition-colors file:border-0 file:bg-transparent file:font-medium placeholder:text-subtle focus:outline-none focus:ring-1 focus:ring-foreground hover:border-gray-300">
+                                                                        <option value="invisible-watermark">Invisible Watermark</option>
+                                                                        <option value="visible-watermark">Tree Ring Watermark</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Artwork Metadata -->
+                                                        <div class="stack gap-4">
+                                                            <h3 class="text-sm font-medium text-foreground">Artwork Metadata</h3>
+
+                                                            <div class="stack gap-3">
+                                                                <div class="stack gap-2">
+                                                                    <label for="author-name" class="text-sm font-medium text-foreground">Author Name</label>
+                                                                    <input type="text" id="author-name" placeholder="Artist name"
+                                                                           class="flex h-9 w-full rounded-[10px] border border-gray-200 bg-background px-3 py-2 text-sm transition-colors placeholder:text-subtle focus:outline-none focus:ring-1 focus:ring-foreground hover:border-gray-300">
+                                                                </div>
+
+                                                                <div class="stack gap-2">
+                                                                    <label for="creation-date" class="text-sm font-medium text-foreground">Creation Date</label>
+                                                                    <div class="hstack gap-2">
+                                                                        <input type="date" id="creation-date"
+                                                                               class="flex h-9 flex-1 rounded-[10px] border border-gray-200 bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-1 focus:ring-foreground hover:border-gray-300">
+                                                                        <button type="button" id="today-btn" title="Set to today"
+                                                                                class="inline-flex items-center justify-center whitespace-nowrap text-xs font-medium transition-colors duration-75 focus-ring bg-background border border-gray-200 hover:bg-gray-50 active:bg-gray-100 h-9 px-3 rounded-[10px]">
+                                                                            Today
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="stack gap-2">
+                                                                    <label for="description" class="text-sm font-medium text-foreground">Description (Optional)</label>
+                                                                    <textarea id="description" rows="3" placeholder="Describe your artwork..."
+                                                                              class="flex min-h-[80px] w-full rounded-[10px] border border-gray-200 bg-background px-3 py-2 text-sm transition-colors placeholder:text-subtle focus:outline-none focus:ring-1 focus:ring-foreground hover:border-gray-300 resize-none"></textarea>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Progress Tab -->
+                                            <div id="tab-progress" role="tabpanel" class="tab-pane h-full absolute top-0 left-0 right-0" style="opacity:0; transform:none; display:none">
+                                                <div class="stack h-full overflow-hidden">
+                                                    <div class="-mx-5 flex-1 stack px-5 scroll-py-12 !overflow-x-hidden" style="position:relative; overflow:auto">
+                                                        <div id="progress-tracker-content" class="stack gap-3">
+                                                            <!-- Progress steps will be added here dynamically -->
+                                                            <div class="flex flex-col items-center justify-center py-12 text-center">
+                                                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-300 mb-4">
+                                                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                                                </svg>
+                                                                <p class="text-sm text-subtle">Upload an artwork to begin processing</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Status Banner (dynamically shown) -->
+    <div id="status-banner" class="fixed bottom-6 right-6 flex items-center gap-3 px-5 py-3 bg-foreground text-background rounded-[10px] shadow-lg z-[1000] text-sm font-medium" style="display: none;">
+        <svg class="status-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+        <span id="status-message"></span>
+    </div>
+
+    <!-- Image Comparison Section (will be populated dynamically) -->
+    <section id="comparison-section" class="max-w-[1200px] mx-auto my-8 p-8 bg-background border border-gray-200 rounded-[14px]" style="display: none;">
+        <div class="stack gap-6">
+            <div class="hstack items-center gap-3">
+                <svg class="section-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                </svg>
+                <h2 class="text-lg font-medium text-foreground">Results & Comparison</h2>
+            </div>
+
+            <!-- View Toggle Buttons -->
+            <div id="view-controls" class="hstack gap-2">
+                <button id="view-original-btn" class="view-btn inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring bg-background border border-gray-200 hover:bg-gray-50 active:bg-gray-100 h-9 px-3 rounded-[10px]">Original</button>
+                <button id="view-protected-btn" class="view-btn inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring bg-background border border-gray-200 hover:bg-gray-50 active:bg-gray-100 h-9 px-3 rounded-[10px]">Protected</button>
+                <button id="view-reconstructed-btn" class="view-btn inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring bg-background border border-gray-200 hover:bg-gray-50 active:bg-gray-100 h-9 px-3 rounded-[10px]">Reconstructed</button>
+                <button id="view-comparison-btn" class="view-btn active inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring bg-foreground text-background hover:bg-gray-800 h-9 px-3 rounded-[10px]">Compare</button>
+            </div>
+
+            <!-- Comparison Mode Selector -->
+            <div id="comparison-mode" class="hstack items-center gap-3">
+                <label for="comparison-mode-select" class="text-sm font-medium text-foreground">Comparison Mode:</label>
+                <select id="comparison-mode-select" class="flex h-9 rounded-[10px] border border-gray-200 bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-1 focus:ring-foreground">
+                    <option value="side-by-side">Side by Side</option>
+                    <option value="slider">Slider</option>
+                    <option value="overlay">Overlay</option>
+                </select>
+            </div>
+
+            <!-- Image Display Container -->
+            <div id="image-display-container" class="min-h-[400px]">
+                <!-- Content will be dynamically generated -->
+            </div>
+
+            <!-- Download Controls -->
+            <div id="download-controls" class="hstack gap-3 flex-wrap">
+                <button id="download-original-btn" class="download-btn inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring bg-background border border-gray-200 hover:bg-gray-50 active:bg-gray-100 h-9 px-3 rounded-[10px]">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Download Original
+                </button>
+                <button id="download-protected-btn" class="download-btn inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring bg-background border border-gray-200 hover:bg-gray-50 active:bg-gray-100 h-9 px-3 rounded-[10px]">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Download Protected
+                </button>
+                <button id="download-mask-btn" class="download-btn inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring bg-background border border-gray-200 hover:bg-gray-50 active:bg-gray-100 h-9 px-3 rounded-[10px]">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Download Mask (.sac)
+                </button>
+                <button id="download-reconstructed-btn" class="download-btn inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring bg-background border border-gray-200 hover:bg-gray-50 active:bg-gray-100 h-9 px-3 rounded-[10px]">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Download Reconstructed
+                </button>
+            </div>
+
+            <!-- Job Information -->
+            <div id="job-info" class="p-5 bg-gray-50 rounded-[10px] border border-gray-200">
+                <!-- Will be populated dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <script>
+    // Optional: Override config for this deployment
+    // window.ArtorizeConfig.ROUTER_URL = 'https://your-router.com';
+    // window.ArtorizeConfig.CDN_URL = 'https://your-cdn.com';
+    </script>
+</body>
+</html>

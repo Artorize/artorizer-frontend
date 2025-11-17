@@ -249,10 +249,10 @@ class ArtorizeDashboard {
       });
     }
 
-    // Change image button (new collapsed mode)
-    const changeImageBtn = document.getElementById('change-image-btn');
-    if (changeImageBtn) {
-      changeImageBtn.addEventListener('click', (e) => {
+    // Change image button (new layout)
+    const changeFileBtn = document.getElementById('change-file-btn');
+    if (changeFileBtn) {
+      changeFileBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
         this.clearImagePreview();
@@ -422,31 +422,19 @@ class ArtorizeDashboard {
    * Show image preview - Collapsed mode in left sidebar
    */
   showImagePreview(file) {
-    // Hide centered standalone upload section
-    if (this.uploadSectionInitialCenter) {
-      this.uploadSectionInitialCenter.style.display = 'none';
-    }
-
-    // Show split layout with sidebar and config
-    if (this.dashboardContentSplit) {
-      this.dashboardContentSplit.classList.add('active');
-    }
-
-    // Hide initial upload section in sidebar
+    // Hide initial upload section
     const uploadSectionInitial = document.getElementById('upload-section-initial');
     if (uploadSectionInitial) {
       uploadSectionInitial.style.display = 'none';
     }
 
-    // Show collapsed upload section with filename
-    const uploadSection = document.getElementById('upload-section');
-    const collapsedFilename = document.getElementById('collapsed-filename');
-    if (uploadSection && collapsedFilename) {
-      collapsedFilename.textContent = file.name;
-      uploadSection.style.display = 'block';
-
-      // Animate in
-      uploadSection.style.animation = 'fadeInUp 0.3s ease-out';
+    // Show uploaded section with filename
+    const uploadSectionUploaded = document.getElementById('upload-section-uploaded');
+    const uploadedFilename = document.getElementById('uploaded-filename');
+    if (uploadSectionUploaded && uploadedFilename) {
+      uploadedFilename.textContent = file.name;
+      uploadSectionUploaded.style.display = 'block';
+      uploadSectionUploaded.classList.add('fadeInUp');
     }
 
     // Show initial progress tracker with all pending steps
@@ -454,6 +442,12 @@ class ArtorizeDashboard {
 
     // Add listeners to rebuild tracker when config changes
     this.setupConfigChangeListeners();
+
+    // Switch to progress tab to show the tracker
+    const progressTabButton = document.querySelector('[data-tab="progress"]');
+    if (progressTabButton) {
+      progressTabButton.click();
+    }
   }
 
   /**
@@ -464,30 +458,26 @@ class ArtorizeDashboard {
     this.imageUploadInput.value = '';
     this.currentJobId = null;
 
-    // Hide split layout
-    if (this.dashboardContentSplit) {
-      this.dashboardContentSplit.classList.remove('active');
+    // Show initial upload section
+    const uploadSectionInitial = document.getElementById('upload-section-initial');
+    if (uploadSectionInitial) {
+      uploadSectionInitial.style.display = 'block';
+      uploadSectionInitial.classList.add('fadeInUp');
     }
 
-    // Show centered standalone upload section
-    if (this.uploadSectionInitialCenter) {
-      this.uploadSectionInitialCenter.style.display = 'block';
-      this.uploadSectionInitialCenter.style.animation = 'fadeInUp 0.3s ease-out';
-    }
-
-    // Hide collapsed upload section
-    const uploadSection = document.getElementById('upload-section');
-    if (uploadSection) {
-      uploadSection.style.display = 'none';
+    // Hide uploaded section
+    const uploadSectionUploaded = document.getElementById('upload-section-uploaded');
+    if (uploadSectionUploaded) {
+      uploadSectionUploaded.style.display = 'none';
     }
 
     // Hide progress tracker
     this.hideProgressTracker();
 
-    // Show initial upload section in sidebar (for when we're back in split mode)
-    const uploadSectionInitial = document.getElementById('upload-section-initial');
-    if (uploadSectionInitial) {
-      uploadSectionInitial.style.display = 'block';
+    // Switch back to configuration tab
+    const configTabButton = document.querySelector('[data-tab="configuration"]');
+    if (configTabButton) {
+      configTabButton.click();
     }
   }
 
@@ -522,22 +512,22 @@ class ArtorizeDashboard {
     });
 
     // Show overlay when dragging over the body
-    this.appBody.addEventListener('dragenter', (e) => {
+    document.body.addEventListener('dragenter', (e) => {
       e.preventDefault();
       dragCounter++;
 
       // Only show overlay if dragging files
       if (e.dataTransfer.types && e.dataTransfer.types.includes('Files')) {
-        this.globalDropOverlay.style.display = 'flex';
+        this.globalDropOverlay.classList.add('flex');
       }
     });
 
-    this.appBody.addEventListener('dragleave', (e) => {
+    document.body.addEventListener('dragleave', (e) => {
       e.preventDefault();
       dragCounter--;
 
       if (dragCounter === 0) {
-        this.globalDropOverlay.style.display = 'none';
+        this.globalDropOverlay.classList.remove('flex');
       }
     });
 
@@ -546,19 +536,13 @@ class ArtorizeDashboard {
       e.preventDefault();
       e.stopPropagation();
       dragCounter = 0;
-      this.globalDropOverlay.style.display = 'none';
+      this.globalDropOverlay.classList.remove('flex');
 
       const files = e.dataTransfer.files;
       if (files.length > 0) {
         // Set the files to the input
         this.imageUploadInput.files = files;
         this.handleFileSelect({ target: { files: files } });
-
-        // Scroll to upload section
-        document.getElementById('upload-section').scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
       }
     });
 
@@ -2147,8 +2131,80 @@ class ArtorizeDashboard {
   }
 }
 
+// Initialize tab switching functionality
+function initializeTabs() {
+  const tabButtons = document.querySelectorAll('.tab-button');
+  const tabPanes = document.querySelectorAll('.tab-pane');
+
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const tabName = button.getAttribute('data-tab');
+
+      // Update all buttons
+      tabButtons.forEach(btn => {
+        if (btn.getAttribute('data-tab') === tabName) {
+          btn.setAttribute('aria-selected', 'true');
+          btn.setAttribute('data-state', 'active');
+        } else {
+          btn.setAttribute('aria-selected', 'false');
+          btn.setAttribute('data-state', 'inactive');
+        }
+      });
+
+      // Update all tab panes
+      tabPanes.forEach(pane => {
+        if (pane.id === `tab-${tabName}`) {
+          pane.style.display = 'block';
+          pane.style.opacity = '1';
+          pane.setAttribute('data-state', 'active');
+        } else {
+          pane.style.display = 'none';
+          pane.style.opacity = '0';
+          pane.setAttribute('data-state', 'inactive');
+        }
+      });
+    });
+  });
+}
+
+// Initialize upload zone interactions
+function initializeUploadZone() {
+  const uploadZone = document.getElementById('upload-zone');
+  const imageUpload = document.getElementById('image-upload');
+
+  if (uploadZone && imageUpload) {
+    // Click on upload zone to trigger file input
+    uploadZone.addEventListener('click', () => {
+      imageUpload.click();
+    });
+
+    // Drag and drop
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('drag-over');
+    });
+
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('drag-over');
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('drag-over');
+
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        imageUpload.files = files;
+        imageUpload.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    });
+  }
+}
+
 // Initialize dashboard when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
   window.dashboard = new ArtorizeDashboard();
+  initializeTabs();
+  initializeUploadZone();
   console.log('Artorize Dashboard initialized');
 });
