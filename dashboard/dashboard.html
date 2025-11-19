@@ -152,7 +152,7 @@
                             <div class="stack h-full">
 
                                 <div class="relative flex-1 min-h-0 overflow-hidden">
-                                    <div class="w-full h-full overflow-y-auto overflow-x-hidden stack gap-4 p-5 pt-2"
+                                    <div class="w-full h-full overflow-y-auto overflow-x-visible stack gap-4 p-5 pt-2"
                                          style="opacity:1; visibility:visible; transform:none">
 
                                         <!-- Tabs -->
@@ -199,7 +199,7 @@
                                                             <div class="stack gap-3">
                                                                 <!-- Fawkes -->
                                                                 <div class="config-option hstack items-start gap-3 p-3 border border-gray-200 rounded-[10px] transition-colors duration-75 hover:bg-gray-50">
-                                                                    <input type="checkbox" id="enable-fawkes" class="mt-0.5 w-5 h-5 rounded border-gray-300 text-foreground focus:ring-1 focus:ring-foreground">
+                                                                    <input type="checkbox" id="enable-fawkes" class="mt-0.5 w-5 h-5 rounded border-gray-300 text-foreground focus:border-gray-300">
                                                                     <div class="flex-1">
                                                                         <label for="enable-fawkes" class="text-sm font-medium text-foreground cursor-pointer">Fawkes</label>
                                                                         <p class="text-xs text-subtle mt-0.5">Privacy protection against facial recognition</p>
@@ -208,7 +208,7 @@
 
                                                                 <!-- PhotoGuard -->
                                                                 <div class="config-option hstack items-start gap-3 p-3 border border-gray-200 rounded-[10px] transition-colors duration-75 hover:bg-gray-50">
-                                                                    <input type="checkbox" id="enable-photoguard" class="mt-0.5 w-5 h-5 rounded border-gray-300 text-foreground focus:ring-1 focus:ring-foreground">
+                                                                    <input type="checkbox" id="enable-photoguard" class="mt-0.5 w-5 h-5 rounded border-gray-300 text-foreground focus:border-gray-300">
                                                                     <div class="flex-1">
                                                                         <label for="enable-photoguard" class="text-sm font-medium text-foreground cursor-pointer">PhotoGuard</label>
                                                                         <p class="text-xs text-subtle mt-0.5">Adversarial protection against image manipulation</p>
@@ -217,7 +217,7 @@
 
                                                                 <!-- MIST -->
                                                                 <div class="config-option hstack items-start gap-3 p-3 border border-gray-200 rounded-[10px] transition-colors duration-75 hover:bg-gray-50">
-                                                                    <input type="checkbox" id="enable-mist" class="mt-0.5 w-5 h-5 rounded border-gray-300 text-foreground focus:ring-1 focus:ring-foreground">
+                                                                    <input type="checkbox" id="enable-mist" class="mt-0.5 w-5 h-5 rounded border-gray-300 text-foreground focus:border-gray-300">
                                                                     <div class="flex-1">
                                                                         <label for="enable-mist" class="text-sm font-medium text-foreground cursor-pointer">MIST</label>
                                                                         <p class="text-xs text-subtle mt-0.5">Prevents AI model training on your artwork</p>
@@ -226,7 +226,7 @@
 
                                                                 <!-- Nightshade -->
                                                                 <div class="config-option hstack items-start gap-3 p-3 border border-gray-200 rounded-[10px] transition-colors duration-75 hover:bg-gray-50">
-                                                                    <input type="checkbox" id="enable-nightshade" class="mt-0.5 w-5 h-5 rounded border-gray-300 text-foreground focus:ring-1 focus:ring-foreground">
+                                                                    <input type="checkbox" id="enable-nightshade" class="mt-0.5 w-5 h-5 rounded border-gray-300 text-foreground focus:border-gray-300">
                                                                     <div class="flex-1">
                                                                         <label for="enable-nightshade" class="text-sm font-medium text-foreground cursor-pointer">Nightshade</label>
                                                                         <p class="text-xs text-subtle mt-0.5">Data poisoning protection for AI datasets</p>
@@ -235,7 +235,7 @@
 
                                                                 <!-- C2PA Manifest -->
                                                                 <div class="config-option hstack items-start gap-3 p-3 border border-gray-200 rounded-[10px] transition-colors duration-75 hover:bg-gray-50">
-                                                                    <input type="checkbox" id="enable-c2pa-manifest" class="mt-0.5 w-5 h-5 rounded border-gray-300 text-foreground focus:ring-1 focus:ring-foreground">
+                                                                    <input type="checkbox" id="enable-c2pa-manifest" class="mt-0.5 w-5 h-5 rounded border-gray-300 text-foreground focus:border-gray-300">
                                                                     <div class="flex-1">
                                                                         <label for="enable-c2pa-manifest" class="text-sm font-medium text-foreground cursor-pointer">C2PA Manifest</label>
                                                                         <p class="text-xs text-subtle mt-0.5">Content authenticity and provenance metadata</p>
@@ -246,7 +246,7 @@
                                                                 <div class="stack gap-2">
                                                                     <label for="watermark-strategy" class="text-sm font-medium text-foreground">Watermark Strategy</label>
                                                                     <select id="watermark-strategy"
-                                                                            class="flex h-9 w-full rounded-[10px] border border-gray-200 bg-background px-3 py-2 text-sm transition-colors file:border-0 file:bg-transparent file:font-medium placeholder:text-subtle focus:outline-none focus:ring-1 focus:ring-foreground hover:border-gray-300">
+                                                                            class="flex h-9 w-full rounded-[10px] border border-gray-200 bg-background px-3 py-2 text-sm transition-colors file:border-0 file:bg-transparent file:font-medium placeholder:text-subtle focus:outline-none focus:border-gray-200 hover:border-gray-300">
                                                                         <option value="invisible-watermark">Invisible Watermark</option>
                                                                         <option value="visible-watermark">Tree Ring Watermark</option>
                                                                     </select>
@@ -262,14 +262,14 @@
                                                                 <div class="stack gap-2">
                                                                     <label for="author-name" class="text-sm font-medium text-foreground">Author Name</label>
                                                                     <input type="text" id="author-name" placeholder="Artist name"
-                                                                           class="flex h-9 w-full rounded-[10px] border border-gray-200 bg-background px-3 py-2 text-sm transition-colors placeholder:text-subtle focus:outline-none focus:ring-1 focus:ring-foreground hover:border-gray-300">
+                                                                           class="flex h-9 w-full rounded-[10px] border border-gray-200 bg-background px-3 py-2 text-sm transition-colors placeholder:text-subtle focus:outline-none focus:border-gray-200 hover:border-gray-300">
                                                                 </div>
 
                                                                 <div class="stack gap-2">
                                                                     <label for="creation-date" class="text-sm font-medium text-foreground">Creation Date</label>
                                                                     <div class="hstack gap-2">
                                                                         <input type="date" id="creation-date"
-                                                                               class="flex h-9 flex-1 rounded-[10px] border border-gray-200 bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-1 focus:ring-foreground hover:border-gray-300">
+                                                                               class="flex h-9 flex-1 rounded-[10px] border border-gray-200 bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:border-gray-200 hover:border-gray-300">
                                                                         <button type="button" id="today-btn" title="Set to today"
                                                                                 class="inline-flex items-center justify-center whitespace-nowrap text-xs font-medium transition-colors duration-75 focus-ring bg-background border border-gray-200 hover:bg-gray-50 active:bg-gray-100 h-9 px-3 rounded-[10px]">
                                                                             Today
@@ -280,7 +280,7 @@
                                                                 <div class="stack gap-2">
                                                                     <label for="description" class="text-sm font-medium text-foreground">Description (Optional)</label>
                                                                     <textarea id="description" rows="3" placeholder="Describe your artwork..."
-                                                                              class="flex min-h-[80px] w-full rounded-[10px] border border-gray-200 bg-background px-3 py-2 text-sm transition-colors placeholder:text-subtle focus:outline-none focus:ring-1 focus:ring-foreground hover:border-gray-300 resize-none"></textarea>
+                                                                              class="flex min-h-[80px] w-full rounded-[10px] border border-gray-200 bg-background px-3 py-2 text-sm transition-colors placeholder:text-subtle focus:outline-none focus:border-gray-200 hover:border-gray-300 resize-none"></textarea>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -347,7 +347,7 @@
             <!-- Comparison Mode Selector -->
             <div id="comparison-mode" class="hstack items-center gap-3">
                 <label for="comparison-mode-select" class="text-sm font-medium text-foreground">Comparison Mode:</label>
-                <select id="comparison-mode-select" class="flex h-9 rounded-[10px] border border-gray-200 bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-1 focus:ring-foreground">
+                <select id="comparison-mode-select" class="flex h-9 rounded-[10px] border border-gray-200 bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:border-gray-200">
                     <option value="side-by-side">Side by Side</option>
                     <option value="slider">Slider</option>
                     <option value="overlay">Overlay</option>
