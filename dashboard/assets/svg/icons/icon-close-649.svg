@@ -1,0 +1,10 @@
+<svg width=1.25rem height=1.25rem viewBox="0 0 20 20"
+                                                                 fill=none xmlns=http://www.w3.org/2000/svg
+                                                                 color=currentColor>
+                                                                <path d="M10.625 6.45834C12.5776 8.41096 12.5776 11.5768 10.625 13.5294M8.26798 8.81537C8.91885 9.46624 8.91885 10.5215 8.26798 11.1724"
+                                                                      stroke=currentColor stroke-width=1.5
+                                                                      stroke-linecap=round></path>
+                                                                <path d="M17 12.2V14.2C17 15.7464 15.7464 17 14.2 17H12.2M17 7.8V5.8C17 4.2536 15.7464 3 14.2 3H12.2M7.79999 17H5.79999C4.25359 17 2.99998 15.7464 2.99998 14.2V12.2M2.99998 7.8V5.8C2.99998 4.2536 4.25359 3 5.79999 3H7.79999"
+                                                                      stroke=currentColor stroke-width=1.5
+                                                                      stroke-linecap=round></path>
+                                                            </svg>
