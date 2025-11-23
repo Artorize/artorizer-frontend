@@ -21,7 +21,7 @@ html, body {
     overflow: visible !important;
 }
 
-/* Remove outline on focus and keep border color the same */
+/* Remove outline on focus and keep border visible */
 input:focus,
 textarea:focus,
 select:focus,
@@ -30,6 +30,7 @@ textarea:focus-visible,
 select:focus-visible {
     outline: none !important;
     box-shadow: none !important;
+    border-color: hsl(240, 5%, 26%) !important;
 }
 
 input:hover,
@@ -8545,4 +8546,16 @@ nav#main-nav button[aria-haspopup="menu"] div.h-8.flex-1 {
     opacity: 1 !important;
     visibility: visible !important;
     transform: translateX(0) !important;
+}
+
+/* ==========================================================================
+   Input/Textarea Focus Border Fix
+   ========================================================================== */
+
+/* Ensure input and textarea have visible border on focus */
+input[type="text"]:focus,
+textarea:focus {
+    border-color: hsl(240, 5%, 26%) !important;
+    border-width: 1px !important;
+    border-style: solid !important;
 }
