@@ -1143,7 +1143,7 @@ function updateProgressTracker() {
     const name = protectionNames[protection] || protection;
 
     // All steps start as pending (will be updated by API callback)
-    <img src="assets/svg/icons/icon-star-outline.svg" alt="icon-star-outline" class="mr-3 flex-shrink-0 ml-1" />
+    const iconHTML = `<img src="assets/svg/icons/icon-star-outline.svg" alt="icon-star-outline" class="mr-3 flex-shrink-0 ml-1" />`;
     const timeHTML = `<div class="text-mono text-normal text-small float-right text-xs text-subtle">-</div>`;
     const textClass = 'text-subtle';
 
