@@ -636,7 +636,14 @@
                                         <div class=flex style=opacity:1>
                                             <div class="opacity-100 transition-opacity duration-300 css-2c8lkk"
                                                  aria-valuemax=100 aria-valuemin=0 aria-valuenow=0 role=progressbar>
-                                                <img src="assets/svg/indicators/progress-circle.svg" alt="progress-circle" class="chakra-progress__track css-131d71n" />
+                                                <svg viewBox="0 0 100 100" class="css-bj12qo">
+                                                    <circle cx="50" cy="50" r="42" stroke-width="4px"
+                                                            class="chakra-progress__track css-131d71n"></circle>
+                                                    <circle cx="50" cy="50" r="42" stroke-width="4px"
+                                                            class="chakra-progress__indicator css-osbmls"
+                                                            stroke-linecap="round" stroke-dashoffset="66"
+                                                            stroke-dasharray="0 264"></circle>
+                                                </svg>
                                             </div>
                                         </div>
                                         <div class="absolute top-0 left-0 h-full w-full rounded-full p-px"
@@ -814,7 +821,15 @@
                                                             <div class=flex style=opacity:1>
                                                                 <div class=css-o6x0z7 aria-valuemax=100 aria-valuemin=0
                                                                      aria-valuenow=0 role=progressbar>
-                                                                    <img src="assets/svg/indicators/progress-circle-1191.svg" alt="progress-circle" class="chakra-progress__track css-131d71n" />
+                                                                    <svg viewBox="0 0 100 100" class="css-r94w0k">
+                                                                        <circle cx="50" cy="50" r="42" stroke-width="10px"
+                                                                                class="chakra-progress__track css-131d71n"></circle>
+                                                                        <circle cx="50" cy="50" r="42" stroke-width="10px"
+                                                                                class="chakra-progress__indicator css-osbmls"
+                                                                                stroke-linecap="round"
+                                                                                stroke-dashoffset="66"
+                                                                                stroke-dasharray="0 264"></circle>
+                                                                    </svg>
                                                                 </div>
                                                             </div>
                                                             <span class="overflow-hidden overflow-ellipsis"
@@ -843,7 +858,10 @@
                                                         <button aria-label="Protect artwork" id="protect-button"
                                                                 data-testid=protect-artwork data-loading=false disabled
                                                                 class="relative inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent bg-foreground text-background shadow-none hover:bg-gray-800 radix-state-open:bg-gray-700 active:bg-gray-700 disabled:bg-gray-400 disabled:text-gray-100 h-9 px-3 rounded-[10px] col-span-2 md:col-span-1">
-                                                            <img src="assets/svg/icons/icon-unknown-1244.svg" alt="icon-unknown-1244" class="mr-2" />
+                                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                                                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                                                <path d="M9 12l2 2 4-4"></path>
+                                                            </svg>
                                                             Protect Artwork
                                                         </button>
                                                     </div>
@@ -1143,7 +1161,9 @@ function updateProgressTracker() {
     const name = protectionNames[protection] || protection;
 
     // All steps start as pending (will be updated by API callback)
-    const iconHTML = `<img src="assets/svg/icons/icon-step-pending.svg" alt="icon-step-pending" class="mr-3 flex-shrink-0 ml-1" />`;
+    const iconHTML = `<svg class="mr-3 flex-shrink-0 ml-1" height="16" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true">
+      <path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13Z" fill="currentColor"></path>
+    </svg>`;
     const timeHTML = `<div class="text-mono text-normal text-small float-right text-xs text-subtle">-</div>`;
     const textClass = 'text-subtle';
 
@@ -1198,7 +1218,9 @@ function updateProgressStep(protection, status, time) {
     step.setAttribute('data-conclusion', 'failure');
   } else {
     // pending
-    iconHTML = `<img src="assets/svg/icons/icon-step-pending.svg" alt="icon-step-pending" class="mr-3 flex-shrink-0 ml-1" />`;
+    iconHTML = `<svg class="mr-3 flex-shrink-0 ml-1" height="16" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true">
+      <path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13Z" fill="currentColor"></path>
+    </svg>`;
     timeHTML = `<div class="text-mono text-normal text-small float-right text-xs text-subtle">-</div>`;
     textClass = 'text-subtle';
     step.setAttribute('data-conclusion', 'pending');
