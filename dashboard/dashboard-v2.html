@@ -1185,20 +1185,20 @@ function updateProgressStep(protection, status, time) {
   let textClass = '';
 
   if (status === 'success' || status === 'completed') {
-    <img src="assets/svg/icons/icon-check.svg" alt="icon-check" class="mr-3 flex-shrink-0 ml-1" />
+    iconHTML = `<img src="assets/svg/icons/icon-check.svg" alt="icon-check" class="mr-3 flex-shrink-0 ml-1" />`;
     timeHTML = `<div class="text-mono text-normal text-small float-right text-xs">${time || '0.0s'}</div>`;
     step.setAttribute('data-conclusion', 'success');
   } else if (status === 'in-progress' || status === 'processing') {
-    <img src="assets/svg/icons/icon-check-1606.svg" alt="icon-check" class="anim-rotate mr-2 flex-shrink-0" />
+    iconHTML = `<img src="assets/svg/icons/icon-check-1606.svg" alt="icon-check" class="anim-rotate mr-2 flex-shrink-0" />`;
     timeHTML = `<div class="text-mono text-normal text-small float-right text-xs">...</div>`;
     step.setAttribute('data-conclusion', 'in-progress');
   } else if (status === 'error' || status === 'failed') {
-    <img src="assets/svg/icons/icon-error.svg" alt="icon-error" class="mr-3 flex-shrink-0 ml-1" />
+    iconHTML = `<img src="assets/svg/icons/icon-error.svg" alt="icon-error" class="mr-3 flex-shrink-0 ml-1" />`;
     timeHTML = `<div class="text-mono text-normal text-small float-right text-xs text-red-600">${time || 'Failed'}</div>`;
     step.setAttribute('data-conclusion', 'failure');
   } else {
     // pending
-    <img src="assets/svg/icons/icon-error.svg" alt="icon-error" class="mr-3 flex-shrink-0 ml-1" />
+    iconHTML = `<img src="assets/svg/icons/icon-star-outline.svg" alt="icon-star-outline" class="mr-3 flex-shrink-0 ml-1" />`;
     timeHTML = `<div class="text-mono text-normal text-small float-right text-xs text-subtle">-</div>`;
     textClass = 'text-subtle';
     step.setAttribute('data-conclusion', 'pending');
