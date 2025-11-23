@@ -7,358 +7,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            background: #0a0a0a;
-            color: #333;
-            overflow: hidden;
-        }
-
-        .login-container {
-            display: flex;
-            width: 100%;
-            height: 100vh;
-        }
-
-        /* Left side - Login form */
-        .login-form-section {
-            flex: 0 0 45%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-            padding: 60px;
-            position: relative;
-            overflow-y: auto;
-            flex-direction: column;
-        }
-
-        .login-form-wrapper {
-            width: 100%;
-            max-width: 440px;
-            animation: fadeInUp 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .logo-section {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 48px;
-        }
-
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            font-size: 20px;
-        }
-
-        .logo-text {
-            font-size: 24px;
-            font-weight: 600;
-            color: #1a1a1a;
-            letter-spacing: -0.02em;
-        }
-
-        .form-header {
-            margin-bottom: 32px;
-        }
-
-        .form-header h1 {
-            font-size: 32px;
-            font-weight: 700;
-            color: #1a1a1a;
-            margin-bottom: 12px;
-            letter-spacing: -0.03em;
-        }
-
-        .form-header p {
-            font-size: 15px;
-            color: #6b7280;
-            line-height: 1.6;
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 14px;
-            font-weight: 500;
-            color: #374151;
-            margin-bottom: 8px;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 14px 16px;
-            font-size: 15px;
-            border: 1.5px solid #e5e7eb;
-            border-radius: 12px;
-            background: #ffffff;
-            color: #1a1a1a;
-            transition: all 0.2s ease;
-            font-family: inherit;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .form-group input::placeholder {
-            color: #9ca3af;
-        }
-
-        .sign-in-btn {
-            width: 100%;
-            padding: 14px 24px;
-            font-size: 15px;
-            font-weight: 600;
-            color: #ffffff;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            margin-bottom: 32px;
-            letter-spacing: -0.01em;
-        }
-
-        .sign-in-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 24px rgba(102, 126, 234, 0.3);
-        }
-
-        .sign-in-btn:active {
-            transform: translateY(0);
-        }
-
-        .divider {
-            display: flex;
-            align-items: center;
-            text-align: center;
-            margin: 32px 0;
-            color: #9ca3af;
-            font-size: 14px;
-        }
-
-        .divider::before,
-        .divider::after {
-            content: '';
-            flex: 1;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .divider span {
-            padding: 0 16px;
-            font-weight: 500;
-        }
-
-        .oauth-buttons {
-            display: flex;
-            gap: 12px;
-        }
-
-        .oauth-btn {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 14px 20px;
-            font-size: 14px;
-            font-weight: 500;
-            color: #374151;
-            background: #ffffff;
-            border: 1.5px solid #e5e7eb;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .oauth-btn:hover {
-            border-color: #d1d5db;
-            background: #f9fafb;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-
-        .oauth-btn svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        .footer-links {
-            margin-top: 40px;
-            text-align: center;
-            font-size: 13px;
-            color: #9ca3af;
-        }
-
-        .footer-links a {
-            color: #667eea;
-            text-decoration: none;
-            margin: 0 12px;
-            transition: color 0.2s ease;
-        }
-
-        .footer-links a:hover {
-            color: #5568d3;
-        }
-
-        /* Right side - Decorative image */
-        .image-section {
-            flex: 1;
-            position: relative;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            overflow: hidden;
-        }
-
-        .image-wrapper {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        .image-wrapper::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-            z-index: 1;
-        }
-
-        .decorative-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            animation: slowZoom 20s ease-in-out infinite alternate;
-        }
-
-        @keyframes slowZoom {
-            from {
-                transform: scale(1);
-            }
-            to {
-                transform: scale(1.05);
-            }
-        }
-
-        .image-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 60px;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
-            z-index: 2;
-        }
-
-        .image-overlay h2 {
-            font-size: 42px;
-            font-weight: 700;
-            color: #ffffff;
-            margin-bottom: 16px;
-            letter-spacing: -0.03em;
-            line-height: 1.2;
-        }
-
-        .image-overlay p {
-            font-size: 16px;
-            color: rgba(255, 255, 255, 0.8);
-            line-height: 1.6;
-            max-width: 480px;
-        }
-
-        /* Copyright footer */
-        .copyright {
-            position: absolute;
-            bottom: 24px;
-            left: 60px;
-            font-size: 12px;
-            color: #9ca3af;
-            z-index: 10;
-        }
-
-        /* Responsive design */
-        @media (max-width: 1024px) {
-            .login-form-section {
-                flex: 0 0 50%;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .login-container {
-                flex-direction: column;
-            }
-
-            .login-form-section {
-                flex: 1;
-                padding: 40px 24px;
-            }
-
-            .image-section {
-                display: none;
-            }
-
-            .copyright {
-                position: static;
-                margin-top: 40px;
-                text-align: center;
-                left: auto;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .form-header h1 {
-                font-size: 28px;
-            }
-
-            .oauth-buttons {
-                flex-direction: column;
-            }
-
-            .oauth-btn {
-                width: 100%;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="auth/login.css">
 </head>
 <body>
     <div class="login-container">
-        <!-- Left side - Login form -->
+        <!-- Left side - Auth form -->
         <div class="login-form-section">
             <div class="login-form-wrapper">
                 <div class="logo-section">
@@ -366,58 +19,154 @@
                     <span class="logo-text">Artorizer</span>
                 </div>
 
-                <div class="form-header">
-                    <h1>Sign in to your account</h1>
-                    <p>Please enter your email address. If you've purchased Artorizer products before, use the same email to access your purchase history and pre-filled account details.</p>
-                </div>
-
-                <form id="login-form">
-                    <div class="form-group">
-                        <label for="email">Email address</label>
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            placeholder="name.email@example.com"
-                            required
-                        >
+                <!-- Sign In Form -->
+                <div id="signin-container">
+                    <div class="form-header">
+                        <h1>Sign in to your account</h1>
+                        <p>Please enter your email address to sign in to your account.</p>
                     </div>
 
-                    <button type="submit" class="sign-in-btn">Sign in</button>
-                </form>
+                    <form id="signin-form">
+                        <div class="form-group">
+                            <label for="signin-email">Email address</label>
+                            <input
+                                type="email"
+                                id="signin-email"
+                                name="email"
+                                placeholder="name.email@example.com"
+                                required
+                            >
+                        </div>
 
-                <div class="divider">
-                    <span>Or sign in with</span>
+                        <button type="submit" class="sign-in-btn">Sign in</button>
+                    </form>
+
+                    <div class="divider">
+                        <span>Or sign in with</span>
+                    </div>
+
+                    <div class="oauth-buttons">
+                        <button class="oauth-btn" id="google-signin">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                            </svg>
+                            Google
+                        </button>
+
+                        <button class="oauth-btn" id="github-signin">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                            </svg>
+                            GitHub
+                        </button>
+                    </div>
+
+                    <div class="auth-toggle">
+                        Don't have an account? <a href="#" id="show-signup">Create account</a>
+                    </div>
                 </div>
 
-                <div class="oauth-buttons">
-                    <button class="oauth-btn" id="google-signin">
-                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                        </svg>
-                        Google
-                    </button>
+                <!-- Sign Up Form -->
+                <div id="signup-container" class="hidden">
+                    <div class="form-header">
+                        <h1>Create your account</h1>
+                        <p>Please fill in your details to create an account.</p>
+                    </div>
 
-                    <button class="oauth-btn" id="github-signin">
-                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
-                            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-                        </svg>
-                        GitHub
-                    </button>
-                </div>
+                    <form id="signup-form">
+                        <div class="form-group">
+                            <label for="signup-username">Username</label>
+                            <input
+                                type="text"
+                                id="signup-username"
+                                name="username"
+                                placeholder="johndoe"
+                                required
+                            >
+                        </div>
 
-                <div class="footer-links">
-                    <span>© 2025 - Artorizer</span>
-                    <a href="#privacy">Privacy policy</a>
-                    <a href="#terms">Terms & conditions</a>
+                        <div class="form-group">
+                            <label for="signup-email">Email address</label>
+                            <input
+                                type="email"
+                                id="signup-email"
+                                name="email"
+                                placeholder="name.email@example.com"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="signup-password">Password</label>
+                            <input
+                                type="password"
+                                id="signup-password"
+                                name="password"
+                                placeholder="Enter your password"
+                                required
+                            >
+                            <div id="password-strength" class="password-strength-container">
+                                <div class="password-strength-bar">
+                                    <div class="strength-segment"></div>
+                                    <div class="strength-segment"></div>
+                                    <div class="strength-segment"></div>
+                                    <div class="strength-segment"></div>
+                                </div>
+                                <div class="password-strength-text"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="signup-password-confirm">Confirm password</label>
+                            <input
+                                type="password"
+                                id="signup-password-confirm"
+                                name="password-confirm"
+                                placeholder="Confirm your password"
+                                required
+                            >
+                        </div>
+
+                        <button type="submit" class="sign-in-btn">Create account</button>
+                    </form>
+
+                    <div class="divider">
+                        <span>Or sign up with</span>
+                    </div>
+
+                    <div class="oauth-buttons">
+                        <button class="oauth-btn" id="google-signup">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                            </svg>
+                            Google
+                        </button>
+
+                        <button class="oauth-btn" id="github-signup">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                            </svg>
+                            GitHub
+                        </button>
+                    </div>
+
+                    <div class="auth-toggle">
+                        Already have an account? <a href="#" id="show-signin">Sign in</a>
+                    </div>
                 </div>
             </div>
 
-            <div class="copyright">
-                © 2025 - Artorizer
+            <!-- Footer links at bottom -->
+            <div class="footer-links">
+                <span>© 2025 - Artorizer</span>
+                <a href="#privacy">Privacy policy</a>
+                <a href="#terms">Terms & conditions</a>
             </div>
         </div>
 
@@ -431,7 +180,7 @@
                 >
             </div>
             <div class="image-overlay">
-                <h2>Disassemble, decompile and debug with IDA</h2>
+                <h2>Protect your creative work</h2>
                 <p>Explore the infinite possibilities of art protection and copyright verification with Artorizer's advanced technology.</p>
             </div>
         </div>
@@ -447,8 +196,8 @@
             console.log('🔧 Mock authentication enabled for development');
         }
 
-        // Initialize login UI
-        import './src/auth/loginUI.js';
+        // Initialize auth UI
+        import './auth/login.js';
     </script>
 </body>
 </html>
