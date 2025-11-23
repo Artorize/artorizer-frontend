@@ -277,7 +277,6 @@ Add a script block **after** loading `config.js` in `dashboard/index.html`:
 </script>
 <script src="sacParser.js"></script>
 <script src="artworkUploader.js"></script>
-<script src="dashboard.js"></script>
 ```
 
 **Use case**: Quick testing with different endpoints without editing config.js
