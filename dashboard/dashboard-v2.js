@@ -35,6 +35,7 @@
     initializeFileUpload();
     initializeProtectButton();
     initializeDownloadButtons();
+    initializeSidebarToggle();
 
     console.log('Artorize Dashboard V2 initialized successfully');
   });
@@ -648,6 +649,91 @@
       toast.style.animation = 'fadeOut 0.3s ease-out';
       setTimeout(() => toast.remove(), 300);
     }, timeout);
+  }
+
+  /**
+   * Initialize sidebar toggle functionality
+   */
+  function initializeSidebarToggle() {
+    const sidebar = document.querySelector('[aria-expanded]');
+    const toggleButton = sidebar?.querySelector('button[data-state]');
+    const logoContainer = sidebar?.querySelector('.group\\/header-logo');
+
+    if (!sidebar || !toggleButton) {
+      console.warn('Sidebar toggle elements not found');
+      return;
+    }
+
+    // Create expand icon element that will replace logo text when collapsed
+    const expandIconContainer = document.createElement('div');
+    expandIconContainer.className = 'hidden items-center translate-x-[13px] transition-transform duration-150';
+    expandIconContainer.id = 'sidebar-expand-icon';
+    expandIconContainer.innerHTML = `
+      <button class="relative inline-flex items-center justify-center whitespace-nowrap text-sm font-medium focus-ring bg-transparent hover:bg-gray-alpha-100 rounded-[10px] p-0 h-8 w-8 text-gray-500 hover:text-gray-alpha-950 duration-100 transition-colors">
+        <svg width="20px" height="20px" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" color="currentColor" class="w-5 h-5">
+          <rect x="7" y="6.5" width="12" height="1.5" rx="0.75" transform="rotate(90 7 6.5)" fill="currentColor"></rect>
+          <rect x="3" y="4" width="14" height="12" rx="2.8" stroke="currentColor" stroke-width="1.5"></rect>
+        </svg>
+      </button>
+    `;
+
+    // Insert expand icon after logo container
+    if (logoContainer && logoContainer.parentElement) {
+      logoContainer.parentElement.insertBefore(expandIconContainer, logoContainer.nextSibling);
+    }
+
+    // Handle toggle button click
+    toggleButton.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const isExpanded = sidebar.getAttribute('aria-expanded') === 'true';
+
+      // Toggle sidebar state
+      sidebar.setAttribute('aria-expanded', !isExpanded);
+
+      // Update sidebar width
+      const root = document.documentElement;
+      if (isExpanded) {
+        // Collapse: set to icon-only width
+        root.style.setProperty('--eleven-sidebar-width', '4rem');
+        // Hide logo, show expand icon
+        if (logoContainer) {
+          logoContainer.style.display = 'none';
+        }
+        expandIconContainer.style.display = 'flex';
+        // Update collapse icon to expand icon (longer rectangle)
+        updateToggleIcon(toggleButton, false);
+      } else {
+        // Expand: set to full width
+        root.style.setProperty('--eleven-sidebar-width', '16rem');
+        // Show logo, hide expand icon
+        if (logoContainer) {
+          logoContainer.style.display = 'flex';
+        }
+        expandIconContainer.style.display = 'none';
+        // Update expand icon to collapse icon (shorter rectangle)
+        updateToggleIcon(toggleButton, true);
+      }
+    });
+
+    // Also handle click on expand icon when collapsed
+    expandIconContainer.addEventListener('click', function(e) {
+      e.stopPropagation();
+      toggleButton.click();
+    });
+  }
+
+  /**
+   * Update toggle icon between collapse and expand states
+   */
+  function updateToggleIcon(button, isExpanded) {
+    const svg = button.querySelector('svg');
+    if (!svg) return;
+
+    // Update the rectangle height (7 for collapse, 12 for expand)
+    const rect = svg.querySelector('rect[transform]');
+    if (rect) {
+      rect.setAttribute('height', isExpanded ? '7' : '12');
+    }
   }
 
 })();
