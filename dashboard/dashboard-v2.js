@@ -175,6 +175,24 @@
   function initializeTabSwitching() {
     const tabButtons = document.querySelectorAll('[role="tab"]');
     const tabPanels = document.querySelectorAll('[role="tabpanel"]');
+    const indicator = document.getElementById('tab-active-indicator');
+
+    function updateIndicator(activeButton) {
+      if (!indicator || !activeButton) return;
+      
+      const left = activeButton.offsetLeft;
+      const width = activeButton.offsetWidth;
+      
+      indicator.style.left = `${left}px`;
+      indicator.style.width = `${width}px`;
+    }
+
+    // Initialize indicator position
+    const activeBtn = document.querySelector('[role="tab"][data-state="active"]');
+    if (activeBtn) {
+        // Use setTimeout to ensure layout is stable
+        setTimeout(() => updateIndicator(activeBtn), 0);
+    }
 
     tabButtons.forEach(button => {
       button.addEventListener('click', function() {
@@ -188,6 +206,9 @@
 
         this.setAttribute('aria-selected', 'true');
         this.setAttribute('data-state', 'active');
+        
+        // Update indicator
+        updateIndicator(this);
 
         // Update panel visibility
         tabPanels.forEach(panel => {
@@ -202,6 +223,12 @@
           }
         });
       });
+    });
+    
+    // Update on window resize
+    window.addEventListener('resize', () => {
+        const currentActive = document.querySelector('[role="tab"][data-state="active"]');
+        if (currentActive) updateIndicator(currentActive);
     });
   }
 
@@ -714,27 +741,34 @@
       if (isExpanded) {
         // Collapse: set to icon-only width
         root.style.setProperty('--eleven-sidebar-width', '4rem');
-        // Hide logo, show expand icon
+        // Hide logo
         if (logoContainer) {
           logoContainer.style.visibility = 'hidden';
           logoContainer.style.opacity = '0';
           logoContainer.style.position = 'absolute';
         }
+        
+        // Show and center the expand icon container
         expandIconContainer.style.display = 'flex';
-        // Update toggle button icon to expand icon
+        expandIconContainer.style.position = 'relative';
+        expandIconContainer.style.justifyContent = 'center';
+        expandIconContainer.style.width = '100%';
+        expandIconContainer.style.height = 'var(--eleven-header-height)';
+        expandIconContainer.style.transform = 'none';
+        expandIconContainer.style.left = 'auto';
+        
+        // Update toggle button icon to expand icon (though hidden)
         toggleButton.innerHTML = expandSVG;
-        // Center the toggle button horizontally when collapsed
-        if (headerContainer) {
-          headerContainer.style.justifyContent = 'center';
-        }
-        toggleButtonContainer.style.position = 'relative';
+        
+        // Reset toggle button container
+        toggleButtonContainer.style.position = 'absolute';
         toggleButtonContainer.style.left = 'auto';
-        toggleButtonContainer.style.right = 'auto';
+        toggleButtonContainer.style.right = '0.125rem';
         toggleButtonContainer.style.transform = 'none';
       } else {
         // Expand: set to full width
         root.style.setProperty('--eleven-sidebar-width', '16rem');
-        // Show logo, hide expand icon
+        // Show logo
         if (logoContainer) {
           logoContainer.style.visibility = 'visible';
           logoContainer.style.opacity = '1';

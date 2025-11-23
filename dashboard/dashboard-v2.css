@@ -42,12 +42,10 @@ select:hover {
 /* Tab Styling */
 .tab-button {
     color: hsl(240, 4%, 46%) !important;
-    border-color: transparent !important;
 }
 
 .tab-button[data-state="active"] {
     color: hsl(240, 3%, 6%) !important;
-    border-color: hsl(240, 3%, 6%) !important;
 }
 
 .tab-button:hover {
