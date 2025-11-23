@@ -1,15 +1,15 @@
-<svg width=1.25rem height=1.25rem viewBox="0 0 20 20"
-                                                                 fill=none xmlns=http://www.w3.org/2000/svg
-                                                                 color=currentColor>
+<svg width="1.25rem" height="1.25rem" viewBox="0 0 20 20"
+                                                                 fill="none" xmlns="http://www.w3.org/2000/svg"
+                                                                 color="currentColor">
                                                                 <path d="M10.5 16H5C3.61929 16 2.5 14.8807 2.5 13.5V8H17.5V10.5"
-                                                                      stroke=currentColor stroke-width=1.5
-                                                                      stroke-linecap=round></path>
+                                                                      stroke="currentColor" stroke-width="1.5"
+                                                                      stroke-linecap="round"></path>
                                                                 <path d="M13.2398 14.6121L14.3586 14.0526C14.4426 14.0106 14.5106 13.9426 14.5526 13.8586L15.1121 12.7398C15.2719 12.4201 15.7281 12.4201 15.8879 12.7398L16.4474 13.8586C16.4894 13.9426 16.5574 14.0106 16.6414 14.0526L17.7602 14.6121C18.0799 14.7719 18.0799 15.2281 17.7602 15.3879L16.6414 15.9474C16.5574 15.9894 16.4894 16.0574 16.4474 16.1414L15.8879 17.2602C15.7281 17.5799 15.2719 17.5799 15.1121 17.2602L14.5526 16.1414C14.5106 16.0574 14.4426 15.9894 14.3586 15.9474L13.2398 15.3879C12.9201 15.2281 12.9201 14.7719 13.2398 14.6121Z"
-                                                                      fill=currentColor></path>
+                                                                      fill="currentColor"></path>
                                                                 <path d="M17.5 8V5.2C17.5 4.53726 16.9627 4 16.3 4H3.7C3.03726 4 2.5 4.53726 2.5 5.2V8"
-                                                                      stroke=currentColor stroke-width=1.5></path>
-                                                                <line x1=6.39952 y1=4.26035 x2=8.39952 y2=7.72445
-                                                                      stroke=currentColor stroke-width=1.5></line>
-                                                                <line x1=13.6005 y1=7.83911 x2=11.6005 y2=4.37501
-                                                                      stroke=currentColor stroke-width=1.5></line>
+                                                                      stroke="currentColor" stroke-width="1.5"></path>
+                                                                <line x1="6.39952" y1="4.26035" x2="8.39952" y2="7.72445"
+                                                                      stroke="currentColor" stroke-width="1.5"></line>
+                                                                <line x1="13.6005" y1="7.83911" x2="11.6005" y2="4.37501"
+                                                                      stroke="currentColor" stroke-width="1.5"></line>
                                                             </svg>

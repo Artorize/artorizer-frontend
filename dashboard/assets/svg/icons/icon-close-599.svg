@@ -1,13 +1,13 @@
-<svg width=1.25rem height=1.25rem viewBox="0 0 20 20"
-                                                                 fill=none xmlns=http://www.w3.org/2000/svg
-                                                                 color=currentColor>
+<svg width="1.25rem" height="1.25rem" viewBox="0 0 20 20"
+                                                                 fill="none" xmlns="http://www.w3.org/2000/svg"
+                                                                 color="currentColor">
                                                                 <path d="M10.3258 5.88235C10.3258 7.47423 9.06066 8.76471 7.5 8.76471C5.93934 8.76471 4.67418 7.47423 4.67418 5.88235C4.67418 4.29047 5.93934 3 7.5 3C9.06066 3 10.3258 4.29047 10.3258 5.88235Z"
-                                                                      stroke=currentColor stroke-width=1.5
-                                                                      stroke-linejoin=round></path>
+                                                                      stroke="currentColor" stroke-width="1.5"
+                                                                      stroke-linejoin="round"></path>
                                                                 <path d="M7.5 11.2353C5.09526 11.2353 3.20018 12.515 2.19824 14.4158C1.52238 15.6981 2.67793 17 4.10519 17H10.8948C12.3221 17 13.4776 15.6981 12.8018 14.4158C11.7998 12.515 9.90473 11.2353 7.5 11.2353Z"
-                                                                      stroke=currentColor stroke-width=1.5
-                                                                      stroke-linejoin=round></path>
+                                                                      stroke="currentColor" stroke-width="1.5"
+                                                                      stroke-linejoin="round"></path>
                                                                 <path d="M15.6187 5C17.5713 6.95262 17.5713 10.1184 15.6187 12.0711M13.2616 7.35702C13.9125 8.0079 13.9125 9.06317 13.2616 9.71405"
-                                                                      stroke=currentColor stroke-width=1.5
-                                                                      stroke-linecap=round></path>
+                                                                      stroke="currentColor" stroke-width="1.5"
+                                                                      stroke-linecap="round"></path>
                                                             </svg>
