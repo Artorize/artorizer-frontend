@@ -8471,3 +8471,78 @@ div:has(> #watermark-strategy-button) {
 .stack.gap-2:has(label[for="watermark-strategy-button"]) > div {
     overflow: visible !important;
 }
+
+/* ==========================================================================
+   Sidebar Platform Switcher Fixes
+   ========================================================================== */
+
+/* Fix platform icon size - keep original size */
+.center.h-8 > div.w-5.h-5 {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+    min-width: 1.25rem !important;
+    min-height: 1.25rem !important;
+}
+
+/* Fix platform switcher - complete override */
+nav#main-nav button[aria-haspopup="menu"] {
+    width: 100% !important;
+}
+
+nav#main-nav button[aria-haspopup="menu"] > div {
+    width: 100% !important;
+    min-width: 100% !important;
+}
+
+nav#main-nav button[aria-haspopup="menu"] > div > div.flex.items-center {
+    width: 100% !important;
+    display: block !important;
+    position: relative !important;
+    height: 2rem !important;
+}
+
+/* Icon container - positioned on the left */
+nav#main-nav button[aria-haspopup="menu"] .center.h-8 {
+    position: absolute !important;
+    left: 0.375rem !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 1 !important;
+}
+
+/* Text container - positioned to the right of icon */
+nav#main-nav button[aria-haspopup="menu"] .flex.items-center.justify-between.flex-1 {
+    position: absolute !important;
+    left: 2.25rem !important;
+    right: 0.375rem !important;
+    top: 0 !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    z-index: 2 !important;
+}
+
+/* Force text to be visible */
+nav#main-nav button[aria-haspopup="menu"] p {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: inline-block !important;
+    transform: none !important;
+    margin: 0 !important;
+    position: relative !important;
+    z-index: 10 !important;
+}
+
+/* Ensure text parent container is visible */
+nav#main-nav button[aria-haspopup="menu"] .flex.items-center.justify-between.flex-1 {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateX(0) !important;
+}
+
+/* Override any hiding classes */
+nav#main-nav button[aria-haspopup="menu"] div.h-8.flex-1 {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateX(0) !important;
+}
