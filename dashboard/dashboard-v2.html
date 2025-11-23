@@ -1399,38 +1399,48 @@
                                                                                                                                class="flex h-9 w-full rounded-[10px] border border-gray-200 bg-background px-3 py-2 text-sm transition-colors placeholder:text-subtle focus:outline-none hover:border-gray-300">                                                                        </div>
 
                                                                         <div class="stack gap-2">
-                                                                            <label class="text-sm font-medium text-foreground">Creation Date</label>
+                                                                            <label for="creation-date-display" class="text-sm font-medium text-foreground">Creation Date</label>
                                                                             <div class="hstack gap-2">
                                                                                 <div class="relative flex-1">
-                                                                                    <!-- Date Filter Button -->
-                                                                                    <button type="button" id="date-filter-btn"
-                                                                                            class="flex items-center justify-center h-9 w-full rounded-lg whitespace-nowrap text-sm font-medium transition-colors duration-200 cursor-pointer select-none focus-ring px-3 border text-foreground bg-background hover:bg-gray-alpha-50 active:bg-gray-alpha-100"
-                                                                                            aria-haspopup="dialog" aria-expanded="false">
-                                                                                        <div class="w-4 h-4 relative focus-ring rounded-full mr-2">
-                                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
-                                                                                                <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
-                                                                                                <line x1="16" x2="16" y1="2" y2="6"></line>
-                                                                                                <line x1="8" x2="8" y1="2" y2="6"></line>
-                                                                                                <line x1="3" x2="21" y1="10" y2="10"></line>
-                                                                                            </svg>
-                                                                                        </div>
-                                                                                        <span id="date-filter-text">Select date...</span>
-                                                                                    </button>
+                                                                                    <input type="text" id="creation-date-display" readonly placeholder="Select date"
+                                                                                           class="flex h-9 w-full rounded-[10px] border border-gray-200 bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:border-gray-800 hover:border-gray-300 cursor-pointer">
+                                                                                    <input type="hidden" id="creation-date">
 
-                                                                                    <!-- Date Picker Popover -->
-                                                                                    <div id="date-picker-popover"
-                                                                                         class="absolute z-50 mt-2 left-0 hidden bg-background rounded-[12px] shadow-lg border border-gray-alpha-200"
-                                                                                         style="min-width: 320px;">
-                                                                                        <div class="relative">
-                                                                                            <div class="p-3">
-                                                                                                <input type="text" id="creation-date" class="hidden">
-                                                                                                <div id="calendar-container"></div>
+                                                                                    <!-- Custom Calendar Popup -->
+                                                                                    <div id="calendar-popup" class="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-[10px] shadow-lg p-4 z-50 hidden" style="width: 280px;">
+                                                                                        <!-- Calendar Header -->
+                                                                                        <div class="flex items-center justify-between mb-4">
+                                                                                            <button type="button" id="prev-month" class="p-1 hover:bg-gray-100 rounded">
+                                                                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                                                                    <polyline points="15 18 9 12 15 6"></polyline>
+                                                                                                </svg>
+                                                                                            </button>
+                                                                                            <div id="calendar-month-year" class="text-sm font-medium text-foreground"></div>
+                                                                                            <button type="button" id="next-month" class="p-1 hover:bg-gray-100 rounded">
+                                                                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                                                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                                                                                </svg>
+                                                                                            </button>
+                                                                                        </div>
+
+                                                                                        <!-- Calendar Grid -->
+                                                                                        <div class="calendar-grid">
+                                                                                            <!-- Week day headers -->
+                                                                                            <div class="grid grid-cols-7 gap-1 mb-2">
+                                                                                                <div class="text-xs text-gray-500 text-center py-1">Su</div>
+                                                                                                <div class="text-xs text-gray-500 text-center py-1">Mo</div>
+                                                                                                <div class="text-xs text-gray-500 text-center py-1">Tu</div>
+                                                                                                <div class="text-xs text-gray-500 text-center py-1">We</div>
+                                                                                                <div class="text-xs text-gray-500 text-center py-1">Th</div>
+                                                                                                <div class="text-xs text-gray-500 text-center py-1">Fr</div>
+                                                                                                <div class="text-xs text-gray-500 text-center py-1">Sa</div>
                                                                                             </div>
+
+                                                                                            <!-- Calendar days -->
+                                                                                            <div id="calendar-days" class="grid grid-cols-7 gap-1"></div>
                                                                                         </div>
                                                                                     </div>
                                                                                 </div>
-
-                                                                                <!-- Today Button -->
                                                                                 <button type="button" id="today-btn" title="Set to today"
                                                                                         class="inline-flex items-center justify-center whitespace-nowrap text-xs font-medium transition-colors duration-75 focus-ring bg-background border border-gray-alpha-200 hover:bg-gray-alpha-50 active:bg-gray-alpha-100 h-9 px-3 rounded-[10px]">
                                                                                     Today
@@ -1781,79 +1791,155 @@ function setupYearInputBehavior(instance) {
   updateShortLabel();
 }
 
-// Initialize flatpickr date picker
+// Custom Date Picker functionality
 function initializeDatePicker() {
-  const dateInput = document.getElementById('creation-date');
-  const container = document.getElementById('calendar-container');
-
-  if (container && typeof flatpickr !== 'undefined') {
-    datePickerInstance = flatpickr(dateInput, {
-      dateFormat: 'Y-m-d',
-      defaultDate: new Date(),
-      inline: true, // Display inline in the container
-      disableMobile: true,
-      appendTo: container,
-      monthSelectorType: 'dropdown', // Show month dropdown
-      onReady: function(selectedDates, dateStr, instance) {
-        setupYearInputBehavior(instance);
-      },
-      onOpen: function(selectedDates, dateStr, instance) {
-        setupYearInputBehavior(instance);
-      },
-      onYearChange: function(selectedDates, dateStr, instance) {
-        setupYearInputBehavior(instance);
-      },
-      onMonthChange: function(selectedDates, dateStr, instance) {
-        setupYearInputBehavior(instance);
-      },
-      onChange: function(selectedDates, dateStr, instance) {
-        updateDateFilterText(selectedDates[0]);
-      }
-    });
-  }
-
-  // Set up popover toggle
-  const filterBtn = document.getElementById('date-filter-btn');
-  const popover = document.getElementById('date-picker-popover');
-
-  if (filterBtn && popover) {
-    filterBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const isHidden = popover.classList.contains('hidden');
-      popover.classList.toggle('hidden');
-      filterBtn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
-    });
-
-    // Close popover when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!popover.contains(e.target) && !filterBtn.contains(e.target)) {
-        popover.classList.add('hidden');
-        filterBtn.setAttribute('aria-expanded', 'false');
-      }
-    });
-  }
-
-  // Set up Today button
+  const displayInput = document.getElementById('creation-date-display');
+  const hiddenInput = document.getElementById('creation-date');
+  const calendarPopup = document.getElementById('calendar-popup');
+  const monthYearDisplay = document.getElementById('calendar-month-year');
+  const calendarDays = document.getElementById('calendar-days');
+  const prevMonthBtn = document.getElementById('prev-month');
+  const nextMonthBtn = document.getElementById('next-month');
   const todayBtn = document.getElementById('today-btn');
-  if (todayBtn && datePickerInstance) {
-    todayBtn.addEventListener('click', () => {
-      datePickerInstance.setDate(new Date(), true);
-      updateDateFilterText(new Date());
-    });
-  }
-}
 
-// Update the date filter button text
-function updateDateFilterText(date) {
-  const filterText = document.getElementById('date-filter-text');
-  if (filterText && date) {
-    const formattedDate = date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-    filterText.textContent = formattedDate;
-  }
+  if (!displayInput || !calendarPopup) return;
+
+  let currentDate = new Date();
+  let selectedDate = null;
+
+  // Month names
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'];
+
+  // Format date as YYYY-MM-DD
+  const formatDate = (date) => {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
+  // Format date for display (e.g., "January 15, 2025")
+  const formatDisplayDate = (date) => {
+    const monthName = monthNames[date.getMonth()];
+    const day = date.getDate();
+    const year = date.getFullYear();
+    return `${monthName} ${day}, ${year}`;
+  };
+
+  // Render calendar for current month
+  const renderCalendar = () => {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+
+    // Update month/year display
+    monthYearDisplay.textContent = `${monthNames[month]} ${year}`;
+
+    // Get first day of month (0 = Sunday, 1 = Monday, etc.)
+    const firstDay = new Date(year, month, 1).getDay();
+
+    // Get number of days in month
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    // Get number of days in previous month
+    const prevMonthDays = new Date(year, month, 0).getDate();
+
+    // Clear calendar
+    calendarDays.innerHTML = '';
+
+    // Add previous month's trailing days
+    for (let i = firstDay - 1; i >= 0; i--) {
+      const day = prevMonthDays - i;
+      const dayEl = document.createElement('div');
+      dayEl.className = 'calendar-day other-month';
+      dayEl.textContent = day;
+      calendarDays.appendChild(dayEl);
+    }
+
+    // Add current month's days
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dayEl = document.createElement('div');
+      dayEl.className = 'calendar-day';
+      dayEl.textContent = day;
+
+      // Check if this is today
+      const today = new Date();
+      if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
+        dayEl.classList.add('today');
+      }
+
+      // Check if this is the selected date
+      if (selectedDate &&
+          year === selectedDate.getFullYear() &&
+          month === selectedDate.getMonth() &&
+          day === selectedDate.getDate()) {
+        dayEl.classList.add('selected');
+      }
+
+      // Click handler
+      dayEl.addEventListener('click', () => {
+        selectedDate = new Date(year, month, day);
+        hiddenInput.value = formatDate(selectedDate);
+        displayInput.value = formatDisplayDate(selectedDate);
+        calendarPopup.classList.add('hidden');
+      });
+
+      calendarDays.appendChild(dayEl);
+    }
+
+    // Add next month's leading days to fill the grid
+    const totalCells = calendarDays.children.length;
+    const remainingCells = 42 - totalCells; // 6 rows × 7 days = 42 cells
+    for (let day = 1; day <= remainingCells; day++) {
+      const dayEl = document.createElement('div');
+      dayEl.className = 'calendar-day other-month';
+      dayEl.textContent = day;
+      calendarDays.appendChild(dayEl);
+    }
+  };
+
+  // Show/hide calendar
+  displayInput.addEventListener('click', () => {
+    calendarPopup.classList.toggle('hidden');
+    if (!calendarPopup.classList.contains('hidden')) {
+      renderCalendar();
+    }
+  });
+
+  // Previous month
+  prevMonthBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    renderCalendar();
+  });
+
+  // Next month
+  nextMonthBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    renderCalendar();
+  });
+
+  // Today button
+  todayBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    const today = new Date();
+    selectedDate = today;
+    currentDate = new Date(today);
+    hiddenInput.value = formatDate(today);
+    displayInput.value = formatDisplayDate(today);
+    renderCalendar();
+    calendarPopup.classList.add('hidden');
+  });
+
+  // Close calendar when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!displayInput.contains(e.target) &&
+        !calendarPopup.contains(e.target) &&
+        !todayBtn.contains(e.target)) {
+      calendarPopup.classList.add('hidden');
+    }
+  });
 }
 
 // Initialize when DOM is ready
