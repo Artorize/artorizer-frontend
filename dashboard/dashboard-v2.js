@@ -697,10 +697,6 @@
 
     // Add debug border to toggle button container for visibility
     const toggleButtonContainer = toggleButton.parentElement;
-    if (toggleButtonContainer) {
-      toggleButtonContainer.style.border = '1px solid rgba(0, 0, 0, 0.1)';
-      toggleButtonContainer.style.borderRadius = '10px';
-    }
 
     // Get the parent flex container that controls layout
     const headerContainer = logoContainer?.parentElement;
