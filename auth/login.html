@@ -436,30 +436,18 @@
         </div>
     </div>
 
-    <script>
-        // Form submission handler
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
+    <script type="module">
+        // Enable mock auth for development
+        import { enableMockAuth } from '../src/auth/__mocks__/mockAuthBackend.js';
 
-            // TODO: Implement email authentication
-            console.log('Email sign-in:', email);
-            alert('Email authentication will be implemented with Better Auth');
-        });
+        // Auto-enable mock auth in development
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            enableMockAuth();
+            console.log('🔧 Mock authentication enabled for development');
+        }
 
-        // Google OAuth handler
-        document.getElementById('google-signin').addEventListener('click', () => {
-            // TODO: Implement Google OAuth
-            console.log('Google sign-in clicked');
-            alert('Google OAuth will be implemented with Better Auth');
-        });
-
-        // GitHub OAuth handler
-        document.getElementById('github-signin').addEventListener('click', () => {
-            // TODO: Implement GitHub OAuth
-            console.log('GitHub sign-in clicked');
-            alert('GitHub OAuth will be implemented with Better Auth');
-        });
+        // Initialize login UI
+        import '../src/auth/loginUI.js';
     </script>
 </body>
 </html>
