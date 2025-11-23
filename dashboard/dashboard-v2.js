@@ -702,6 +702,9 @@
       toggleButtonContainer.style.borderRadius = '10px';
     }
 
+    // Get the parent flex container that controls layout
+    const headerContainer = logoContainer?.parentElement;
+
     // Handle toggle button click
     toggleButton.addEventListener('click', function(e) {
       e.stopPropagation();
@@ -725,9 +728,13 @@
         // Update toggle button icon to expand icon
         toggleButton.innerHTML = expandSVG;
         // Center the toggle button horizontally when collapsed
-        toggleButtonContainer.style.left = '50%';
+        if (headerContainer) {
+          headerContainer.style.justifyContent = 'center';
+        }
+        toggleButtonContainer.style.position = 'relative';
+        toggleButtonContainer.style.left = 'auto';
         toggleButtonContainer.style.right = 'auto';
-        toggleButtonContainer.style.transform = 'translateX(-50%)';
+        toggleButtonContainer.style.transform = 'none';
       } else {
         // Expand: set to full width
         root.style.setProperty('--eleven-sidebar-width', '16rem');
@@ -741,6 +748,10 @@
         // Update toggle button icon back to collapse icon
         toggleButton.innerHTML = collapseSVG;
         // Reset toggle button position when expanded
+        if (headerContainer) {
+          headerContainer.style.justifyContent = 'space-between';
+        }
+        toggleButtonContainer.style.position = 'absolute';
         toggleButtonContainer.style.left = 'auto';
         toggleButtonContainer.style.right = '0.125rem';
         toggleButtonContainer.style.transform = 'none';
