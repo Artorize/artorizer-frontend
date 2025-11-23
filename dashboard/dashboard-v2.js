@@ -664,22 +664,35 @@
       return;
     }
 
+    // SVG for collapse icon (original - shorter rectangle in middle)
+    const collapseSVG = `
+      <svg width="20px" height="20px" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" color="currentColor" class="w-5 h-5">
+        <rect x="7" y="6.5" width="7" height="1.5" rx="0.75" transform="rotate(90 7 6.5)" fill="currentColor"></rect>
+        <rect x="3" y="4" width="14" height="12" rx="2.8" stroke="currentColor" stroke-width="1.5"></rect>
+      </svg>
+    `;
+
+    // SVG for expand icon (longer rectangle at top, near border)
+    const expandSVG = `
+      <svg width="20px" height="20px" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" color="currentColor" class="w-5 h-5">
+        <rect x="7" y="1" width="10" height="1.5" rx="0.75" transform="rotate(90 7 6.5)" fill="currentColor"></rect>
+        <rect x="3" y="4" width="14" height="12" rx="2.8" stroke="currentColor" stroke-width="1.5"></rect>
+      </svg>
+    `;
+
     // Create expand icon element that will replace logo text when collapsed
     const expandIconContainer = document.createElement('div');
     expandIconContainer.className = 'hidden items-center translate-x-[13px] transition-transform duration-150';
     expandIconContainer.id = 'sidebar-expand-icon';
     expandIconContainer.innerHTML = `
       <button class="relative inline-flex items-center justify-center whitespace-nowrap text-sm font-medium focus-ring bg-transparent hover:bg-gray-alpha-100 rounded-[10px] p-0 h-8 w-8 text-gray-500 hover:text-gray-alpha-950 duration-100 transition-colors">
-        <svg width="20px" height="20px" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" color="currentColor" class="w-5 h-5">
-          <rect x="7" y="1" width="7" height="1.5" rx="0.75" transform="rotate(90 7 6.5)" fill="currentColor"></rect>
-          <rect x="3" y="4" width="14" height="12" rx="2.8" stroke="currentColor" stroke-width="1.5"></rect>
-        </svg>
+        ${expandSVG}
       </button>
     `;
 
-    // Insert expand icon after logo container
-    if (logoContainer && logoContainer.parentElement) {
-      logoContainer.parentElement.insertBefore(expandIconContainer, logoContainer.nextSibling);
+    // Insert expand icon after logo container's parent to maintain position
+    if (logoContainer && logoContainer.parentElement && logoContainer.parentElement.parentElement) {
+      logoContainer.parentElement.parentElement.insertBefore(expandIconContainer, logoContainer.parentElement.nextSibling);
     }
 
     // Handle toggle button click
@@ -697,17 +710,25 @@
         root.style.setProperty('--eleven-sidebar-width', '4rem');
         // Hide logo, show expand icon
         if (logoContainer) {
-          logoContainer.style.display = 'none';
+          logoContainer.style.visibility = 'hidden';
+          logoContainer.style.opacity = '0';
+          logoContainer.style.position = 'absolute';
         }
         expandIconContainer.style.display = 'flex';
+        // Update toggle button icon to expand icon
+        toggleButton.innerHTML = expandSVG;
       } else {
         // Expand: set to full width
         root.style.setProperty('--eleven-sidebar-width', '16rem');
         // Show logo, hide expand icon
         if (logoContainer) {
-          logoContainer.style.display = 'flex';
+          logoContainer.style.visibility = 'visible';
+          logoContainer.style.opacity = '1';
+          logoContainer.style.position = 'relative';
         }
         expandIconContainer.style.display = 'none';
+        // Update toggle button icon back to collapse icon
+        toggleButton.innerHTML = collapseSVG;
       }
     });
 
