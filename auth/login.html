@@ -213,12 +213,12 @@
             text-decoration: underline;
         }
 
-        /* Right side - Decorative image */
+        /* Right side - Image background */
         .image-section {
             flex: 1;
             position: relative;
-            background: #ffffff;
-            overflow: hidden;
+            background: #f5f5f5;
+            padding: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -228,13 +228,17 @@
             position: relative;
             width: 100%;
             height: 100%;
+            border-radius: 24px;
             overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
         }
 
         .decorative-image {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            user-select: none;
+            pointer-events: none;
         }
 
         .image-overlay {
@@ -242,15 +246,18 @@
             bottom: 0;
             left: 0;
             right: 0;
-            padding: 40px;
+            padding: 48px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0) 100%);
             z-index: 2;
         }
 
         .image-overlay h2 {
-            font-size: 40px;
-            font-weight: 400;
+            font-size: 36px;
+            font-weight: 300;
             color: #ffffff;
-            line-height: 1.2;
+            line-height: 1.4;
+            letter-spacing: -0.02em;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         }
 
         /* Responsive design */
@@ -353,17 +360,18 @@
             </div>
         </div>
 
-        <!-- Right side - Decorative image -->
+        <!-- Right side - Image background -->
         <div class="image-section">
             <div class="image-wrapper">
                 <img
-                    src="assets/thinker-starry-night.jpg"
-                    alt="The Thinker with Starry Night background"
+                    src="../example-websites/FF70EDDFBD40D32373F85CFF55426012.png"
+                    alt="The Thinker"
                     class="decorative-image"
+                    loading="lazy"
                 >
-            </div>
-            <div class="image-overlay">
-                <h2>Disassemble, decompile and debug with IDA</h2>
+                <div class="image-overlay">
+                    <h2>Protect your creative work with advanced watermarking</h2>
+                </div>
             </div>
         </div>
     </div>

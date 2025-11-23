@@ -25,101 +25,119 @@ export function setupDebugPanel(camera, renderer, composer, controls) {
     // Camera Z position
     const cameraZSlider = document.getElementById('camera-z');
     const cameraZValue = document.getElementById('camera-z-value');
-    cameraZSlider.addEventListener('input', (e) => {
-        const value = parseFloat(e.target.value);
-        camera.position.z = value;
-        cameraZValue.textContent = value;
-    });
+    if (cameraZSlider && cameraZValue) {
+        cameraZSlider.addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            camera.position.z = value;
+            cameraZValue.textContent = value;
+        });
+    }
 
     // Min Distance
     const minDistanceSlider = document.getElementById('min-distance');
     const minDistanceValue = document.getElementById('min-distance-value');
-    minDistanceSlider.addEventListener('input', (e) => {
-        const value = parseFloat(e.target.value);
-        controls.minDistance = value;
-        minDistanceValue.textContent = value;
-    });
+    if (minDistanceSlider && minDistanceValue) {
+        minDistanceSlider.addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            controls.minDistance = value;
+            minDistanceValue.textContent = value;
+        });
+    }
 
     // Max Distance
     const maxDistanceSlider = document.getElementById('max-distance');
     const maxDistanceValue = document.getElementById('max-distance-value');
-    maxDistanceSlider.addEventListener('input', (e) => {
-        const value = parseFloat(e.target.value);
-        controls.maxDistance = value;
-        maxDistanceValue.textContent = value;
-    });
+    if (maxDistanceSlider && maxDistanceValue) {
+        maxDistanceSlider.addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            controls.maxDistance = value;
+            maxDistanceValue.textContent = value;
+        });
+    }
 
     // Bloom Strength
     const bloomStrengthSlider = document.getElementById('bloom-strength');
     const bloomStrengthValue = document.getElementById('bloom-strength-value');
-    debugPanel.setBloomStrengthDisplay = (value) => {
-        bloomStrengthValue.textContent = value.toFixed(1);
-    };
-    debugPanel.setBloomStrengthDisplay(bloomPass ? bloomPass.strength : 0);
-    bloomStrengthSlider.addEventListener('input', (e) => {
-        const value = parseFloat(e.target.value);
-        debugPanel.isBloomStrengthManual = true;
-        debugPanel.manualBloomStrength = value;
-        if (bloomPass) bloomPass.strength = value;
-        debugPanel.setBloomStrengthDisplay(value);
-    });
+    if (bloomStrengthSlider && bloomStrengthValue) {
+        debugPanel.setBloomStrengthDisplay = (value) => {
+            if (bloomStrengthValue) bloomStrengthValue.textContent = value.toFixed(1);
+        };
+        debugPanel.setBloomStrengthDisplay(bloomPass ? bloomPass.strength : 0);
+        bloomStrengthSlider.addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            debugPanel.isBloomStrengthManual = true;
+            debugPanel.manualBloomStrength = value;
+            if (bloomPass) bloomPass.strength = value;
+            debugPanel.setBloomStrengthDisplay(value);
+        });
+    }
 
     // Bloom Radius
     const bloomRadiusSlider = document.getElementById('bloom-radius');
     const bloomRadiusValue = document.getElementById('bloom-radius-value');
-    debugPanel.setBloomRadiusDisplay = (value) => {
-        bloomRadiusValue.textContent = value.toFixed(2);
-    };
-    debugPanel.setBloomRadiusDisplay(bloomPass ? bloomPass.radius : 0);
-    bloomRadiusSlider.addEventListener('input', (e) => {
-        const value = parseFloat(e.target.value);
-        debugPanel.isBloomRadiusManual = true;
-        debugPanel.manualBloomRadius = value;
-        if (bloomPass) bloomPass.radius = value;
-        debugPanel.setBloomRadiusDisplay(value);
-    });
+    if (bloomRadiusSlider && bloomRadiusValue) {
+        debugPanel.setBloomRadiusDisplay = (value) => {
+            if (bloomRadiusValue) bloomRadiusValue.textContent = value.toFixed(2);
+        };
+        debugPanel.setBloomRadiusDisplay(bloomPass ? bloomPass.radius : 0);
+        bloomRadiusSlider.addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            debugPanel.isBloomRadiusManual = true;
+            debugPanel.manualBloomRadius = value;
+            if (bloomPass) bloomPass.radius = value;
+            debugPanel.setBloomRadiusDisplay(value);
+        });
+    }
 
     // Bloom Threshold
     const bloomThresholdSlider = document.getElementById('bloom-threshold');
     const bloomThresholdValue = document.getElementById('bloom-threshold-value');
-    debugPanel.setBloomThresholdDisplay = (value) => {
-        bloomThresholdValue.textContent = value.toFixed(2);
-    };
-    debugPanel.setBloomThresholdDisplay(bloomPass ? bloomPass.threshold : 0);
-    bloomThresholdSlider.addEventListener('input', (e) => {
-        const value = parseFloat(e.target.value);
-        debugPanel.isBloomThresholdManual = true;
-        debugPanel.manualBloomThreshold = value;
-        if (bloomPass) bloomPass.threshold = value;
-        debugPanel.setBloomThresholdDisplay(value);
-    });
+    if (bloomThresholdSlider && bloomThresholdValue) {
+        debugPanel.setBloomThresholdDisplay = (value) => {
+            if (bloomThresholdValue) bloomThresholdValue.textContent = value.toFixed(2);
+        };
+        debugPanel.setBloomThresholdDisplay(bloomPass ? bloomPass.threshold : 0);
+        bloomThresholdSlider.addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            debugPanel.isBloomThresholdManual = true;
+            debugPanel.manualBloomThreshold = value;
+            if (bloomPass) bloomPass.threshold = value;
+            debugPanel.setBloomThresholdDisplay(value);
+        });
+    }
 
     // Exposure
     const exposureSlider = document.getElementById('exposure');
     const exposureValue = document.getElementById('exposure-value');
-    exposureSlider.addEventListener('input', (e) => {
-        const value = parseFloat(e.target.value);
-        renderer.toneMappingExposure = value;
-        exposureValue.textContent = value.toFixed(1);
-    });
+    if (exposureSlider && exposureValue) {
+        exposureSlider.addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            renderer.toneMappingExposure = value;
+            exposureValue.textContent = value.toFixed(1);
+        });
+    }
 
     // Damping
     const dampingSlider = document.getElementById('damping');
     const dampingValue = document.getElementById('damping-value');
-    dampingSlider.addEventListener('input', (e) => {
-        const value = parseFloat(e.target.value);
-        controls.dampingFactor = value;
-        dampingValue.textContent = value.toFixed(2);
-    });
+    if (dampingSlider && dampingValue) {
+        dampingSlider.addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            controls.dampingFactor = value;
+            dampingValue.textContent = value.toFixed(2);
+        });
+    }
 
     // Rotation Speed
     const rotationSpeedSlider = document.getElementById('rotation-speed');
     const rotationSpeedValue = document.getElementById('rotation-speed-value');
-    rotationSpeedSlider.addEventListener('input', (e) => {
-        const value = parseFloat(e.target.value);
-        debugPanel.rotationSpeedMultiplier = value;
-        rotationSpeedValue.textContent = value.toFixed(1);
-    });
+    if (rotationSpeedSlider && rotationSpeedValue) {
+        rotationSpeedSlider.addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            debugPanel.rotationSpeedMultiplier = value;
+            rotationSpeedValue.textContent = value.toFixed(1);
+        });
+    }
 
     // Blur controls
     const blurSlider = document.getElementById('blur-maxblur');

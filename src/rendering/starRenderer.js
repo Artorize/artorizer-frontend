@@ -9,7 +9,8 @@ let starData = [];
 
 export async function loadStars(scene) {
     try {
-        const response = await fetch('data/bsc5p_stars.json');
+        // Use absolute path from root to work from any page
+        const response = await fetch('/data/bsc5p_stars.json');
         const data = await response.json();
 
         const positions = [];

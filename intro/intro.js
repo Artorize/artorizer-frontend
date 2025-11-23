@@ -91,122 +91,142 @@ function hideEntryAnimation() {
     }, remainingTime);
 }
 
-// Start entry animation immediately
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', playEntryAnimation);
-} else {
-    playEntryAnimation();
+// Export function to initialize starry background
+export function initStarryBackground() {
+    // Initialize scene, camera, renderer, and controls
+    const { scene, camera, renderer, composer, controls, bloomPass, bokehPass } = setupScene();
+
+    // Setup window resize handler
+    setupWindowResize(camera, renderer, composer);
+
+    // Setup debug panel (will be hidden by default on login page)
+    const debugPanel = setupDebugPanel(camera, renderer, composer, controls);
+
+    // Global toggle function for debug panel
+    window.toggleDebug = function() {
+        const panel = document.getElementById('debug-panel');
+        if (panel.style.display === 'none') {
+            panel.style.display = 'block';
+        } else {
+            panel.style.display = 'none';
+        }
+    };
+
+    // Animation loop
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+
+        const distanceToTarget = camera.position.distanceTo(controls.target);
+        const zoomRange = Math.max(controls.maxDistance - controls.minDistance, 1);
+        const normalizedZoom = Math.min(Math.max((distanceToTarget - controls.minDistance) / zoomRange, 0), 1);
+        const eased = Math.pow(normalizedZoom, 1.6);
+
+        const starPoints = getStarPoints();
+        if (starPoints) {
+            // Ease rotation speed with zoom so close views feel calmer
+            const rotationSpeed = (0.00002 + (0.0003 - 0.00002) * eased) * debugPanel.rotationSpeedMultiplier;
+            starPoints.rotation.y += rotationSpeed;
+        }
+
+        if (bloomPass) {
+            if (debugPanel.isBloomStrengthManual) {
+                const manualStrength = debugPanel.manualBloomStrength ?? bloomPass.strength;
+                bloomPass.strength = manualStrength;
+                if (typeof debugPanel.setBloomStrengthDisplay === 'function') {
+                    debugPanel.setBloomStrengthDisplay(manualStrength);
+                }
+            } else {
+                const adaptiveStrength = calculateAdaptiveBloomStrength(distanceToTarget);
+                bloomPass.strength = adaptiveStrength;
+                if (typeof debugPanel.setBloomStrengthDisplay === 'function') {
+                    debugPanel.setBloomStrengthDisplay(adaptiveStrength);
+                }
+            }
+
+            if (debugPanel.isBloomRadiusManual) {
+                const manualRadius = debugPanel.manualBloomRadius ?? bloomPass.radius;
+                bloomPass.radius = manualRadius;
+                if (typeof debugPanel.setBloomRadiusDisplay === 'function') {
+                    debugPanel.setBloomRadiusDisplay(manualRadius);
+                }
+            } else {
+                const adaptiveRadius = calculateAdaptiveBloomRadius(distanceToTarget);
+                bloomPass.radius = adaptiveRadius;
+                if (typeof debugPanel.setBloomRadiusDisplay === 'function') {
+                    debugPanel.setBloomRadiusDisplay(adaptiveRadius);
+                }
+            }
+
+            if (debugPanel.isBloomThresholdManual) {
+                const manualThreshold = debugPanel.manualBloomThreshold ?? bloomPass.threshold;
+                bloomPass.threshold = manualThreshold;
+                if (typeof debugPanel.setBloomThresholdDisplay === 'function') {
+                    debugPanel.setBloomThresholdDisplay(manualThreshold);
+                }
+            } else {
+                const adaptiveThreshold = calculateAdaptiveBloomThreshold(distanceToTarget);
+                bloomPass.threshold = adaptiveThreshold;
+                if (typeof debugPanel.setBloomThresholdDisplay === 'function') {
+                    debugPanel.setBloomThresholdDisplay(adaptiveThreshold);
+                }
+            }
+        }
+
+        if (bokehPass) {
+            if (debugPanel.blurDirection === 'manual') {
+                const manualBlur = debugPanel.manualBlur ?? bokehPass.uniforms.maxblur.value;
+                bokehPass.uniforms.maxblur.value = manualBlur;
+                bokehPass.uniforms.aperture.value = manualBlur > 0 ? 0.00001 : 0;
+                if (typeof debugPanel.setBlurDisplay === 'function') {
+                    debugPanel.setBlurDisplay(manualBlur);
+                }
+            } else {
+                const adaptiveBlur = debugPanel.blurDirection === 'close'
+                    ? calculateAdaptiveBlurClose(distanceToTarget, debugPanel.blurStrength)
+                    : calculateAdaptiveBlurFar(distanceToTarget, debugPanel.blurStrength);
+                bokehPass.uniforms.maxblur.value = adaptiveBlur;
+                // Scale aperture with blur strength (0 strength = 0 aperture)
+                bokehPass.uniforms.aperture.value = debugPanel.blurStrength * 0.0001;
+                if (typeof debugPanel.setBlurDisplay === 'function') {
+                    debugPanel.setBlurDisplay(adaptiveBlur);
+                }
+            }
+        }
+
+        composer.render();
+    }
+
+    // Start animation loop
+    animate();
+
+    // Load stars
+    loadStars(scene);
 }
 
-// Initialize scene, camera, renderer, and controls
-const { scene, camera, renderer, composer, controls, bloomPass, bokehPass } = setupScene();
-
-// Setup window resize handler
-setupWindowResize(camera, renderer, composer);
-
-// Setup debug panel
-const debugPanel = setupDebugPanel(camera, renderer, composer, controls);
-
-// Global toggle function for debug panel
-window.toggleDebug = function() {
-    const panel = document.getElementById('debug-panel');
-    if (panel.style.display === 'none') {
-        panel.style.display = 'block';
+// Auto-initialize for index.html (has entry-overlay element)
+if (document.getElementById('entry-overlay')) {
+    // Start entry animation immediately
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', playEntryAnimation);
     } else {
-        panel.style.display = 'none';
-    }
-};
-
-// Animation loop
-function animate() {
-    requestAnimationFrame(animate);
-    controls.update();
-
-    const distanceToTarget = camera.position.distanceTo(controls.target);
-    const zoomRange = Math.max(controls.maxDistance - controls.minDistance, 1);
-    const normalizedZoom = Math.min(Math.max((distanceToTarget - controls.minDistance) / zoomRange, 0), 1);
-    const eased = Math.pow(normalizedZoom, 1.6);
-
-    const starPoints = getStarPoints();
-    if (starPoints) {
-        // Ease rotation speed with zoom so close views feel calmer
-        const rotationSpeed = (0.00002 + (0.0003 - 0.00002) * eased) * debugPanel.rotationSpeedMultiplier;
-        starPoints.rotation.y += rotationSpeed;
+        playEntryAnimation();
     }
 
-    if (bloomPass) {
-        if (debugPanel.isBloomStrengthManual) {
-            const manualStrength = debugPanel.manualBloomStrength ?? bloomPass.strength;
-            bloomPass.strength = manualStrength;
-            if (typeof debugPanel.setBloomStrengthDisplay === 'function') {
-                debugPanel.setBloomStrengthDisplay(manualStrength);
-            }
+    // Initialize starry background and handle entry animation
+    const checkStarsLoaded = () => {
+        // Check if stars are loaded by looking for star points
+        if (getStarPoints()) {
+            hideEntryAnimation();
         } else {
-            const adaptiveStrength = calculateAdaptiveBloomStrength(distanceToTarget);
-            bloomPass.strength = adaptiveStrength;
-            if (typeof debugPanel.setBloomStrengthDisplay === 'function') {
-                debugPanel.setBloomStrengthDisplay(adaptiveStrength);
-            }
+            // Check again in 100ms
+            setTimeout(checkStarsLoaded, 100);
         }
+    };
 
-        if (debugPanel.isBloomRadiusManual) {
-            const manualRadius = debugPanel.manualBloomRadius ?? bloomPass.radius;
-            bloomPass.radius = manualRadius;
-            if (typeof debugPanel.setBloomRadiusDisplay === 'function') {
-                debugPanel.setBloomRadiusDisplay(manualRadius);
-            }
-        } else {
-            const adaptiveRadius = calculateAdaptiveBloomRadius(distanceToTarget);
-            bloomPass.radius = adaptiveRadius;
-            if (typeof debugPanel.setBloomRadiusDisplay === 'function') {
-                debugPanel.setBloomRadiusDisplay(adaptiveRadius);
-            }
-        }
+    initStarryBackground();
 
-        if (debugPanel.isBloomThresholdManual) {
-            const manualThreshold = debugPanel.manualBloomThreshold ?? bloomPass.threshold;
-            bloomPass.threshold = manualThreshold;
-            if (typeof debugPanel.setBloomThresholdDisplay === 'function') {
-                debugPanel.setBloomThresholdDisplay(manualThreshold);
-            }
-        } else {
-            const adaptiveThreshold = calculateAdaptiveBloomThreshold(distanceToTarget);
-            bloomPass.threshold = adaptiveThreshold;
-            if (typeof debugPanel.setBloomThresholdDisplay === 'function') {
-                debugPanel.setBloomThresholdDisplay(adaptiveThreshold);
-            }
-        }
-    }
-
-    if (bokehPass) {
-        if (debugPanel.blurDirection === 'manual') {
-            const manualBlur = debugPanel.manualBlur ?? bokehPass.uniforms.maxblur.value;
-            bokehPass.uniforms.maxblur.value = manualBlur;
-            bokehPass.uniforms.aperture.value = manualBlur > 0 ? 0.00001 : 0;
-            if (typeof debugPanel.setBlurDisplay === 'function') {
-                debugPanel.setBlurDisplay(manualBlur);
-            }
-        } else {
-            const adaptiveBlur = debugPanel.blurDirection === 'close'
-                ? calculateAdaptiveBlurClose(distanceToTarget, debugPanel.blurStrength)
-                : calculateAdaptiveBlurFar(distanceToTarget, debugPanel.blurStrength);
-            bokehPass.uniforms.maxblur.value = adaptiveBlur;
-            // Scale aperture with blur strength (0 strength = 0 aperture)
-            bokehPass.uniforms.aperture.value = debugPanel.blurStrength * 0.0001;
-            if (typeof debugPanel.setBlurDisplay === 'function') {
-                debugPanel.setBlurDisplay(adaptiveBlur);
-            }
-        }
-    }
-
-    composer.render();
+    // Start checking for loaded stars
+    setTimeout(checkStarsLoaded, 500);
 }
-
-// Start animation loop immediately
-animate();
-
-// Load stars in background, hide intro when done
-loadStars(scene).then(() => {
-    hideEntryAnimation();
-});
 
