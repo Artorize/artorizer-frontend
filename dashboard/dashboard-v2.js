@@ -671,7 +671,7 @@
     expandIconContainer.innerHTML = `
       <button class="relative inline-flex items-center justify-center whitespace-nowrap text-sm font-medium focus-ring bg-transparent hover:bg-gray-alpha-100 rounded-[10px] p-0 h-8 w-8 text-gray-500 hover:text-gray-alpha-950 duration-100 transition-colors">
         <svg width="20px" height="20px" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" color="currentColor" class="w-5 h-5">
-          <rect x="7" y="6.5" width="12" height="1.5" rx="0.75" transform="rotate(90 7 6.5)" fill="currentColor"></rect>
+          <rect x="7" y="1" width="7" height="1.5" rx="0.75" transform="rotate(90 7 6.5)" fill="currentColor"></rect>
           <rect x="3" y="4" width="14" height="12" rx="2.8" stroke="currentColor" stroke-width="1.5"></rect>
         </svg>
       </button>
@@ -700,8 +700,6 @@
           logoContainer.style.display = 'none';
         }
         expandIconContainer.style.display = 'flex';
-        // Update collapse icon to expand icon (longer rectangle)
-        updateToggleIcon(toggleButton, false);
       } else {
         // Expand: set to full width
         root.style.setProperty('--eleven-sidebar-width', '16rem');
@@ -710,8 +708,6 @@
           logoContainer.style.display = 'flex';
         }
         expandIconContainer.style.display = 'none';
-        // Update expand icon to collapse icon (shorter rectangle)
-        updateToggleIcon(toggleButton, true);
       }
     });
 
@@ -720,20 +716,6 @@
       e.stopPropagation();
       toggleButton.click();
     });
-  }
-
-  /**
-   * Update toggle icon between collapse and expand states
-   */
-  function updateToggleIcon(button, isExpanded) {
-    const svg = button.querySelector('svg');
-    if (!svg) return;
-
-    // Update the rectangle height (7 for collapse, 12 for expand)
-    const rect = svg.querySelector('rect[transform]');
-    if (rect) {
-      rect.setAttribute('height', isExpanded ? '7' : '12');
-    }
   }
 
 })();
