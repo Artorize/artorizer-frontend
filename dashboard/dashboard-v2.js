@@ -675,7 +675,7 @@
     // SVG for expand icon (longer rectangle at top, near border)
     const expandSVG = `
       <svg width="20px" height="20px" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" color="currentColor" class="w-5 h-5">
-        <rect x="7" y="1" width="10" height="1.5" rx="0.75" transform="rotate(90 7 6.5)" fill="currentColor"></rect>
+        <rect x="7" width="7" rx="0.75" transform="rotate(90 7 6.5)" fill="currentColor" height="5" y="0"></rect>
         <rect x="3" y="4" width="14" height="12" rx="2.8" stroke="currentColor" stroke-width="1.5"></rect>
       </svg>
     `;
@@ -694,6 +694,16 @@
     if (logoContainer && logoContainer.parentElement && logoContainer.parentElement.parentElement) {
       logoContainer.parentElement.parentElement.insertBefore(expandIconContainer, logoContainer.parentElement.nextSibling);
     }
+
+    // Add debug border to toggle button container for visibility
+    const toggleButtonContainer = toggleButton.parentElement;
+    if (toggleButtonContainer) {
+      toggleButtonContainer.style.border = '1px solid rgba(0, 0, 0, 0.1)';
+      toggleButtonContainer.style.borderRadius = '10px';
+    }
+
+    // Get the parent flex container that controls layout
+    const headerContainer = logoContainer?.parentElement;
 
     // Handle toggle button click
     toggleButton.addEventListener('click', function(e) {
@@ -717,6 +727,14 @@
         expandIconContainer.style.display = 'flex';
         // Update toggle button icon to expand icon
         toggleButton.innerHTML = expandSVG;
+        // Center the toggle button horizontally when collapsed
+        if (headerContainer) {
+          headerContainer.style.justifyContent = 'center';
+        }
+        toggleButtonContainer.style.position = 'relative';
+        toggleButtonContainer.style.left = 'auto';
+        toggleButtonContainer.style.right = 'auto';
+        toggleButtonContainer.style.transform = 'none';
       } else {
         // Expand: set to full width
         root.style.setProperty('--eleven-sidebar-width', '16rem');
@@ -729,6 +747,14 @@
         expandIconContainer.style.display = 'none';
         // Update toggle button icon back to collapse icon
         toggleButton.innerHTML = collapseSVG;
+        // Reset toggle button position when expanded
+        if (headerContainer) {
+          headerContainer.style.justifyContent = 'space-between';
+        }
+        toggleButtonContainer.style.position = 'absolute';
+        toggleButtonContainer.style.left = 'auto';
+        toggleButtonContainer.style.right = '0.125rem';
+        toggleButtonContainer.style.transform = 'none';
       }
     });
 
