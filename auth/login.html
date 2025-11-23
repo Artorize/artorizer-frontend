@@ -18,7 +18,7 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             min-height: 100vh;
             display: flex;
-            background: #0a0a0a;
+            background: #ffffff;
             color: #333;
             overflow: hidden;
         }
@@ -31,11 +31,11 @@
 
         /* Left side - Login form */
         .login-form-section {
-            flex: 0 0 45%;
+            flex: 0 0 40%;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            background: #ffffff;
             padding: 60px;
             position: relative;
             overflow-y: auto;
@@ -43,143 +43,126 @@
 
         .login-form-wrapper {
             width: 100%;
-            max-width: 440px;
-            animation: fadeInUp 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            max-width: 400px;
         }
 
         .logo-section {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 48px;
+            gap: 8px;
+            margin-bottom: 40px;
         }
 
         .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 12px;
+            width: 24px;
+            height: 24px;
+            background: hsl(240, 3%, 6%);
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-weight: 700;
-            font-size: 20px;
+        }
+
+        .logo-icon svg {
+            width: 16px;
+            height: 16px;
+            fill: #ffffff;
         }
 
         .logo-text {
-            font-size: 24px;
+            font-size: 16px;
             font-weight: 600;
-            color: #1a1a1a;
-            letter-spacing: -0.02em;
+            color: hsl(240, 3%, 6%);
         }
 
         .form-header {
-            margin-bottom: 32px;
+            margin-bottom: 24px;
         }
 
         .form-header h1 {
-            font-size: 32px;
-            font-weight: 700;
-            color: #1a1a1a;
+            font-size: 24px;
+            font-weight: 600;
+            color: hsl(240, 3%, 6%);
             margin-bottom: 12px;
-            letter-spacing: -0.03em;
         }
 
         .form-header p {
-            font-size: 15px;
-            color: #6b7280;
-            line-height: 1.6;
+            font-size: 14px;
+            color: hsl(240, 4%, 46%);
+            line-height: 1.5;
         }
 
         .form-group {
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         .form-group label {
             display: block;
             font-size: 14px;
             font-weight: 500;
-            color: #374151;
+            color: hsl(240, 3%, 6%);
             margin-bottom: 8px;
         }
 
         .form-group input {
             width: 100%;
-            padding: 14px 16px;
-            font-size: 15px;
-            border: 1.5px solid #e5e7eb;
-            border-radius: 12px;
+            padding: 10px 12px;
+            font-size: 14px;
+            border: 1px solid hsl(0, 0%, 82%);
+            border-radius: 6px;
             background: #ffffff;
-            color: #1a1a1a;
-            transition: all 0.2s ease;
+            color: hsl(240, 3%, 6%);
             font-family: inherit;
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: hsl(240, 5%, 26%);
+        }
+
+        .form-group input:hover {
+            border-color: hsl(240, 5%, 26%);
         }
 
         .form-group input::placeholder {
-            color: #9ca3af;
+            color: hsl(240, 4%, 46%);
         }
 
         .sign-in-btn {
             width: 100%;
-            padding: 14px 24px;
-            font-size: 15px;
-            font-weight: 600;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 500;
             color: #ffffff;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: hsl(240, 3%, 6%);
             border: none;
-            border-radius: 12px;
+            border-radius: 6px;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            margin-bottom: 32px;
-            letter-spacing: -0.01em;
+            margin-bottom: 24px;
         }
 
         .sign-in-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 24px rgba(102, 126, 234, 0.3);
-        }
-
-        .sign-in-btn:active {
-            transform: translateY(0);
+            background: hsl(240, 3%, 12%);
         }
 
         .divider {
             display: flex;
             align-items: center;
             text-align: center;
-            margin: 32px 0;
-            color: #9ca3af;
-            font-size: 14px;
+            margin: 24px 0;
+            color: hsl(240, 4%, 46%);
+            font-size: 13px;
         }
 
         .divider::before,
         .divider::after {
             content: '';
             flex: 1;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid hsl(0, 0%, 82%);
         }
 
         .divider span {
-            padding: 0 16px;
-            font-weight: 500;
+            padding: 0 12px;
         }
 
         .oauth-buttons {
@@ -192,53 +175,49 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            padding: 14px 20px;
+            gap: 8px;
+            padding: 10px 16px;
             font-size: 14px;
             font-weight: 500;
-            color: #374151;
+            color: hsl(240, 3%, 6%);
             background: #ffffff;
-            border: 1.5px solid #e5e7eb;
-            border-radius: 12px;
+            border: 1px solid hsl(0, 0%, 82%);
+            border-radius: 6px;
             cursor: pointer;
-            transition: all 0.2s ease;
         }
 
         .oauth-btn:hover {
-            border-color: #d1d5db;
-            background: #f9fafb;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-color: hsl(240, 5%, 26%);
+            background: hsl(240, 5%, 96%);
         }
 
         .oauth-btn svg {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
         }
 
         .footer-links {
-            margin-top: 40px;
-            text-align: center;
-            font-size: 13px;
-            color: #9ca3af;
+            margin-top: 32px;
+            text-align: left;
+            font-size: 12px;
+            color: hsl(240, 4%, 46%);
         }
 
         .footer-links a {
-            color: #667eea;
+            color: hsl(240, 3%, 6%);
             text-decoration: none;
-            margin: 0 12px;
-            transition: color 0.2s ease;
+            margin-left: 16px;
         }
 
         .footer-links a:hover {
-            color: #5568d3;
+            text-decoration: underline;
         }
 
         /* Right side - Decorative image */
         .image-section {
             flex: 1;
             position: relative;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background: #f5f5f5;
             overflow: hidden;
         }
 
@@ -251,28 +230,10 @@
             overflow: hidden;
         }
 
-        .image-wrapper::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-            z-index: 1;
-        }
-
         .decorative-image {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            animation: slowZoom 20s ease-in-out infinite alternate;
-        }
-
-        @keyframes slowZoom {
-            from {
-                transform: scale(1);
-            }
-            to {
-                transform: scale(1.05);
-            }
         }
 
         .image-overlay {
@@ -280,34 +241,24 @@
             bottom: 0;
             left: 0;
             right: 0;
-            padding: 60px;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
+            padding: 40px;
             z-index: 2;
         }
 
         .image-overlay h2 {
-            font-size: 42px;
-            font-weight: 700;
+            font-size: 36px;
+            font-weight: 600;
             color: #ffffff;
-            margin-bottom: 16px;
-            letter-spacing: -0.03em;
-            line-height: 1.2;
-        }
-
-        .image-overlay p {
-            font-size: 16px;
-            color: rgba(255, 255, 255, 0.8);
-            line-height: 1.6;
-            max-width: 480px;
+            line-height: 1.3;
         }
 
         /* Copyright footer */
         .copyright {
             position: absolute;
-            bottom: 24px;
+            bottom: 20px;
             left: 60px;
-            font-size: 12px;
-            color: #9ca3af;
+            font-size: 11px;
+            color: hsl(240, 4%, 46%);
             z-index: 10;
         }
 
@@ -342,7 +293,7 @@
 
         @media (max-width: 480px) {
             .form-header h1 {
-                font-size: 28px;
+                font-size: 20px;
             }
 
             .oauth-buttons {
@@ -361,13 +312,17 @@
         <div class="login-form-section">
             <div class="login-form-wrapper">
                 <div class="logo-section">
-                    <div class="logo-icon">A</div>
-                    <span class="logo-text">Artorizer</span>
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" fill="#ffffff"/>
+                        </svg>
+                    </div>
+                    <span class="logo-text">My hex-rays</span>
                 </div>
 
                 <div class="form-header">
                     <h1>Sign in to your account</h1>
-                    <p>Please enter your email address. If you've purchased Artorizer products before, use the same email to access your purchase history and pre-filled account details.</p>
+                    <p>Please enter your email address. If you've purchased Hex-Rays products before, use the same email to access your purchase history and pre-filled account details.</p>
                 </div>
 
                 <form id="login-form">
@@ -377,7 +332,7 @@
                             type="email"
                             id="email"
                             name="email"
-                            placeholder="name.email@example.com"
+                            placeholder="mme.de.maintenon@email.com"
                             required
                         >
                     </div>
@@ -397,26 +352,20 @@
                             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                         </svg>
-                        Google
                     </button>
 
                     <button class="oauth-btn" id="github-signin">
                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
                             <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
                         </svg>
-                        GitHub
                     </button>
                 </div>
 
                 <div class="footer-links">
-                    <span>© 2025 - Artorizer</span>
+                    <span>© 2025 - Hex-Rays</span>
                     <a href="#privacy">Privacy policy</a>
                     <a href="#terms">Terms & conditions</a>
                 </div>
-            </div>
-
-            <div class="copyright">
-                © 2025 - Artorizer
             </div>
         </div>
 
@@ -424,14 +373,13 @@
         <div class="image-section">
             <div class="image-wrapper">
                 <img
-                    src="assets/thinker-starry-night.jpg"
-                    alt="The Thinker silhouette against Starry Night"
+                    src="../img.png"
+                    alt="Artistic portrait"
                     class="decorative-image"
                 >
             </div>
             <div class="image-overlay">
                 <h2>Disassemble, decompile and debug with IDA</h2>
-                <p>Explore the infinite possibilities of art protection and copyright verification with Artorizer's advanced technology.</p>
             </div>
         </div>
     </div>
