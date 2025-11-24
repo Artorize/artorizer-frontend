@@ -1,20 +1,20 @@
 /**
- * Better Auth Client Wrapper
+ * Auth Client for Artorizer
  *
- * Provides a clean interface to Better Auth client library.
- * This can be imported via CDN (no build step required).
+ * Provides authentication methods matching the Better Auth backend API.
+ * Endpoints documented in auth/auth.md
  */
 
-// For production, import Better Auth client from CDN
-// For now, we'll create a compatible interface that can work with mocks
+// Base URL for the API router
+const API_BASE_URL = 'http://localhost:7000';
+
 let authClientInstance = null;
 
 /**
- * Initialize Better Auth client
- * Call this once when the app starts, or let it initialize lazily
+ * Initialize auth client
  */
 export async function initAuthClient(config = {}) {
-  const baseURL = config.baseURL || 'https://router.artorizer.com';
+  const baseURL = config.baseURL || API_BASE_URL;
 
   // Check if we're in mock mode
   if (window.__MOCK_AUTH_ENABLED__) {
@@ -23,41 +23,93 @@ export async function initAuthClient(config = {}) {
     return authClientInstance;
   }
 
-  // In production, this would import Better Auth
-  // import { createAuthClient } from "https://esm.sh/better-auth@1.0.0/client";
-  // For now, we create a compatible interface
-  try {
-    // Dynamically import Better Auth if available
-    const { createAuthClient } = await import('https://esm.sh/better-auth@1.0.0/client');
-    authClientInstance = createAuthClient({
-      baseURL,
-      credentials: 'include'
-    });
-  } catch (error) {
-    console.warn('Better Auth client not available, using fallback');
-    // Create fallback implementation
-    authClientInstance = createFallbackClient(baseURL);
-  }
-
+  authClientInstance = createAuthClient(baseURL);
   return authClientInstance;
 }
 
 /**
- * Fallback client for development when Better Auth isn't available
+ * Create auth client with API methods
  */
-function createFallbackClient(baseURL) {
+function createAuthClient(baseURL) {
   return {
+    baseURL,
+
+    /**
+     * OAuth sign in - redirects to OAuth provider
+     */
     signIn: {
-      async social({ provider, callbackURL }) {
-        // Simulate OAuth redirect
-        const redirectUrl = `${baseURL}/api/auth/signin/${provider}?callbackURL=${encodeURIComponent(callbackURL || '/dashboard/dashboard-v2.html')}`;
-        window.location.href = redirectUrl;
+      social({ provider }) {
+        // Redirect to OAuth start endpoint
+        window.location.href = `${baseURL}/auth/oauth/${provider}/start`;
       }
     },
 
+    /**
+     * Email/password login
+     */
+    async login(emailOrUsername, password) {
+      const response = await fetch(`${baseURL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ emailOrUsername, password })
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: 'Login failed' }));
+        throw new Error(error.error || error.message || 'Login failed');
+      }
+
+      return response.json();
+    },
+
+    /**
+     * Register new user
+     */
+    async register(email, username, password, name = null) {
+      const body = { email, username, password };
+      if (name) body.name = name;
+
+      const response = await fetch(`${baseURL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(body)
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: 'Registration failed' }));
+        throw new Error(error.error || error.message || 'Registration failed');
+      }
+
+      return response.json();
+    },
+
+    /**
+     * Check email/username availability
+     */
+    async checkAvailability(email = null, username = null) {
+      const params = new URLSearchParams();
+      if (email) params.append('email', email);
+      if (username) params.append('username', username);
+
+      const response = await fetch(`${baseURL}/auth/check-availability?${params}`, {
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to check availability');
+      }
+
+      return response.json();
+    },
+
+    /**
+     * Get current session
+     */
     async getSession() {
       try {
-        const response = await fetch(`${baseURL}/api/auth/session`, {
+        const response = await fetch(`${baseURL}/auth/me`, {
           credentials: 'include'
         });
 
@@ -65,16 +117,19 @@ function createFallbackClient(baseURL) {
           return null;
         }
 
-        return await response.json();
+        return response.json();
       } catch (error) {
         console.error('Failed to get session:', error);
         return null;
       }
     },
 
+    /**
+     * Sign out
+     */
     async signOut(options = {}) {
       try {
-        await fetch(`${baseURL}/api/auth/sign-out`, {
+        await fetch(`${baseURL}/auth/logout`, {
           method: 'POST',
           credentials: 'include'
         });
@@ -105,30 +160,49 @@ async function getAuthClient() {
  */
 export const auth = {
   /**
-   * Sign in with Google
+   * Sign in with Google OAuth
    */
-  async signInWithGoogle() {
-    const client = await getAuthClient();
-    return client.signIn.social({
-      provider: 'google',
-      callbackURL: '/dashboard/dashboard-v2.html'
-    });
+  signInWithGoogle() {
+    const client = authClientInstance || createAuthClient(API_BASE_URL);
+    client.signIn.social({ provider: 'google' });
   },
 
   /**
-   * Sign in with GitHub
+   * Sign in with GitHub OAuth
    */
-  async signInWithGitHub() {
+  signInWithGitHub() {
+    const client = authClientInstance || createAuthClient(API_BASE_URL);
+    client.signIn.social({ provider: 'github' });
+  },
+
+  /**
+   * Login with email/username and password
+   */
+  async login(emailOrUsername, password) {
     const client = await getAuthClient();
-    return client.signIn.social({
-      provider: 'github',
-      callbackURL: '/dashboard/dashboard-v2.html'
-    });
+    return client.login(emailOrUsername, password);
+  },
+
+  /**
+   * Register new user
+   */
+  async register(email, username, password, name = null) {
+    const client = await getAuthClient();
+    return client.register(email, username, password, name);
+  },
+
+  /**
+   * Check email/username availability
+   * @returns {Promise<{emailAvailable: boolean, usernameAvailable: boolean}>}
+   */
+  async checkAvailability(email = null, username = null) {
+    const client = await getAuthClient();
+    return client.checkAvailability(email, username);
   },
 
   /**
    * Get current session
-   * @returns {Promise<Session | null>}
+   * @returns {Promise<{user, session} | null>}
    */
   async getSession() {
     const client = await getAuthClient();
@@ -143,7 +217,7 @@ export const auth = {
     return client.signOut({
       fetchOptions: {
         onSuccess: () => {
-          window.location.href = '/login.html';
+          window.location.href = '/auth/login.html';
         }
       }
     });

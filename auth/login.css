@@ -49,19 +49,7 @@ body {
 }
 
 .logo-section {
-    display: flex;
-    align-items: center;
-    gap: 12px;
     margin-bottom: 40px;
-}
-
-.logo-text {
-    font-family: 'Inter', sans-serif;
-    font-size: 24px;
-    font-weight: 700;
-    color: hsl(240, 3%, 6%);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
 }
 
 .form-header {
@@ -214,6 +202,40 @@ body {
     color: #ffd700;
 }
 
+/* Form Error Messages */
+.form-error {
+    padding: 10px 12px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #dc2626;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+}
+
+/* Password step transition */
+.password-step {
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Disabled input style */
+.form-group input:disabled {
+    background: #f9fafb;
+    color: #6b7280;
+    cursor: not-allowed;
+}
+
 .sign-in-btn {
     width: 100%;
     padding: 10px 16px;
@@ -225,11 +247,16 @@ body {
     border-radius: 6px;
     cursor: pointer;
     margin-bottom: 24px;
-    transition: background 0.2s;
+    transition: background 0.2s, opacity 0.2s;
 }
 
-.sign-in-btn:hover {
+.sign-in-btn:hover:not(:disabled) {
     background: hsl(240, 3%, 12%);
+}
+
+.sign-in-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .divider {
