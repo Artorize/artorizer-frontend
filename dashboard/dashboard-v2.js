@@ -2,6 +2,7 @@
  * Artorize Dashboard V2 - Image Upload and Protection Workflow
  *
  * This script handles the complete workflow for uploading and protecting images
+ * Requires authentication - will redirect to login if not authenticated
  */
 
 (function() {
@@ -12,6 +13,7 @@
   let selectedFile = null;
   let currentJobId = null;
   let currentResult = null;
+  let currentUser = null;
   let images = {
     original: null,
     protected: null,
@@ -19,8 +21,26 @@
   };
 
   // Wait for DOM to be fully loaded
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', async function() {
     console.log('Artorize Dashboard V2 initializing...');
+
+    // Check authentication first
+    if (window.DashboardAuth) {
+      try {
+        const session = await window.DashboardAuth.init();
+        if (!session) {
+          // User is being redirected to login
+          return;
+        }
+        currentUser = session.user;
+        console.log('User authenticated:', currentUser.email);
+      } catch (error) {
+        console.error('Authentication check failed:', error);
+        // Continue without auth if DashboardAuth throws
+      }
+    } else {
+      console.warn('DashboardAuth not loaded - running without authentication');
+    }
 
     // Initialize uploader
     if (window.ArtorizeConfig && window.ArtworkUploader) {
@@ -36,6 +56,7 @@
     initializeProtectButton();
     initializeDownloadButtons();
     initializeSidebarToggle();
+    initializeUserMenu();
 
     console.log('Artorize Dashboard V2 initialized successfully');
   });
@@ -793,6 +814,83 @@
       e.stopPropagation();
       toggleButton.click();
     });
+  }
+
+  /**
+   * Initialize user menu functionality
+   */
+  function initializeUserMenu() {
+    const userMenuButton = document.querySelector('[data-testid="user-menu-button"]');
+    if (!userMenuButton) {
+      console.warn('User menu button not found');
+      return;
+    }
+
+    // Create user menu dropdown
+    const menuDropdown = createUserMenuDropdown();
+    userMenuButton.parentElement.appendChild(menuDropdown);
+
+    // Toggle menu on click
+    userMenuButton.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const isOpen = menuDropdown.style.display !== 'none';
+      menuDropdown.style.display = isOpen ? 'none' : 'block';
+      userMenuButton.setAttribute('data-state', isOpen ? 'closed' : 'open');
+      userMenuButton.setAttribute('aria-expanded', !isOpen);
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!userMenuButton.contains(e.target) && !menuDropdown.contains(e.target)) {
+        menuDropdown.style.display = 'none';
+        userMenuButton.setAttribute('data-state', 'closed');
+        userMenuButton.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  /**
+   * Create user menu dropdown
+   */
+  function createUserMenuDropdown() {
+    const dropdown = document.createElement('div');
+    dropdown.id = 'user-menu-dropdown';
+    dropdown.className = 'absolute bottom-full left-0 mb-2 w-full rounded-lg border border-gray-200 bg-background shadow-lg z-50';
+    dropdown.style.display = 'none';
+
+    dropdown.innerHTML = `
+      <div class="p-1">
+        <div class="px-3 py-2 border-b border-gray-100">
+          <p class="text-sm font-medium text-foreground" data-user-name>${currentUser?.name || 'User'}</p>
+          <p class="text-xs text-subtle" data-user-email>${currentUser?.email || ''}</p>
+        </div>
+        <button data-action="sign-out"
+                class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          Sign out
+        </button>
+      </div>
+    `;
+
+    // Add sign-out handler
+    const signOutBtn = dropdown.querySelector('[data-action="sign-out"]');
+    if (signOutBtn) {
+      signOutBtn.addEventListener('click', async function(e) {
+        e.preventDefault();
+        if (window.DashboardAuth) {
+          await window.DashboardAuth.signOut();
+        } else {
+          // Fallback: redirect to login
+          window.location.href = '/auth/login.html';
+        }
+      });
+    }
+
+    return dropdown;
   }
 
 })();

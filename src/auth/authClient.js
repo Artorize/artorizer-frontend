@@ -5,8 +5,10 @@
  * Endpoints documented in auth/auth.md
  */
 
-// Base URL for the API router
-const API_BASE_URL = 'http://localhost:7000';
+import { authConfig, normalizeAvailability } from './authConfig.js';
+
+// Base URL for the API router (from centralized config)
+const API_BASE_URL = authConfig.baseURL;
 
 let authClientInstance = null;
 
@@ -29,6 +31,7 @@ export async function initAuthClient(config = {}) {
 
 /**
  * Create auth client with API methods
+ * Uses Better Auth /api/auth/* endpoints
  */
 function createAuthClient(baseURL) {
   return {
@@ -36,23 +39,25 @@ function createAuthClient(baseURL) {
 
     /**
      * OAuth sign in - redirects to OAuth provider
+     * Better Auth endpoints: /api/auth/signin/{provider}
      */
     signIn: {
       social({ provider }) {
-        // Redirect to OAuth start endpoint
-        window.location.href = `${baseURL}/auth/oauth/${provider}/start`;
+        // Redirect to Better Auth OAuth endpoint
+        window.location.href = `${baseURL}/api/auth/signin/${provider}`;
       }
     },
 
     /**
      * Email/password login
+     * Better Auth endpoint: POST /api/auth/sign-in/email
      */
     async login(emailOrUsername, password) {
-      const response = await fetch(`${baseURL}/auth/login`, {
+      const response = await fetch(`${baseURL}/api/auth/sign-in/email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ emailOrUsername, password })
+        body: JSON.stringify({ email: emailOrUsername, password })
       });
 
       if (!response.ok) {
@@ -65,12 +70,12 @@ function createAuthClient(baseURL) {
 
     /**
      * Register new user
+     * Better Auth endpoint: POST /api/auth/sign-up/email
      */
     async register(email, username, password, name = null) {
-      const body = { email, username, password };
-      if (name) body.name = name;
+      const body = { email, password, name: name || username };
 
-      const response = await fetch(`${baseURL}/auth/register`, {
+      const response = await fetch(`${baseURL}/api/auth/sign-up/email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -87,13 +92,20 @@ function createAuthClient(baseURL) {
 
     /**
      * Check email/username availability
+     * Note: Better Auth doesn't have a built-in availability check endpoint
+     * We'll attempt to check by trying getSession or use a custom endpoint if available
+     * For now, we'll use the router's custom endpoint if available
+     * @returns {Promise<{emailAvailable: boolean, usernameAvailable: boolean}>}
      */
     async checkAvailability(email = null, username = null) {
       const params = new URLSearchParams();
       if (email) params.append('email', email);
       if (username) params.append('username', username);
 
-      const response = await fetch(`${baseURL}/auth/check-availability?${params}`, {
+      const url = `${baseURL}/auth/check-availability?${params}`;
+      console.log('Checking availability at:', url);
+
+      const response = await fetch(url, {
         credentials: 'include'
       });
 
@@ -101,15 +113,23 @@ function createAuthClient(baseURL) {
         throw new Error('Failed to check availability');
       }
 
-      return response.json();
+      const apiResponse = await response.json();
+      console.log('Raw API response:', apiResponse);
+
+      // Normalize the response to boolean flags
+      const normalized = normalizeAvailability(apiResponse);
+      console.log('Normalized response:', normalized);
+
+      return normalized;
     },
 
     /**
      * Get current session
+     * Better Auth endpoint: GET /api/auth/session
      */
     async getSession() {
       try {
-        const response = await fetch(`${baseURL}/auth/me`, {
+        const response = await fetch(`${baseURL}/api/auth/session`, {
           credentials: 'include'
         });
 
@@ -117,7 +137,13 @@ function createAuthClient(baseURL) {
           return null;
         }
 
-        return response.json();
+        const data = await response.json();
+        // Better Auth returns null when not authenticated
+        if (!data || !data.user) {
+          return null;
+        }
+
+        return data;
       } catch (error) {
         console.error('Failed to get session:', error);
         return null;
@@ -126,10 +152,11 @@ function createAuthClient(baseURL) {
 
     /**
      * Sign out
+     * Better Auth endpoint: POST /api/auth/sign-out
      */
     async signOut(options = {}) {
       try {
-        await fetch(`${baseURL}/auth/logout`, {
+        await fetch(`${baseURL}/api/auth/sign-out`, {
           method: 'POST',
           credentials: 'include'
         });

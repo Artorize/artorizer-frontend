@@ -32,6 +32,19 @@ class ArtworkUploader {
   }
 
   /**
+   * Build fetch options with credentials for authenticated requests
+   * @param {Object} options - Fetch options
+   * @returns {Object} Enhanced fetch options with credentials
+   */
+  _buildFetchOptions(options = {}) {
+    return {
+      ...options,
+      credentials: 'include', // Include session cookies for authentication
+      headers: this._buildHeaders(options.headers || {})
+    };
+  }
+
+  /**
    * Submit artwork for protection
    * @param {Object} params - Submission parameters
    * @param {File} params.imageFile - Image file to upload
@@ -125,6 +138,9 @@ class ArtworkUploader {
       const response = await new Promise((resolve, reject) => {
         xhr.open('POST', `${this.routerUrl}/protect`);
 
+        // Enable credentials for session cookie authentication
+        xhr.withCredentials = true;
+
         // Set headers (excluding Content-Type - browser sets it with boundary)
         if (this.authToken) {
           xhr.setRequestHeader('Authorization', `Bearer ${this.authToken}`);
@@ -167,10 +183,9 @@ class ArtworkUploader {
    */
   async getJobStatus(jobId) {
     try {
-      const response = await fetch(`${this.routerUrl}/jobs/${jobId}`, {
-        method: 'GET',
-        headers: this._buildHeaders()
-      });
+      const response = await fetch(`${this.routerUrl}/jobs/${jobId}`,
+        this._buildFetchOptions({ method: 'GET' })
+      );
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -194,10 +209,9 @@ class ArtworkUploader {
    */
   async getJobResult(jobId) {
     try {
-      const response = await fetch(`${this.routerUrl}/jobs/${jobId}/result`, {
-        method: 'GET',
-        headers: this._buildHeaders()
-      });
+      const response = await fetch(`${this.routerUrl}/jobs/${jobId}/result`,
+        this._buildFetchOptions({ method: 'GET' })
+      );
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -267,10 +281,9 @@ class ArtworkUploader {
    */
   async downloadVariant(jobId, variant = 'protected') {
     try {
-      const response = await fetch(`${this.routerUrl}/jobs/${jobId}/download/${variant}`, {
-        method: 'GET',
-        headers: this._buildHeaders()
-      });
+      const response = await fetch(`${this.routerUrl}/jobs/${jobId}/download/${variant}`,
+        this._buildFetchOptions({ method: 'GET' })
+      );
 
       if (!response.ok) {
         if (response.status === 404) {
