@@ -6,6 +6,7 @@
  */
 
 import { auth } from './authClient.js';
+import { authConfig } from './authConfig.js';
 
 /**
  * Custom error class for authentication errors
@@ -24,14 +25,14 @@ export class AuthError extends Error {
  */
 export class AuthManager {
   constructor(config = {}) {
-    this.baseUrl = config.baseUrl || 'http://localhost:7000';
-    this.redirectUrl = config.redirectUrl || '/dashboard/dashboard-v2.html';
-    this.loginUrl = config.loginUrl || '/auth/login.html';
+    this.baseUrl = config.baseUrl || authConfig.baseURL;
+    this.redirectUrl = config.redirectUrl || authConfig.redirectUrl;
+    this.loginUrl = config.loginUrl || authConfig.loginUrl;
 
     // Session cache to reduce API calls
     this.sessionCache = null;
     this.cacheExpiry = null;
-    this.cacheDuration = config.cacheDuration || 5 * 60 * 1000; // 5 minutes
+    this.cacheDuration = config.cacheDuration || authConfig.cacheDuration;
   }
 
   /**

@@ -39,25 +39,25 @@ function createAuthClient(baseURL) {
 
     /**
      * OAuth sign in - redirects to OAuth provider
-     * Better Auth endpoints: /api/auth/signin/{provider}
+     * Router endpoints: /auth/oauth/{provider}/start
      */
     signIn: {
       social({ provider }) {
-        // Redirect to Better Auth OAuth endpoint
-        window.location.href = `${baseURL}/api/auth/signin/${provider}`;
+        // Redirect to OAuth endpoint
+        window.location.href = `${baseURL}/auth/oauth/${provider}/start`;
       }
     },
 
     /**
      * Email/password login
-     * Better Auth endpoint: POST /api/auth/sign-in/email
+     * Router endpoint: POST /auth/login
      */
     async login(emailOrUsername, password) {
-      const response = await fetch(`${baseURL}/api/auth/sign-in/email`, {
+      const response = await fetch(`${baseURL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ email: emailOrUsername, password })
+        body: JSON.stringify({ emailOrUsername, password })
       });
 
       if (!response.ok) {
@@ -70,12 +70,12 @@ function createAuthClient(baseURL) {
 
     /**
      * Register new user
-     * Better Auth endpoint: POST /api/auth/sign-up/email
+     * Router endpoint: POST /auth/register
      */
     async register(email, username, password, name = null) {
-      const body = { email, password, name: name || username };
+      const body = { email, password, username, name: name || username };
 
-      const response = await fetch(`${baseURL}/api/auth/sign-up/email`, {
+      const response = await fetch(`${baseURL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -125,11 +125,11 @@ function createAuthClient(baseURL) {
 
     /**
      * Get current session
-     * Better Auth endpoint: GET /api/auth/session
+     * Router endpoint: GET /auth/me
      */
     async getSession() {
       try {
-        const response = await fetch(`${baseURL}/api/auth/session`, {
+        const response = await fetch(`${baseURL}/auth/me`, {
           credentials: 'include'
         });
 
@@ -152,11 +152,11 @@ function createAuthClient(baseURL) {
 
     /**
      * Sign out
-     * Better Auth endpoint: POST /api/auth/sign-out
+     * Router endpoint: POST /auth/logout
      */
     async signOut(options = {}) {
       try {
-        await fetch(`${baseURL}/api/auth/sign-out`, {
+        await fetch(`${baseURL}/auth/logout`, {
           method: 'POST',
           credentials: 'include'
         });

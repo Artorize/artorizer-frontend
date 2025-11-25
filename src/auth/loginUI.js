@@ -5,6 +5,7 @@
  */
 
 import { AuthManager } from './authManager.js';
+import { authConfig } from './authConfig.js';
 
 /**
  * Login UI Controller
@@ -168,7 +169,7 @@ export class LoginUI {
    */
   redirectAfterLogin() {
     const params = new URLSearchParams(window.location.search);
-    const returnUrl = params.get('returnUrl') || '/dashboard/dashboard-v2.html';
+    const returnUrl = params.get('returnUrl') || authConfig.redirectUrl;
     window.location.href = returnUrl;
   }
 

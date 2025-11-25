@@ -4,6 +4,7 @@
  */
 
 import { authManager } from '../src/auth/authManager.js';
+import { authConfig } from '../src/auth/authConfig.js';
 
 // State management
 let loginStep = 'email'; // 'email' or 'password'
@@ -252,12 +253,15 @@ async function handleEmailFormSubmit(e) {
 
         try {
             const result = await authManager.checkAvailability(email);
+            console.log('Availability check result:', result);
 
             if (result.emailAvailable) {
-                // Email doesn't exist - switch to signup
+                // Email is available (not registered) - switch to signup
+                console.log('Email not registered, switching to signup');
                 switchToSignup(email);
             } else {
-                // Email exists - show password field
+                // Email is taken (account exists) - show password field
+                console.log('Email registered, showing password field');
                 currentEmail = email;
                 showPasswordStep();
             }
@@ -283,8 +287,10 @@ async function handleEmailFormSubmit(e) {
 
         try {
             await authManager.login(currentEmail, password);
-            // Redirect to dashboard on success
-            window.location.href = '/dashboard/dashboard-v2.html';
+            // Redirect to dashboard on success (or returnUrl if provided)
+            const params = new URLSearchParams(window.location.search);
+            const returnUrl = params.get('returnUrl') || authConfig.redirectUrl;
+            window.location.href = returnUrl;
         } catch (error) {
             console.error('Login error:', error);
             showError(elements.loginError, error.message || 'Invalid credentials. Please try again.');
@@ -346,8 +352,10 @@ async function handleSignupFormSubmit(e) {
         // Register the user
         await authManager.register(email, username, password);
 
-        // Redirect to dashboard on success
-        window.location.href = '/dashboard/dashboard-v2.html';
+        // Redirect to dashboard on success (or returnUrl if provided)
+        const params = new URLSearchParams(window.location.search);
+        const returnUrl = params.get('returnUrl') || authConfig.redirectUrl;
+        window.location.href = returnUrl;
     } catch (error) {
         console.error('Signup error:', error);
         showError(elements.signupError, error.message || 'Registration failed. Please try again.');
@@ -446,8 +454,10 @@ async function checkExistingSession() {
     try {
         const isAuthenticated = await authManager.isAuthenticated();
         if (isAuthenticated) {
-            // User already logged in, redirect to dashboard
-            window.location.href = '/dashboard/dashboard-v2.html';
+            // User already logged in, redirect to returnUrl or dashboard
+            const params = new URLSearchParams(window.location.search);
+            const returnUrl = params.get('returnUrl') || authConfig.redirectUrl;
+            window.location.href = returnUrl;
         }
     } catch (error) {
         // Not authenticated, stay on login page

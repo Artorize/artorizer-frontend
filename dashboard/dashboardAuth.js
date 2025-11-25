@@ -33,7 +33,7 @@
     }
 
     try {
-      const response = await fetch(`${AUTH_CONFIG.baseURL}/api/auth/session`, {
+      const response = await fetch(`${AUTH_CONFIG.baseURL}/auth/me`, {
         credentials: 'include'
       });
 
@@ -98,7 +98,7 @@
    */
   async function signOut() {
     try {
-      await fetch(`${AUTH_CONFIG.baseURL}/api/auth/sign-out`, {
+      await fetch(`${AUTH_CONFIG.baseURL}/auth/logout`, {
         method: 'POST',
         credentials: 'include'
       });
