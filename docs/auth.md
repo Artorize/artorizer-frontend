@@ -4,11 +4,13 @@ This document details all authentication endpoints and provides guidance on impl
 
 ## Overview
 
-The Artorizer Core Router proxies all authentication requests to the backend service. Authentication is handled via session cookies (`better-auth.session_token`) with support for:
+The Artorizer Core Router uses **Better Auth** for authentication. Authentication is handled via session cookies (`better-auth.session_token`) with support for:
 
 - Email/password authentication
 - OAuth 2.0 (Google and GitHub)
 - Session-based authentication with automatic refresh
+
+**Base URL**: `https://router.artorizer.com`
 
 ## Session Management
 
@@ -21,6 +23,24 @@ The Artorizer Core Router proxies all authentication requests to the backend ser
 
 ---
 
+## Dashboard Integration
+
+The dashboard (`/dashboard/dashboard-v2.html`) requires authentication:
+
+1. On page load, `dashboardAuth.js` checks the session via `GET /api/auth/session`
+2. If not authenticated, user is redirected to `/auth/login.html`
+3. If authenticated, user info is displayed in the sidebar
+4. All API requests include `credentials: 'include'` to send the session cookie
+
+### Protected Dashboard Features
+
+- Artwork upload with user association
+- Job status queries with user context
+- Download artwork with access control
+- User profile display and sign-out
+
+---
+
 ## Email/Password Authentication
 
 ### Register a New User
@@ -28,7 +48,7 @@ The Artorizer Core Router proxies all authentication requests to the backend ser
 Creates a new user account with email and password.
 
 ```
-POST /auth/register
+POST /api/auth/sign-up/email
 ```
 
 **Request Body:**
@@ -36,7 +56,6 @@ POST /auth/register
 {
   "email": "user@example.com",
   "password": "secure_password",
-  "username": "username",
   "name": "Full Name"
 }
 ```
@@ -45,7 +64,6 @@ POST /auth/register
 |-------|------|----------|-------------|
 | email | string | Yes | Valid email address |
 | password | string | Yes | User password |
-| username | string | Yes | Unique username |
 | name | string | No | Display name |
 
 **Response (201 Created):**
@@ -71,23 +89,23 @@ POST /auth/register
 
 ### Login
 
-Authenticates a user with email/username and password.
+Authenticates a user with email and password.
 
 ```
-POST /auth/login
+POST /api/auth/sign-in/email
 ```
 
 **Request Body:**
 ```json
 {
-  "emailOrUsername": "user@example.com",
+  "email": "user@example.com",
   "password": "password"
 }
 ```
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| emailOrUsername | string | Yes | Email address or username |
+| email | string | Yes | Email address |
 | password | string | Yes | User password |
 
 **Response (200 OK):**
@@ -113,12 +131,12 @@ POST /auth/login
 
 ---
 
-### Logout
+### Sign Out
 
 Ends the current user session.
 
 ```
-POST /auth/logout
+POST /api/auth/sign-out
 ```
 
 **Request Headers:**
@@ -138,12 +156,12 @@ Origin: https://artorizer.com
 
 ---
 
-### Get Current User
+### Get Session
 
-Returns the authenticated user's information.
+Returns the authenticated user's session and information.
 
 ```
-GET /auth/me
+GET /api/auth/session
 ```
 
 **Request Headers:**
@@ -213,23 +231,23 @@ The router supports OAuth authentication via Google and GitHub. The flow uses PK
 
 ### Getting OAuth Redirect Links
 
-To initiate OAuth login, redirect the user to the appropriate start endpoint:
+To initiate OAuth login, redirect the user to the appropriate sign-in endpoint:
 
 | Provider | Redirect URL |
 |----------|--------------|
-| Google | `/auth/oauth/google/start` |
-| GitHub | `/auth/oauth/github/start` |
+| Google | `/api/auth/signin/google` |
+| GitHub | `/api/auth/signin/github` |
 
 **Production URLs:**
 ```
-https://router.artorizer.com/auth/oauth/google/start
-https://router.artorizer.com/auth/oauth/github/start
+https://router.artorizer.com/api/auth/signin/google
+https://router.artorizer.com/api/auth/signin/github
 ```
 
 **Local Development:**
 ```
-http://localhost:7000/auth/oauth/google/start
-http://localhost:7000/auth/oauth/github/start
+http://localhost:7000/api/auth/signin/google
+http://localhost:7000/api/auth/signin/github
 ```
 
 ### Start OAuth Flow
@@ -237,7 +255,7 @@ http://localhost:7000/auth/oauth/github/start
 Initiates the OAuth authentication flow with the specified provider.
 
 ```
-GET /auth/oauth/:provider/start
+GET /api/auth/signin/:provider
 ```
 
 **Path Parameters:**
@@ -247,7 +265,7 @@ GET /auth/oauth/:provider/start
 | provider | `google`, `github` | OAuth provider |
 
 **Behavior:**
-1. Backend generates PKCE state and nonce
+1. Better Auth generates PKCE state and nonce
 2. State is stored in secure cookies
 3. User is redirected to provider's consent screen
 
@@ -258,7 +276,7 @@ GET /auth/oauth/:provider/start
 Handles the OAuth provider callback after user authorization.
 
 ```
-GET /auth/oauth/:provider/callback
+GET /api/auth/callback/:provider
 ```
 
 **Query Parameters (set by provider):**
@@ -269,7 +287,7 @@ GET /auth/oauth/:provider/callback
 | state | PKCE state for verification |
 
 **Behavior:**
-1. Backend verifies PKCE state against cookie
+1. Better Auth verifies PKCE state against cookie
 2. Exchanges authorization code for access token
 3. Creates or links user account
 4. Sets session cookie
@@ -287,19 +305,19 @@ GET /auth/oauth/:provider/callback
 └─────────────────────────────────────────────────────────────────────┘
                                     │
                                     │ 1. User clicks "Login with Google"
-                                    │    window.location = '/auth/oauth/google/start'
+                                    │    window.location = '/api/auth/signin/google'
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │                      ROUTER (port 7000)                              │
 │                                                                      │
-│   GET /auth/oauth/google/start                                       │
-│   → Proxies to backend                                               │
+│   GET /api/auth/signin/google                                        │
+│   → Better Auth handles OAuth flow                                   │
 └─────────────────────────────────────────────────────────────────────┘
                                     │
-                                    │ 2. Backend initiates PKCE flow
+                                    │ 2. Better Auth initiates PKCE flow
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│                      BACKEND (port 5001)                             │
+│                      Better Auth Handler                             │
 │                                                                      │
 │   • Generates state & nonce                                          │
 │   • Sets PKCE cookies                                                │
