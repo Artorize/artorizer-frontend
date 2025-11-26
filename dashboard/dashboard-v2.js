@@ -855,7 +855,7 @@
   function createUserMenuDropdown() {
     const dropdown = document.createElement('div');
     dropdown.id = 'user-menu-dropdown';
-    dropdown.className = 'absolute bottom-full left-0 mb-2 w-full min-w-[200px] rounded-xl border border-gray-200 bg-background shadow-xl z-50';
+    dropdown.className = 'absolute left-full bottom-0 ml-2 min-w-[220px] rounded-xl border border-gray-200 bg-background shadow-xl z-[9999]';
     dropdown.style.display = 'none';
 
     const userName = currentUser?.name || currentUser?.email?.split('@')[0] || 'User';
