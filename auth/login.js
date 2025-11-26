@@ -367,12 +367,12 @@ async function handleSignupFormSubmit(e) {
 /**
  * Handle OAuth sign in
  */
-function handleOAuthSignIn(provider) {
+async function handleOAuthSignIn(provider) {
     try {
         if (provider === 'google') {
-            authManager.signInWithGoogle();
+            await authManager.signInWithGoogle();
         } else if (provider === 'github') {
-            authManager.signInWithGitHub();
+            await authManager.signInWithGitHub();
         }
     } catch (error) {
         console.error(`${provider} sign-in error:`, error);
@@ -430,20 +430,32 @@ function initPasswordStrength() {
 function initOAuthButtons() {
     // Login form OAuth
     if (elements.googleSignin) {
-        elements.googleSignin.addEventListener('click', () => handleOAuthSignIn('google'));
+        elements.googleSignin.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await handleOAuthSignIn('google');
+        });
     }
 
     if (elements.githubSignin) {
-        elements.githubSignin.addEventListener('click', () => handleOAuthSignIn('github'));
+        elements.githubSignin.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await handleOAuthSignIn('github');
+        });
     }
 
     // Signup form OAuth
     if (elements.googleSignup) {
-        elements.googleSignup.addEventListener('click', () => handleOAuthSignIn('google'));
+        elements.googleSignup.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await handleOAuthSignIn('google');
+        });
     }
 
     if (elements.githubSignup) {
-        elements.githubSignup.addEventListener('click', () => handleOAuthSignIn('github'));
+        elements.githubSignup.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await handleOAuthSignIn('github');
+        });
     }
 }
 

@@ -1,545 +1,758 @@
-# Authentication API Reference
+# Authentication Guide for Artorize
 
-This document details all authentication endpoints and provides guidance on implementing authentication in client applications.
+## Architecture Overview
 
-## Overview
+The authentication system consists of two services:
 
-The Artorizer Core Router uses **Better Auth** for authentication. Authentication is handled via session cookies (`better-auth.session_token`) with support for:
+1. **Artorizer-core-router** (Port: 7000) - API Gateway
+   - Your frontend should ONLY connect to this service
+   - Handles request proxying and session validation
 
-- Email/password authentication
-- OAuth 2.0 (Google and GitHub)
-- Session-based authentication with automatic refresh
+2. **artorize-storage-backend** (Port: 7001) - Storage Service
+   - Backend service (internal only)
+   - Contains Better Auth configuration and user data
 
-**Base URL**: `https://router.artorizer.com`
-
-## Session Management
-
-| Property | Value |
-|----------|-------|
-| Cookie Name | `better-auth.session_token` |
-| Duration | 7 days |
-| Auto-refresh | Within 1 day of expiration |
-| Cookie Flags | `httpOnly`, `secure`, `sameSite=Lax` |
+**IMPORTANT: All frontend requests must go to the Router at `http://localhost:7000`**
 
 ---
 
-## Dashboard Integration
+## Authentication Technology
 
-The dashboard (`/dashboard/dashboard-v2.html`) requires authentication:
-
-1. On page load, `dashboardAuth.js` checks the session via `GET /api/auth/session`
-2. If not authenticated, user is redirected to `/auth/login.html`
-3. If authenticated, user info is displayed in the sidebar
-4. All API requests include `credentials: 'include'` to send the session cookie
-
-### Protected Dashboard Features
-
-- Artwork upload with user association
-- Job status queries with user context
-- Download artwork with access control
-- User profile display and sign-out
+- **Framework**: Better Auth (modern authentication library)
+- **Session Storage**: MongoDB
+- **Session Method**: HTTP-only cookies (`better-auth.session_token`)
+- **OAuth Providers**: Google, GitHub
+- **Security**: AES-256-GCM encryption for PII, Argon2id password hashing
 
 ---
 
-## Email/Password Authentication
+## API Endpoints (Frontend → Router)
 
-### Register a New User
+All endpoints below should be called from your frontend to the **Router** (port 7000).
 
-Creates a new user account with email and password.
-
+### Base URL
 ```
-POST /api/auth/sign-up/email
+http://localhost:7000
+```
+
+### Available Endpoints
+
+#### 1. User Registration
+```
+POST /auth/register
 ```
 
 **Request Body:**
 ```json
 {
   "email": "user@example.com",
-  "password": "secure_password",
-  "name": "Full Name"
+  "username": "username",
+  "password": "securePassword123",
+  "name": "User Name" // optional
 }
 ```
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| email | string | Yes | Valid email address |
-| password | string | Yes | User password |
-| name | string | No | Display name |
-
-**Response (201 Created):**
+**Response:** (201 Created)
 ```json
 {
   "user": {
-    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "id": "user-uuid",
     "email": "user@example.com",
     "username": "username",
-    "name": "Full Name"
+    "name": "User Name"
   },
   "session": {
-    "id": "session-id",
-    "token": "session-token",
-    "expiresAt": "2025-02-01T12:00:00.000Z"
+    "id": "session-uuid",
+    "expiresAt": "2025-12-31T23:59:59.000Z"
   }
 }
 ```
 
-**Cookies Set:** `better-auth.session_token` (httpOnly)
+**Cookies Set:**
+```
+Set-Cookie: better-auth.session_token=...; HttpOnly; Secure; SameSite=Lax
+```
 
 ---
 
-### Login
-
-Authenticates a user with email and password.
-
+#### 2. User Login
 ```
-POST /api/auth/sign-in/email
+POST /auth/login
 ```
 
 **Request Body:**
 ```json
 {
-  "email": "user@example.com",
-  "password": "password"
+  "emailOrUsername": "user@example.com", // or "username"
+  "password": "securePassword123"
 }
 ```
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| email | string | Yes | Email address |
-| password | string | Yes | User password |
-
-**Response (200 OK):**
+**Response:** (200 OK)
 ```json
 {
   "user": {
-    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "id": "user-uuid",
     "email": "user@example.com",
     "username": "username",
-    "name": "Full Name"
+    "name": "User Name"
   },
   "session": {
-    "id": "session-id",
-    "token": "session-token",
-    "expiresAt": "2025-02-01T12:00:00.000Z"
+    "id": "session-uuid",
+    "expiresAt": "2025-12-31T23:59:59.000Z"
   }
 }
 ```
 
-**Error Responses:**
-- `401 Unauthorized` - Invalid credentials
-- `400 Bad Request` - Missing required fields
+**Cookies Set:**
+```
+Set-Cookie: better-auth.session_token=...; HttpOnly; Secure; SameSite=Lax
+```
 
 ---
 
-### Sign Out
-
-Ends the current user session.
-
+#### 3. User Logout
 ```
-POST /api/auth/sign-out
+POST /auth/logout
 ```
 
 **Request Headers:**
 ```
-Cookie: better-auth.session_token=<token>
-Origin: https://artorizer.com
+Cookie: better-auth.session_token=...
 ```
 
-**Response (200 OK):**
-```json
-{
-  "success": true
-}
-```
+**Response:** (204 No Content)
 
-**Cookies Cleared:** `better-auth.session_token`
+**Cookies Cleared:**
+```
+Set-Cookie: better-auth.session_token=; Max-Age=0
+```
 
 ---
 
-### Get Session
-
-Returns the authenticated user's session and information.
-
+#### 4. Get Current User
 ```
-GET /api/auth/session
+GET /auth/me
 ```
 
 **Request Headers:**
 ```
-Cookie: better-auth.session_token=<token>
+Cookie: better-auth.session_token=...
 ```
 
-**Response (200 OK):**
+**Response:** (200 OK)
 ```json
 {
   "user": {
-    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "id": "user-uuid",
     "email": "user@example.com",
     "username": "username",
-    "name": "Full Name",
-    "emailVerified": true
+    "name": "User Name"
   },
   "session": {
-    "id": "session-id",
-    "expiresAt": "2025-02-01T12:00:00.000Z"
+    "id": "session-uuid",
+    "expiresAt": "2025-12-31T23:59:59.000Z"
   }
 }
 ```
 
-**Error Responses:**
-- `401 Unauthorized` - Not authenticated or session expired
+**Response if Unauthenticated:** (401 Unauthorized)
+```json
+{
+  "error": "Unauthorized"
+}
+```
 
 ---
 
-### Check Availability
-
-Checks if an email or username is available for registration.
-
+#### 5. Check Username/Email Availability
 ```
-GET /auth/check-availability?email=<email>&username=<username>
+GET /auth/check-availability?email=user@example.com&username=username
 ```
 
 **Query Parameters:**
+- `email` (optional): Email to check
+- `username` (optional): Username to check
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| email | string | No | Email to check |
-| username | string | No | Username to check |
-
-*At least one parameter must be provided.*
-
-**Response (200 OK):**
+**Response:** (200 OK)
 ```json
 {
-  "available": true,
-  "email": "available",
-  "username": "taken"
+  "emailAvailable": true,
+  "usernameAvailable": false
 }
 ```
 
-| Status Value | Description |
-|--------------|-------------|
-| `available` | Not registered |
-| `taken` | Already in use |
-| `invalid` | Invalid format |
+**Note:** This endpoint does NOT require authentication.
 
 ---
 
-## OAuth 2.0 Authentication
-
-The router supports OAuth authentication via Google and GitHub. The flow uses PKCE (Proof Key for Code Exchange) for enhanced security.
-
-### Getting OAuth Redirect Links
-
-To initiate OAuth login, redirect the user to the appropriate sign-in endpoint:
-
-| Provider | Redirect URL |
-|----------|--------------|
-| Google | `/api/auth/signin/google` |
-| GitHub | `/api/auth/signin/github` |
-
-**Production URLs:**
+#### 6. OAuth - Start Flow
 ```
-https://router.artorizer.com/api/auth/signin/google
-https://router.artorizer.com/api/auth/signin/github
+POST /auth/sign-in/social
 ```
 
-**Local Development:**
-```
-http://localhost:7000/api/auth/signin/google
-http://localhost:7000/api/auth/signin/github
-```
-
-### Start OAuth Flow
-
-Initiates the OAuth authentication flow with the specified provider.
-
-```
-GET /api/auth/signin/:provider
-```
-
-**Path Parameters:**
-
-| Parameter | Values | Description |
-|-----------|--------|-------------|
-| provider | `google`, `github` | OAuth provider |
-
-**Behavior:**
-1. Better Auth generates PKCE state and nonce
-2. State is stored in secure cookies
-3. User is redirected to provider's consent screen
-
-**Response:** HTTP 302 redirect to OAuth provider
-
-### OAuth Callback
-
-Handles the OAuth provider callback after user authorization.
-
-```
-GET /api/auth/callback/:provider
-```
-
-**Query Parameters (set by provider):**
-
-| Parameter | Description |
-|-----------|-------------|
-| code | Authorization code from provider |
-| state | PKCE state for verification |
-
-**Behavior:**
-1. Better Auth verifies PKCE state against cookie
-2. Exchanges authorization code for access token
-3. Creates or links user account
-4. Sets session cookie
-5. Redirects to frontend application
-
-**Response:** HTTP 302 redirect to frontend with session established
-
----
-
-## OAuth Flow Diagram
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        CLIENT APPLICATION                            │
-└─────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    │ 1. User clicks "Login with Google"
-                                    │    window.location = '/api/auth/signin/google'
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                      ROUTER (port 7000)                              │
-│                                                                      │
-│   GET /api/auth/signin/google                                        │
-│   → Better Auth handles OAuth flow                                   │
-└─────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    │ 2. Better Auth initiates PKCE flow
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                      Better Auth Handler                             │
-│                                                                      │
-│   • Generates state & nonce                                          │
-│   • Sets PKCE cookies                                                │
-│   • Returns 302 redirect to Google                                   │
-└─────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    │ 3. HTTP 302 Redirect
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                    GOOGLE OAUTH CONSENT                              │
-│                                                                      │
-│   https://accounts.google.com/o/oauth2/v2/auth                       │
-│   ?client_id=...                                                     │
-│   &redirect_uri=.../auth/oauth/google/callback                       │
-│   &state=...                                                         │
-└─────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    │ 4. User grants permission
-                                    │    Provider redirects to callback
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                      ROUTER (port 7000)                              │
-│                                                                      │
-│   GET /auth/oauth/google/callback?code=...&state=...                 │
-│   → Proxies to backend                                               │
-└─────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    │ 5. Backend processes callback
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                      BACKEND (port 5001)                             │
-│                                                                      │
-│   • Verifies PKCE state                                              │
-│   • Exchanges code for access token                                  │
-│   • Fetches user profile from Google                                 │
-│   • Creates/links user account                                       │
-│   • Creates session                                                  │
-│   • Sets better-auth.session_token cookie                            │
-│   • Returns 302 redirect to frontend                                 │
-└─────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    │ 6. User redirected to app (authenticated)
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                        CLIENT APPLICATION                            │
-│                                                                      │
-│   Session cookie is set, user is authenticated                       │
-│   Call GET /auth/me to get user info                                 │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Client Implementation Examples
-
-### JavaScript/TypeScript - Initiating OAuth
-
-```typescript
-// Redirect to OAuth provider
-function loginWithGoogle() {
-  window.location.href = '/auth/oauth/google/start';
-}
-
-function loginWithGitHub() {
-  window.location.href = '/auth/oauth/github/start';
+**Request Body:**
+```json
+{
+  "provider": "google"
 }
 ```
 
-### JavaScript/TypeScript - Email/Password Login
+**Parameters:**
+- `provider` - Either `google` or `github`
 
-```typescript
-async function login(emailOrUsername: string, password: string) {
-  const response = await fetch('/auth/login', {
+**Example:**
+```
+POST /auth/sign-in/social
+Content-Type: application/json
+
+{"provider":"google"}
+```
+
+**Response:** (200 OK)
+```json
+{
+  "url": "https://accounts.google.com/o/oauth2/auth?...",
+  "redirect": true
+}
+```
+
+The response contains a `url` that you should navigate the user to. This URL redirects to the OAuth provider's authorization page where the user authenticates with Google/GitHub.
+
+---
+
+#### 7. OAuth - Callback Handler
+```
+GET /auth/callback/:provider
+```
+
+**Parameters:**
+- `:provider` - Either `google` or `github`
+- Query parameters added by OAuth provider (code, state, etc.)
+
+**Example Callback URLs:**
+```
+GET /auth/callback/google?code=...&state=...
+GET /auth/callback/github?code=...&state=...
+```
+
+**Response:** (302 Redirect)
+- Creates or links user account
+- Sets session cookie
+- Redirects to frontend application
+
+**Note:** This endpoint is called automatically by OAuth providers. Your frontend should initiate OAuth by calling the `/auth/sign-in/social` endpoint, which returns a URL to navigate to. After the user authenticates with the OAuth provider, they are redirected back to this callback endpoint.
+
+---
+
+## Authentication Flows
+
+### Flow 1: Email/Password Registration
+
+```
+┌─────────┐                    ┌────────┐                    ┌─────────┐
+│ Frontend│                    │ Router │                    │ Backend │
+└────┬────┘                    └───┬────┘                    └────┬────┘
+     │                             │                              │
+     │ POST /auth/register         │                              │
+     │ {email, username, password} │                              │
+     │────────────────────────────>│                              │
+     │                             │                              │
+     │                             │ Proxy POST /auth/register    │
+     │                             │─────────────────────────────>│
+     │                             │                              │
+     │                             │        Better Auth:          │
+     │                             │        - Validate input      │
+     │                             │        - Encrypt PII         │
+     │                             │        - Hash password       │
+     │                             │        - Create user         │
+     │                             │        - Create session      │
+     │                             │                              │
+     │                             │ 201 {user, session}          │
+     │                             │ Set-Cookie: session_token    │
+     │                             │<─────────────────────────────│
+     │                             │                              │
+     │ 201 {user, session}         │                              │
+     │ Set-Cookie: session_token   │                              │
+     │<────────────────────────────│                              │
+     │                             │                              │
+     │ Store session cookie        │                              │
+     │ (automatic by browser)      │                              │
+     │                             │                              │
+```
+
+**Frontend Code Example:**
+```javascript
+async function register(email, username, password, name) {
+  const response = await fetch('http://localhost:7000/auth/register', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    credentials: 'include', // Important: include cookies
-    body: JSON.stringify({ emailOrUsername, password }),
+    credentials: 'include', // Important: Include cookies
+    body: JSON.stringify({
+      email,
+      username,
+      password,
+      name, // optional
+    }),
   });
 
   if (!response.ok) {
-    throw new Error('Login failed');
+    const error = await response.json();
+    throw new Error(error.message || 'Registration failed');
   }
 
-  return response.json();
+  const data = await response.json();
+  return data; // { user, session }
 }
 ```
 
-### JavaScript/TypeScript - Get Current User
+---
 
-```typescript
+### Flow 2: Email/Password Login
+
+```
+┌─────────┐                    ┌────────┐                    ┌─────────┐
+│ Frontend│                    │ Router │                    │ Backend │
+└────┬────┘                    └───┬────┘                    └────┬────┘
+     │                             │                              │
+     │ POST /auth/login            │                              │
+     │ {emailOrUsername, password} │                              │
+     │────────────────────────────>│                              │
+     │                             │                              │
+     │                             │ Proxy POST /auth/login       │
+     │                             │─────────────────────────────>│
+     │                             │                              │
+     │                             │        Better Auth:          │
+     │                             │        - Lookup user         │
+     │                             │        - Verify password     │
+     │                             │        - Create session      │
+     │                             │                              │
+     │                             │ 200 {user, session}          │
+     │                             │ Set-Cookie: session_token    │
+     │                             │<─────────────────────────────│
+     │                             │                              │
+     │ 200 {user, session}         │                              │
+     │ Set-Cookie: session_token   │                              │
+     │<────────────────────────────│                              │
+     │                             │                              │
+```
+
+**Frontend Code Example:**
+```javascript
+async function login(emailOrUsername, password) {
+  const response = await fetch('http://localhost:7000/auth/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include', // Important: Include cookies
+    body: JSON.stringify({
+      emailOrUsername,
+      password,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Login failed');
+  }
+
+  const data = await response.json();
+  return data; // { user, session }
+}
+```
+
+---
+
+### Flow 3: Get Current User (Session Validation)
+
+```
+┌─────────┐                    ┌────────┐                    ┌─────────┐
+│ Frontend│                    │ Router │                    │ Backend │
+└────┬────┘                    └───┬────┘                    └────┬────┘
+     │                             │                              │
+     │ GET /auth/me                │                              │
+     │ Cookie: session_token       │                              │
+     │────────────────────────────>│                              │
+     │                             │                              │
+     │                             │ Proxy GET /auth/me           │
+     │                             │ Cookie: session_token        │
+     │                             │─────────────────────────────>│
+     │                             │                              │
+     │                             │        Better Auth:          │
+     │                             │        - Validate session    │
+     │                             │        - Fetch user data     │
+     │                             │                              │
+     │                             │ 200 {user, session}          │
+     │                             │<─────────────────────────────│
+     │                             │                              │
+     │ 200 {user, session}         │                              │
+     │<────────────────────────────│                              │
+     │                             │                              │
+```
+
+**Frontend Code Example:**
+```javascript
 async function getCurrentUser() {
-  const response = await fetch('/auth/me', {
-    credentials: 'include', // Important: include cookies
+  const response = await fetch('http://localhost:7000/auth/me', {
+    method: 'GET',
+    credentials: 'include', // Important: Include cookies
   });
 
   if (!response.ok) {
     if (response.status === 401) {
-      return null; // Not authenticated
+      return null; // User not authenticated
     }
-    throw new Error('Failed to get user');
+    throw new Error('Failed to fetch user');
   }
 
-  return response.json();
+  const data = await response.json();
+  return data; // { user, session }
 }
 ```
 
-### JavaScript/TypeScript - Logout
+---
 
-```typescript
+### Flow 4: Logout
+
+```
+┌─────────┐                    ┌────────┐                    ┌─────────┐
+│ Frontend│                    │ Router │                    │ Backend │
+└────┬────┘                    └───┬────┘                    └────┬────┘
+     │                             │                              │
+     │ POST /auth/logout           │                              │
+     │ Cookie: session_token       │                              │
+     │────────────────────────────>│                              │
+     │                             │                              │
+     │                             │ Proxy POST /auth/logout      │
+     │                             │ Cookie: session_token        │
+     │                             │─────────────────────────────>│
+     │                             │                              │
+     │                             │        Better Auth:          │
+     │                             │        - Invalidate session  │
+     │                             │                              │
+     │                             │ 204 No Content               │
+     │                             │ Set-Cookie: Max-Age=0        │
+     │                             │<─────────────────────────────│
+     │                             │                              │
+     │ 204 No Content              │                              │
+     │ Set-Cookie: Max-Age=0       │                              │
+     │<────────────────────────────│                              │
+     │                             │                              │
+     │ Cookie cleared by browser   │                              │
+     │                             │                              │
+```
+
+**Frontend Code Example:**
+```javascript
 async function logout() {
-  const response = await fetch('/auth/logout', {
+  const response = await fetch('http://localhost:7000/auth/logout', {
     method: 'POST',
-    credentials: 'include',
+    credentials: 'include', // Important: Include cookies
   });
 
   if (!response.ok) {
     throw new Error('Logout failed');
   }
 
-  // Redirect to login page or update UI
-  window.location.href = '/login';
+  // Cookie is automatically cleared by browser
+  return true;
 }
 ```
 
-### React Hook Example
+---
 
-```typescript
-import { useState, useEffect } from 'react';
+### Flow 5: OAuth Authentication (Google/GitHub)
 
-function useAuth() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+```
+┌─────────┐        ┌────────┐        ┌─────────┐        ┌──────────┐
+│ Frontend│        │ Router │        │ Backend │        │  OAuth   │
+│         │        │        │        │         │        │ Provider │
+└────┬────┘        └───┬────┘        └────┬────┘        └────┬─────┘
+     │                 │                  │                  │
+     │ User clicks     │                  │                  │
+     │ "Login with     │                  │                  │
+     │  Google"        │                  │                  │
+     │                 │                  │                  │
+     │ POST /auth/     │                  │                  │
+     │  sign-in/social │                  │                  │
+     │  {provider:     │                  │                  │
+     │   "google"}     │                  │                  │
+     │────────────────>│                  │                  │
+     │                 │                  │                  │
+     │                 │ Proxy POST /auth/│                  │
+     │                 │  sign-in/social  │                  │
+     │                 │─────────────────>│                  │
+     │                 │                  │                  │
+     │                 │                  │ Generate OAuth   │
+     │                 │                  │ authorization URL│
+     │                 │                  │                  │
+     │                 │ 200 OK           │                  │
+     │                 │ {url: "https://..│                  │
+     │                 │   ...google..."}  │                  │
+     │                 │<─────────────────│                  │
+     │                 │                  │                  │
+     │ {url: "https://│                  │                  │
+     │  ...google..."}│                  │                  │
+     │<────────────────│                  │                  │
+     │                 │                  │                  │
+     │ Navigate to URL │                  │                  │
+     │─────────────────────────────────────────────────────>│
+     │                 │                  │                  │
+     │                 │                  │    User logs in  │
+     │                 │                  │    and authorizes│
+     │                 │                  │                  │
+     │          302 Redirect to callback URL                │
+     │          /auth/callback/google?code=...&state=...    │
+     │<─────────────────────────────────────────────────────│
+     │                 │                  │                  │
+     │ Navigate to     │                  │                  │
+     │ /auth/callback/ │                  │                  │
+     │  google?code... │                  │                  │
+     │────────────────>│                  │                  │
+     │                 │                  │                  │
+     │                 │ Proxy GET /auth/ │                  │
+     │                 │  callback/google?│                  │
+     │                 │  code...         │                  │
+     │                 │─────────────────>│                  │
+     │                 │                  │                  │
+     │                 │                  │ Exchange code    │
+     │                 │                  │ for tokens       │
+     │                 │                  │─────────────────>│
+     │                 │                  │                  │
+     │                 │                  │ Access token +   │
+     │                 │                  │ user profile     │
+     │                 │                  │<─────────────────│
+     │                 │                  │                  │
+     │                 │      Better Auth:│                  │
+     │                 │      - Create/   │                  │
+     │                 │        link user │                  │
+     │                 │      - Encrypt   │                  │
+     │                 │        tokens    │                  │
+     │                 │      - Create    │                  │
+     │                 │        session   │                  │
+     │                 │                  │                  │
+     │                 │ 302 Redirect to  │                  │
+     │                 │ frontend app     │                  │
+     │                 │ Set-Cookie:      │                  │
+     │                 │  session_token   │                  │
+     │                 │<─────────────────│                  │
+     │                 │                  │                  │
+     │ 302 Redirect to │                  │                  │
+     │ frontend app    │                  │                  │
+     │ Set-Cookie:     │                  │                  │
+     │  session_token  │                  │                  │
+     │<────────────────│                  │                  │
+     │                 │                  │                  │
+     │ User is now     │                  │                  │
+     │ authenticated!  │                  │                  │
+     │                 │                  │                  │
+```
 
-  useEffect(() => {
-    fetch('/auth/me', { credentials: 'include' })
-      .then(res => res.ok ? res.json() : null)
-      .then(data => {
-        setUser(data?.user || null);
-        setLoading(false);
-      })
-      .catch(() => {
-        setUser(null);
-        setLoading(false);
-      });
-  }, []);
-
-  const loginWithGoogle = () => {
-    window.location.href = '/auth/oauth/google/start';
-  };
-
-  const loginWithGitHub = () => {
-    window.location.href = '/auth/oauth/github/start';
-  };
-
-  const logout = async () => {
-    await fetch('/auth/logout', {
+**Frontend Code Example:**
+```javascript
+// Initiate OAuth flow
+async function loginWithGoogle() {
+  try {
+    const response = await fetch('http://localhost:7000/auth/sign-in/social', {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
+      body: JSON.stringify({ provider: 'google' }),
     });
-    setUser(null);
-  };
 
-  return { user, loading, loginWithGoogle, loginWithGitHub, logout };
+    if (!response.ok) throw new Error('Failed to start OAuth');
+
+    const data = await response.json();
+    // Navigate to the OAuth provider
+    window.location.href = data.url;
+  } catch (error) {
+    console.error('OAuth error:', error);
+  }
+}
+
+async function loginWithGithub() {
+  try {
+    const response = await fetch('http://localhost:7000/auth/sign-in/social', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ provider: 'github' }),
+    });
+
+    if (!response.ok) throw new Error('Failed to start OAuth');
+
+    const data = await response.json();
+    // Navigate to the OAuth provider
+    window.location.href = data.url;
+  } catch (error) {
+    console.error('OAuth error:', error);
+  }
+}
+
+// Option 2: Open in popup window
+async function loginWithGooglePopup() {
+  const width = 500;
+  const height = 600;
+  const left = (window.innerWidth - width) / 2;
+  const top = (window.innerHeight - height) / 2;
+
+  try {
+    const response = await fetch('http://localhost:7000/auth/sign-in/social', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ provider: 'google' }),
+    });
+
+    if (!response.ok) throw new Error('Failed to start OAuth');
+
+    const data = await response.json();
+    const popup = window.open(
+      data.url,
+      'oauth-login',
+      `width=${width},height=${height},left=${left},top=${top}`
+    );
+
+    // Listen for popup close or message
+    const checkInterval = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(checkInterval);
+        // Check if user is now authenticated
+        getCurrentUser().then(user => {
+          if (user) {
+            console.log('Login successful:', user);
+          }
+        });
+      }
+    }, 500);
+  } catch (error) {
+    console.error('OAuth error:', error);
+  }
 }
 ```
 
 ---
 
-## OAuth Provider Setup
+## Making Authenticated Requests
 
-### Google OAuth Configuration
+Once a user is authenticated, their session cookie is automatically included in all requests to the same domain.
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create or select a project
-3. Navigate to **APIs & Services** > **Credentials**
-4. Click **Create Credentials** > **OAuth client ID**
-5. Configure the consent screen if prompted
-6. Select **Web application**
-7. Add authorized redirect URIs:
+### Important: Always Include Credentials
+
+When making requests from your frontend, ALWAYS include `credentials: 'include'`:
+
+```javascript
+fetch('http://localhost:7000/api/protected-endpoint', {
+  method: 'GET',
+  credentials: 'include', // This includes the session cookie
+})
+```
+
+### How Protected Routes Work
+
+When you call any protected endpoint:
+
+1. **Frontend** sends request with `credentials: 'include'`
+2. **Router** intercepts the request
+3. **Router middleware** validates session by calling `/auth/me`
+4. If valid, router attaches user context and forwards to backend:
    ```
-   https://router.artorizer.com/auth/oauth/google/callback
-   http://localhost:7000/auth/oauth/google/callback  (for development)
+   X-User-Id: user-uuid
+   X-User-Email: user@example.com
+   X-User-Name: User Name
    ```
-8. Save the Client ID and Client Secret
+5. **Backend** receives headers and uses them for access control
 
-### GitHub OAuth Configuration
+### Example: Fetching User's Artworks
 
-1. Go to [GitHub Developer Settings](https://github.com/settings/developers)
-2. Click **New OAuth App**
-3. Fill in application details:
-   - **Homepage URL:** `https://artorizer.com`
-   - **Authorization callback URL:** `https://router.artorizer.com/auth/oauth/github/callback`
-4. Register the application
-5. Generate a client secret
-6. Save the Client ID and Client Secret
+```javascript
+async function getMyArtworks() {
+  const response = await fetch('http://localhost:7000/api/artworks', {
+    method: 'GET',
+    credentials: 'include', // Session cookie included automatically
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error('Not authenticated');
+    }
+    throw new Error('Failed to fetch artworks');
+  }
+
+  const artworks = await response.json();
+  return artworks;
+}
+```
 
 ---
 
-## Environment Configuration
+## Session Management
 
-```env
-# Enable authentication
-AUTH_ENABLED=true
+### Cookie Details
 
-# Backend URL (handles auth logic)
-BACKEND_URL=https://backend.artorizer.com
+- **Cookie Name**: `better-auth.session_token`
+- **Properties**:
+  - `HttpOnly` - Cannot be accessed by JavaScript (prevents XSS)
+  - `Secure` - Only sent over HTTPS in production
+  - `SameSite=Lax` - CSRF protection
+- **Storage**: MongoDB (sessions collection)
+- **Expiration**: Configured by Better Auth (check backend config)
 
-# Allowed origins for CORS
-ALLOWED_ORIGINS=https://artorizer.com,https://app.artorizer.com
+### Checking Authentication State
+
+To check if a user is authenticated on app load:
+
+```javascript
+async function initializeAuth() {
+  try {
+    const data = await getCurrentUser();
+    if (data && data.user) {
+      console.log('User is authenticated:', data.user);
+      return data.user;
+    }
+  } catch (error) {
+    console.log('User is not authenticated');
+  }
+  return null;
+}
+
+// Call on app initialization
+initializeAuth().then(user => {
+  if (user) {
+    // Render authenticated UI
+  } else {
+    // Render login UI
+  }
+});
 ```
 
-Backend environment variables (configured in backend service):
-```env
-# Google OAuth
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
+### Handling Session Expiration
 
-# GitHub OAuth
-GITHUB_CLIENT_ID=your-github-client-id
-GITHUB_CLIENT_SECRET=your-github-client-secret
+When a session expires:
+
+1. Requests to protected endpoints will return `401 Unauthorized`
+2. Your frontend should detect this and redirect to login
+3. Better Auth automatically cleans up expired sessions via TTL indexes
+
+```javascript
+async function makeAuthenticatedRequest(url, options = {}) {
+  const response = await fetch(url, {
+    ...options,
+    credentials: 'include',
+  });
+
+  if (response.status === 401) {
+    // Session expired or user not authenticated
+    console.log('Session expired, redirecting to login');
+    window.location.href = '/login';
+    return null;
+  }
+
+  return response;
+}
 ```
 
 ---
@@ -548,44 +761,340 @@ GITHUB_CLIENT_SECRET=your-github-client-secret
 
 ### Common Error Responses
 
-| Status Code | Description | Common Causes |
-|-------------|-------------|---------------|
-| 400 | Bad Request | Missing required fields, invalid format |
-| 401 | Unauthorized | Invalid credentials, expired session |
-| 403 | Forbidden | Account disabled, insufficient permissions |
-| 409 | Conflict | Email/username already exists |
-| 500 | Server Error | Backend unavailable |
+#### Registration Errors
+```json
+{
+  "error": "Email already exists"
+}
+```
+```json
+{
+  "error": "Username already taken"
+}
+```
 
-### Error Response Format
+#### Login Errors
+```json
+{
+  "error": "Invalid credentials"
+}
+```
 
+#### Authentication Errors
 ```json
 {
   "error": "Unauthorized",
-  "message": "Invalid credentials"
+  "message": "No valid session found"
+}
+```
+
+### Frontend Error Handling Example
+
+```javascript
+async function handleAuthRequest(requestFn) {
+  try {
+    return await requestFn();
+  } catch (error) {
+    if (error.message.includes('Unauthorized')) {
+      // Redirect to login
+      window.location.href = '/login';
+    } else if (error.message.includes('already exists')) {
+      // Show user-friendly message
+      alert('An account with this email already exists');
+    } else {
+      // Generic error handling
+      console.error('Request failed:', error);
+      alert('Something went wrong. Please try again.');
+    }
+  }
 }
 ```
 
 ---
 
-## Security Considerations
+## Complete Frontend Auth Context Example
 
-1. **HTTPS Required:** All authentication endpoints must be accessed over HTTPS in production
-2. **Cookie Security:** Session cookies are `httpOnly` (no JavaScript access), `secure` (HTTPS only), and `sameSite=Lax`
-3. **PKCE:** OAuth flows use Proof Key for Code Exchange to prevent authorization code interception
-4. **CORS:** Only allowed origins can make authenticated requests
-5. **Credentials:** Always use `credentials: 'include'` when making fetch requests to include cookies
+Here's a complete React context example for managing authentication:
+
+```javascript
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
+const AuthContext = createContext(null);
+
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Check authentication on mount
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  async function checkAuth() {
+    try {
+      const response = await fetch('http://localhost:7000/auth/me', {
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user);
+      } else {
+        setUser(null);
+      }
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function register(email, username, password, name) {
+    const response = await fetch('http://localhost:7000/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ email, username, password, name }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Registration failed');
+    }
+
+    const data = await response.json();
+    setUser(data.user);
+    return data;
+  }
+
+  async function login(emailOrUsername, password) {
+    const response = await fetch('http://localhost:7000/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ emailOrUsername, password }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Login failed');
+    }
+
+    const data = await response.json();
+    setUser(data.user);
+    return data;
+  }
+
+  async function logout() {
+    const response = await fetch('http://localhost:7000/auth/logout', {
+      method: 'POST',
+      credentials: 'include',
+    });
+
+    if (response.ok) {
+      setUser(null);
+    }
+  }
+
+  async function loginWithGoogle() {
+    try {
+      const response = await fetch('http://localhost:7000/auth/sign-in/social', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ provider: 'google' }),
+      });
+
+      if (!response.ok) throw new Error('Failed to start OAuth');
+
+      const data = await response.json();
+      window.location.href = data.url;
+    } catch (error) {
+      console.error('OAuth error:', error);
+    }
+  }
+
+  async function loginWithGithub() {
+    try {
+      const response = await fetch('http://localhost:7000/auth/sign-in/social', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ provider: 'github' }),
+      });
+
+      if (!response.ok) throw new Error('Failed to start OAuth');
+
+      const data = await response.json();
+      window.location.href = data.url;
+    } catch (error) {
+      console.error('OAuth error:', error);
+    }
+  }
+
+  const value = {
+    user,
+    loading,
+    register,
+    login,
+    logout,
+    loginWithGoogle,
+    loginWithGithub,
+    checkAuth, // Useful for revalidating after OAuth
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
+  }
+  return context;
+}
+```
+
+**Usage:**
+```javascript
+function LoginPage() {
+  const { login, loginWithGoogle, user } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError('');
+
+    try {
+      await login(email, password);
+      // Redirect to dashboard
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  if (user) {
+    return <Navigate to="/dashboard" />;
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        type="text"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Email or username"
+      />
+      <input
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder="Password"
+      />
+      <button type="submit">Login</button>
+
+      {error && <div className="error">{error}</div>}
+
+      <button type="button" onClick={loginWithGoogle}>
+        Login with Google
+      </button>
+    </form>
+  );
+}
+```
 
 ---
 
-## Endpoints Summary
+## File References
 
-| Endpoint | Method | Auth | Description |
-|----------|--------|------|-------------|
-| `/auth/register` | POST | No | Create new account |
-| `/auth/login` | POST | No | Email/password login |
-| `/auth/logout` | POST | Yes | End session |
-| `/auth/me` | GET | Yes | Get current user |
-| `/auth/check-availability` | GET | No | Check email/username |
-| `/auth/oauth/google/start` | GET | No | Start Google OAuth |
-| `/auth/oauth/github/start` | GET | No | Start GitHub OAuth |
-| `/auth/oauth/:provider/callback` | GET | OAuth | OAuth callback |
+### Router (Frontend connects here)
+
+| File | Line | Description |
+|------|------|-------------|
+| `Artorizer-core-router/src/routes/auth.ts` | 1-200 | All auth route handlers |
+| `Artorizer-core-router/src/middleware/auth.middleware.ts` | 1-100 | Session validation middleware |
+
+### Backend (Internal only)
+
+| File | Line | Description |
+|------|------|-------------|
+| `artorize-storage-backend/src/auth/betterAuth.js` | 1-300 | Better Auth configuration |
+| `artorize-storage-backend/src/routes/auth.routes.js` | 1-50 | Auth routes (check-availability) |
+| `artorize-storage-backend/src/middlewares/auth.js` | 1-150 | Authentication middleware |
+
+---
+
+## Security Considerations
+
+1. **Always use `credentials: 'include'`** in fetch requests
+2. **Never store tokens in localStorage** - cookies are more secure (HttpOnly)
+3. **HTTPS in production** - Session cookies should only be sent over HTTPS
+4. **CORS configuration** - Ensure your frontend domain is allowed
+5. **Password requirements** - Enforce strong passwords on frontend and backend
+6. **Rate limiting** - Consider implementing rate limiting for auth endpoints
+
+---
+
+## Troubleshooting
+
+### Issue: "Unauthorized" errors even after login
+
+**Solution:** Make sure you're including `credentials: 'include'` in ALL fetch requests.
+
+### Issue: OAuth redirects not working
+
+**Solution:** Check that `APP_BASE_URL` in backend `.env` matches your router URL:
+```
+APP_BASE_URL=http://localhost:7000
+```
+
+### Issue: Session not persisting
+
+**Solution:**
+- Check that cookies are enabled in browser
+- Verify CORS allows credentials
+- Ensure frontend and backend are on same domain or configured for cross-origin cookies
+
+### Issue: Can't login with username
+
+**Solution:** Ensure you're using `emailOrUsername` field in login request, not separate fields.
+
+---
+
+## Environment Variables Required
+
+### Backend (.env in artorize-storage-backend)
+
+```env
+# Better Auth
+BETTER_AUTH_SECRET=your-32-character-secret-here
+APP_ENCRYPTION_KEY=base64-encoded-32-byte-key
+
+# OAuth Providers
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GITHUB_CLIENT_ID=your-github-client-id
+GITHUB_CLIENT_SECRET=your-github-client-secret
+
+# Base URL for OAuth callbacks
+APP_BASE_URL=http://localhost:7000
+
+# MongoDB
+MONGODB_URI=mongodb://localhost:27017/artorize
+```
+
+---
+
+## Summary
+
+✅ **Frontend connects to**: Router at `http://localhost:7000`
+✅ **All auth endpoints**: `/auth/*`
+✅ **Session method**: HTTP-only cookies (automatic)
+✅ **OAuth providers**: Google, GitHub
+✅ **Protected routes**: Include `credentials: 'include'`
+✅ **User context**: Automatically forwarded via headers to backend
+
+For additional questions or issues, refer to the file references above or check Better Auth documentation.

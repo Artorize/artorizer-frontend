@@ -12,8 +12,8 @@ Complete API reference for the Artorizer Core Router.
 2. [Artwork Submission](#artwork-submission)
 3. [Job Status](#job-status)
 4. [Callback Endpoints](#callback-endpoints)
-   - [Process Complete Callback](#post-callbacksprocess-complete)
-   - [Process Progress Callback](#post-callbacksprocess-progress)
+    - [Process Complete Callback](#post-callbacksprocess-complete)
+    - [Process Progress Callback](#post-callbacksprocess-progress)
 5. [Health Checks](#health-checks)
 6. [Error Codes](#error-codes)
 
@@ -24,6 +24,35 @@ Complete API reference for the Artorizer Core Router.
 **Optional Feature** - Disabled by default (`AUTH_ENABLED=false`)
 
 When enabled, the router supports user authentication via Better Auth with OAuth providers (Google, GitHub). User information is automatically forwarded to the backend for access control and ownership tracking.
+
+### Authentication Overview
+
+| Feature | Status | Details |
+|---------|--------|---------|
+| **User Authentication** | Optional | Users can authenticate via Google/GitHub OAuth |
+| **Session Management** | Optional | Sessions stored in PostgreSQL, 7-day duration |
+| **Artwork Upload** | Optional Auth | Upload with or without authentication |
+| **Job Queries** | Optional Auth | Query job status with or without authentication |
+| **Downloads** | Optional Auth | Download artwork with or without authentication |
+| **Backend Forwarding** | When Authenticated | User headers (`X-User-Id`, `X-User-Email`, `X-User-Name`) forwarded to backend |
+| **Access Control** | Backend-Enforced | Backend decides access rights based on user headers and artwork ownership |
+
+### Authentication Benefits
+
+When authentication is **enabled and user is authenticated**:
+- Artwork is associated with the user account
+- User can retrieve all their uploads via `GET /artworks/me` (backend endpoint)
+- Backend can enforce user-based access control
+- User activity is tracked
+- Private artwork management possible
+- Multi-user collaboration features available
+
+When authentication is **disabled or user is anonymous**:
+- Artwork is still processed normally
+- No user association
+- Job status queryable by job_id only
+- Limited access control (public/private determined by backend)
+- No user-specific features
 
 ### Authentication Flow
 
@@ -150,7 +179,18 @@ Submit artwork for protection processing. The router validates metadata, checks 
 
 **Content-Type**: `multipart/form-data` or `application/json`
 
-**Authentication**: Optional - uses `optionalAuth` middleware. If authenticated (session cookie present), user info is extracted and forwarded to backend via `X-User-Id`, `X-User-Email`, `X-User-Name` headers. The backend can use these headers to associate the artwork with the authenticated user.
+**Authentication**: Optional - but recommended for tracking artwork ownership and enabling user-specific features.
+- **When authenticated** (session cookie present):
+    - Session must be valid and active (Better Auth session)
+    - User info is extracted and forwarded to backend via `X-User-Id`, `X-User-Email`, `X-User-Name` headers
+    - Backend associates artwork with authenticated user
+    - User can retrieve artwork via `GET /artworks/me` endpoint (backend)
+    - User-specific access control applied
+- **When anonymous** (no session cookie):
+    - Artwork is still processed normally
+    - Not associated with any user
+    - Processing uses processor-to-backend token-based authentication
+    - Job status queryable by job_id (public)
 
 #### Required Fields
 
@@ -287,7 +327,15 @@ Artwork already exists in the backend:
 
 Get job status. Checks Redis first for processing jobs, then falls back to backend for completed jobs.
 
-**Authentication**: Optional - uses `optionalAuth` middleware. If authenticated, user headers are forwarded to backend for access control (backend can restrict users to only see their own jobs).
+**Authentication**: Optional - uses `optionalAuth` middleware.
+- **When authenticated** (session cookie present):
+    - User context is forwarded to backend via `X-User-Id`, `X-User-Email`, `X-User-Name` headers
+    - Backend can restrict users to only see their own jobs
+    - More detailed information may be returned for owned artwork
+- **When anonymous** (no session cookie):
+    - Job status can be queried by job_id
+    - Access control depends on backend configuration
+    - Limited details may be returned for privacy
 
 #### Example
 
@@ -391,7 +439,15 @@ curl http://localhost:7000/jobs/f2dc197c-43b9-404d-b3f3-159282802609 \
 
 Get complete job result with backend URLs. Returns 409 if job is still processing.
 
-**Authentication**: Optional - uses `optionalAuth` middleware. If authenticated, user headers are forwarded to backend for access control.
+**Authentication**: Optional - uses `optionalAuth` middleware.
+- **When authenticated** (session cookie present):
+    - User context is forwarded to backend via `X-User-Id`, `X-User-Email`, `X-User-Name` headers
+    - Backend can restrict access to owned artwork only
+    - Full artwork metadata and download URLs returned for authorized users
+- **When anonymous** (no session cookie):
+    - Job result can be queried by job_id
+    - Access depends on backend privacy settings
+    - Limited metadata may be returned
 
 #### Example
 
@@ -491,7 +547,15 @@ Proxy download from backend. Fetches the file from backend storage and streams i
 
 **Variants**: `original`, `protected`, `mask`
 
-**Authentication**: Optional - uses `optionalAuth` middleware. If authenticated, user headers are forwarded to backend for access control.
+**Authentication**: Optional - uses `optionalAuth` middleware.
+- **When authenticated** (session cookie present):
+    - User context is forwarded to backend via `X-User-Id`, `X-User-Email`, `X-User-Name` headers
+    - Backend enforces download access control based on artwork ownership
+    - Authenticated users can download their own artwork
+- **When anonymous** (no session cookie):
+    - Downloads available if artwork is publicly accessible
+    - Access depends on backend privacy settings
+    - Rate limiting applies per IP address
 
 #### Example
 

@@ -38,13 +38,39 @@ function createAuthClient(baseURL) {
     baseURL,
 
     /**
-     * OAuth sign in - redirects to OAuth provider
-     * Router endpoints: /auth/oauth/{provider}/start
+     * OAuth sign in - initiates OAuth flow
+     * Router endpoint: POST /auth/sign-in/social
+     *
+     * 1. POST to /auth/sign-in/social with provider
+     * 2. Get redirect URL from response
+     * 3. Redirect to OAuth provider
      */
     signIn: {
-      social({ provider }) {
-        // Redirect to OAuth endpoint
-        window.location.href = `${baseURL}/auth/oauth/${provider}/start`;
+      async social({ provider }) {
+        try {
+          const response = await fetch(`${baseURL}/auth/sign-in/social`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ provider })
+          });
+
+          if (!response.ok) {
+            throw new Error(`OAuth flow initiation failed: ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          // Redirect to the OAuth provider URL
+          if (data.url) {
+            window.location.href = data.url;
+          } else {
+            throw new Error('No OAuth URL received from server');
+          }
+        } catch (error) {
+          console.error('OAuth sign-in error:', error);
+          throw error;
+        }
       }
     },
 
@@ -189,17 +215,17 @@ export const auth = {
   /**
    * Sign in with Google OAuth
    */
-  signInWithGoogle() {
+  async signInWithGoogle() {
     const client = authClientInstance || createAuthClient(API_BASE_URL);
-    client.signIn.social({ provider: 'google' });
+    return client.signIn.social({ provider: 'google' });
   },
 
   /**
    * Sign in with GitHub OAuth
    */
-  signInWithGitHub() {
+  async signInWithGitHub() {
     const client = authClientInstance || createAuthClient(API_BASE_URL);
-    client.signIn.social({ provider: 'github' });
+    return client.signIn.social({ provider: 'github' });
   },
 
   /**

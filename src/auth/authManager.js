@@ -38,15 +38,23 @@ export class AuthManager {
   /**
    * Sign in with Google OAuth
    */
-  signInWithGoogle() {
-    auth.signInWithGoogle();
+  async signInWithGoogle() {
+    try {
+      await auth.signInWithGoogle();
+    } catch (error) {
+      throw new AuthError(error.message || 'Google sign-in failed', error, 'GOOGLE_SIGNIN_FAILED');
+    }
   }
 
   /**
    * Sign in with GitHub OAuth
    */
-  signInWithGitHub() {
-    auth.signInWithGitHub();
+  async signInWithGitHub() {
+    try {
+      await auth.signInWithGitHub();
+    } catch (error) {
+      throw new AuthError(error.message || 'GitHub sign-in failed', error, 'GITHUB_SIGNIN_FAILED');
+    }
   }
 
   /**

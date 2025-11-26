@@ -122,12 +122,12 @@ User → Router (Fastify) → Backend (Express) → MongoDB
 ### Router Requirements
 
 The router MUST:
-1. ✅ Forward `X-User-Id` header when user is authenticated
-2. ✅ Forward `X-User-Email` header when user is authenticated
-3. ✅ Forward `X-User-Name` header when user is authenticated
-4. ✅ Only forward headers for valid, authenticated sessions
-5. ✅ Call `POST /tokens` to generate tokens for processor uploads
-6. ✅ Act as reverse proxy since backend binds to localhost only
+1. Forward `X-User-Id` header when user is authenticated
+2. Forward `X-User-Email` header when user is authenticated
+3. Forward `X-User-Name` header when user is authenticated
+4. Only forward headers for valid, authenticated sessions
+5. Call `POST /tokens` to generate tokens for processor uploads
+6. Act as reverse proxy since backend binds to localhost only
 
 ---
 
@@ -148,15 +148,15 @@ This backend is designed to support **direct processor uploads** in the Artorize
 10. Router uses `id` to retrieve files when needed
 
 **Key Points**:
-- ✅ Secure token-based authentication (one-time use)
-- ✅ Per-artwork token isolation limits breach impact
-- ✅ All required files and metadata are supported
-- ✅ Returns `id` field that processor needs for callbacks
-- ✅ Handles large files (256MB max) efficiently
-- ✅ Rate limiting configured (30 uploads/hour per IP)
-- ✅ No temporary storage needed in router
-- ✅ Tokens expire after 1 hour (configurable)
-- ✅ Automatic cleanup of expired/used tokens
+- Secure token-based authentication (one-time use)
+- Per-artwork token isolation limits breach impact
+- All required files and metadata are supported
+- Returns `id` field that processor needs for callbacks
+- Handles large files (256MB max) efficiently
+- Rate limiting configured (30 uploads/hour per IP)
+- No temporary storage needed in router
+- Tokens expire after 1 hour (configurable)
+- Automatic cleanup of expired/used tokens
 
 **Security Architecture**:
 - Each artwork gets a unique 16-character token
