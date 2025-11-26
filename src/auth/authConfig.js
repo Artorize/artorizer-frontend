@@ -10,9 +10,8 @@
  */
 
 /**
- * Determine the API base URL based on environment
- * Development: http://localhost:7000
- * Production: https://router.artorizer.com
+ * Determine the API base URL
+ * Always uses production router for consistency (allows local testing with real auth)
  */
 function getBaseURL() {
   // Check for explicit environment variable (set via build process or window config)
@@ -20,14 +19,7 @@ function getBaseURL() {
     return window.__API_BASE_URL__;
   }
 
-  // Auto-detect based on current hostname
-  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
-
-  if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return 'http://localhost:7000';
-  }
-
-  // Production
+  // Always use production router
   return 'https://router.artorizer.com';
 }
 

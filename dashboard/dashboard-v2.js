@@ -855,26 +855,53 @@
   function createUserMenuDropdown() {
     const dropdown = document.createElement('div');
     dropdown.id = 'user-menu-dropdown';
-    dropdown.className = 'absolute bottom-full left-0 mb-2 w-full rounded-lg border border-gray-200 bg-background shadow-lg z-50';
+    dropdown.className = 'absolute bottom-full left-0 mb-2 w-full min-w-[200px] rounded-xl border border-gray-200 bg-background shadow-xl z-50';
     dropdown.style.display = 'none';
 
+    const userName = currentUser?.name || currentUser?.email?.split('@')[0] || 'User';
+    const userEmail = currentUser?.email || '';
+
     dropdown.innerHTML = `
-      <div class="p-1">
-        <div class="px-3 py-2 border-b border-gray-100">
-          <p class="text-sm font-medium text-foreground" data-user-name>${currentUser?.name || 'User'}</p>
-          <p class="text-xs text-subtle" data-user-email>${currentUser?.email || ''}</p>
+      <div class="py-2">
+        <!-- User info header -->
+        <div class="px-4 py-3 border-b border-gray-100">
+          <p class="text-sm font-medium text-foreground truncate" data-dropdown-user-name>${userName}</p>
+          <p class="text-xs text-gray-500 truncate" data-dropdown-user-email>${userEmail}</p>
         </div>
-        <button data-action="sign-out"
-                class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-            <polyline points="16 17 21 12 16 7"></polyline>
-            <line x1="21" y1="12" x2="9" y2="12"></line>
-          </svg>
-          Sign out
-        </button>
+
+        <!-- Menu items -->
+        <div class="py-1">
+          <button data-action="settings"
+                  class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-gray-50 transition-colors text-left">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500">
+              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            Settings
+          </button>
+
+          <button data-action="sign-out"
+                  class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors text-left">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            Sign out
+          </button>
+        </div>
       </div>
     `;
+
+    // Add settings handler
+    const settingsBtn = dropdown.querySelector('[data-action="settings"]');
+    if (settingsBtn) {
+      settingsBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        // Navigate to settings page or open settings modal
+        window.location.href = '/dashboard/settings.html';
+      });
+    }
 
     // Add sign-out handler
     const signOutBtn = dropdown.querySelector('[data-action="sign-out"]');

@@ -173,21 +173,46 @@
    * @param {Object} user - User object from session
    */
   function updateSidebarUserInfo(user) {
-    // Find the user menu button in sidebar
-    const userMenuButton = document.querySelector('[data-testid="user-menu-button"]');
-    if (!userMenuButton) return;
+    const userName = user.name || user.email?.split('@')[0] || 'User';
+    const userEmail = user.email || '';
 
-    // Update the displayed name
-    const nameElement = userMenuButton.querySelector('.text-foreground.font-medium.truncate');
-    if (nameElement) {
-      nameElement.textContent = user.name || user.email?.split('@')[0] || 'User';
+    // Update sidebar user name element
+    const sidebarNameElement = document.querySelector('[data-sidebar-user-name]');
+    if (sidebarNameElement) {
+      // Get the child div (workspace section) to preserve it
+      const childDiv = sidebarNameElement.querySelector('div');
+      const childDivClone = childDiv ? childDiv.cloneNode(true) : null;
+      // Clear and rebuild content
+      sidebarNameElement.innerHTML = '';
+      sidebarNameElement.appendChild(document.createTextNode(userName));
+      if (childDivClone) {
+        sidebarNameElement.appendChild(childDivClone);
+      }
     }
 
-    // Update the avatar image
-    const avatarImg = userMenuButton.querySelector('img[alt]');
-    if (avatarImg && user.image) {
-      avatarImg.src = user.image;
-      avatarImg.alt = user.name || 'User avatar';
+    // Update sidebar avatar
+    const sidebarAvatar = document.querySelector('[data-sidebar-user-avatar]');
+    if (sidebarAvatar) {
+      if (user.image) {
+        sidebarAvatar.src = user.image;
+        sidebarAvatar.alt = userName;
+      } else {
+        // Generate initials avatar SVG
+        const initials = userName.charAt(0).toUpperCase();
+        sidebarAvatar.src = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%236366f1'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='.35em' fill='white' font-size='40' font-family='system-ui'%3E${initials}%3C/text%3E%3C/svg%3E`;
+        sidebarAvatar.alt = userName;
+      }
+    }
+
+    // Update dropdown user info if it exists
+    const dropdownNameElement = document.querySelector('[data-dropdown-user-name]');
+    if (dropdownNameElement) {
+      dropdownNameElement.textContent = userName;
+    }
+
+    const dropdownEmailElement = document.querySelector('[data-dropdown-user-email]');
+    if (dropdownEmailElement) {
+      dropdownEmailElement.textContent = userEmail;
     }
 
     // Update the header user avatar (Talk to El section)
@@ -195,7 +220,7 @@
     headerAvatars.forEach(img => {
       if (user.image && img.alt !== 'Ask El') {
         img.src = user.image;
-        img.alt = user.name || 'User avatar';
+        img.alt = userName;
       }
     });
   }
