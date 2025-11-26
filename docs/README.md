@@ -195,13 +195,14 @@ Multiple protection technologies can be combined:
 - `GET /jobs/:id/result` - Get protection results
 - `GET /jobs/:id/download/:variant` - Download variants
 
-### Authentication API
+### Authentication API (Better Auth)
 - `POST /auth/register` - Create new account
 - `POST /auth/login` - Email/password login
-- `GET /auth/oauth/:provider/start` - Initiate OAuth
-- `GET /auth/oauth/:provider/callback` - OAuth callback
-- `GET /auth/me` - Get current user
 - `POST /auth/logout` - Sign out
+- `GET /auth/me` - Get current session/user
+- `GET /auth/check-availability` - Check email/username availability
+- `POST /auth/sign-in/social` - Start OAuth flow (Google/GitHub)
+- `GET /auth/callback/:provider` - OAuth callback (automatic)
 
 ### Backend API
 - `POST /tokens` - Generate upload token

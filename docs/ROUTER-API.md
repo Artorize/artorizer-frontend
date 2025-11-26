@@ -56,89 +56,169 @@ When authentication is **disabled or user is anonymous**:
 
 ### Authentication Flow
 
-1. Client initiates OAuth: `GET /api/auth/signin/google` (or `/github`)
-2. OAuth provider redirects to callback: `GET /api/auth/callback/google`
-3. Better Auth creates session and sets httpOnly cookie (`better-auth.session_token`)
-4. Client includes cookie in subsequent requests
-5. Router extracts user info and forwards to backend via HTTP headers
+1. Client initiates OAuth: `POST /auth/sign-in/social` with `{provider: "google"}` (or `"github"`)
+2. Client receives OAuth URL and redirects user to it
+3. OAuth provider redirects to callback: `GET /auth/callback/google`
+4. Better Auth creates session and sets httpOnly cookie (`better-auth.session_token`)
+5. Router redirects to frontend with `?auth=success` (or `?error=...` on failure)
+6. Client includes cookie in subsequent requests via `credentials: 'include'`
+7. Router extracts user info and forwards to backend via HTTP headers
 
 ### Available Endpoints
 
 When `AUTH_ENABLED=true`, the following endpoints are automatically mounted:
 
-#### GET /api/auth/signin/google
+#### POST /auth/register
 
-Initiates Google OAuth flow. Redirects to Google for authentication.
+Create a new user account.
 
-**Response:** HTTP 302 redirect to Google OAuth consent screen
+**Request:**
+```json
+{
+  "email": "user@example.com",
+  "username": "johndoe",
+  "password": "securePassword123",
+  "name": "John Doe"
+}
+```
 
-#### GET /api/auth/signin/github
+**Response (201 Created):**
+```json
+{
+  "user": {
+    "id": "user-uuid",
+    "email": "user@example.com",
+    "username": "johndoe",
+    "name": "John Doe"
+  },
+  "session": {
+    "id": "session-uuid",
+    "expiresAt": "2025-12-03T12:00:00.000Z"
+  }
+}
+```
 
-Initiates GitHub OAuth flow. Redirects to GitHub for authentication.
+#### POST /auth/login
 
-**Response:** HTTP 302 redirect to GitHub OAuth consent screen
+Login with email/username and password.
 
-#### GET /api/auth/callback/google
+**Request:**
+```json
+{
+  "emailOrUsername": "user@example.com",
+  "password": "securePassword123"
+}
+```
 
-OAuth callback endpoint for Google. Handles the OAuth code exchange and session creation.
+**Response (200 OK):**
+```json
+{
+  "user": {
+    "id": "user-uuid",
+    "email": "user@example.com",
+    "username": "johndoe",
+    "name": "John Doe"
+  },
+  "session": {
+    "id": "session-uuid",
+    "expiresAt": "2025-12-03T12:00:00.000Z"
+  }
+}
+```
 
-**Response:** HTTP 302 redirect to frontend with session cookie set
+#### POST /auth/sign-in/social
 
-#### GET /api/auth/callback/github
+Initiates OAuth flow for Google or GitHub.
 
-OAuth callback endpoint for GitHub. Handles the OAuth code exchange and session creation.
+**Request:**
+```json
+{
+  "provider": "google"
+}
+```
 
-**Response:** HTTP 302 redirect to frontend with session cookie set
+**Response (200 OK):**
+```json
+{
+  "url": "https://accounts.google.com/o/oauth2/auth?client_id=...&redirect_uri=...&scope=...",
+  "redirect": true
+}
+```
 
-#### GET /api/auth/session
+Client should redirect user to the returned URL: `window.location.href = data.url`
+
+#### GET /auth/callback/:provider
+
+OAuth callback endpoint (Google or GitHub). Handles the OAuth code exchange and session creation.
+
+**Response:** HTTP 302 redirect to frontend:
+- Success: `?auth=success` with session cookie set
+- Error: `?error=ERROR_CODE&error_description=...`
+
+#### GET /auth/me
 
 Get current authenticated user session.
 
 **Example:**
 ```bash
-curl -X GET https://router.artorizer.com/api/auth/session \
+curl -X GET https://router.artorizer.com/auth/me \
   --cookie "better-auth.session_token=xxx"
 ```
 
-**Response (authenticated):**
+**Response (200 OK - authenticated):**
 ```json
 {
   "user": {
     "id": "550e8400-e29b-41d4-a716-446655440000",
     "email": "user@example.com",
+    "username": "johndoe",
     "name": "John Doe",
     "image": "https://avatars.githubusercontent.com/u/12345",
     "emailVerified": true,
     "createdAt": "2025-01-15T10:30:00.000Z"
   },
   "session": {
-    "token": "session-token-here",
+    "id": "session-uuid",
     "expiresAt": "2025-01-22T10:30:00.000Z"
   }
 }
 ```
 
-**Response (not authenticated):**
+**Response (401 Unauthorized):**
 ```json
-null
+{
+  "error": "Unauthorized"
+}
 ```
 
-#### POST /api/auth/sign-out
+#### GET /auth/check-availability
+
+Check email/username availability for registration.
+
+**Example:**
+```bash
+curl "https://router.artorizer.com/auth/check-availability?email=user@example.com&username=johndoe"
+```
+
+**Response (200 OK):**
+```json
+{
+  "emailAvailable": true,
+  "usernameAvailable": false
+}
+```
+
+#### POST /auth/logout
 
 Sign out and clear session cookie.
 
 **Example:**
 ```bash
-curl -X POST https://router.artorizer.com/api/auth/sign-out \
+curl -X POST https://router.artorizer.com/auth/logout \
   --cookie "better-auth.session_token=xxx"
 ```
 
-**Response:**
-```json
-{
-  "success": true
-}
-```
+**Response:** 204 No Content
 
 ### User Header Forwarding
 
@@ -163,11 +243,11 @@ The backend can use these headers to:
 
 ### Session Management
 
-- **Storage**: PostgreSQL via Better Auth
-- **Duration**: 7 days
-- **Refresh**: Sessions can be refreshed within 1 day of expiration
-- **Cookie**: `better-auth.session_token` (httpOnly, secure in production)
-- **CORS**: Credentials must be included in cross-origin requests
+- **Storage**: MongoDB via Better Auth
+- **Duration**: 7 days with automatic refresh
+- **Cookie**: `better-auth.session_token` (HttpOnly, Secure in production, SameSite=Lax)
+- **CORS**: Credentials must be included in cross-origin requests (`credentials: 'include'`)
+- **Security**: AES-256-GCM encryption, Argon2id password hashing
 
 ---
 

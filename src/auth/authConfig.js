@@ -2,14 +2,41 @@
  * Authentication Configuration
  *
  * Centralizes auth-related configuration including API base URLs.
+ * Uses Better Auth with HTTP-only cookies for session management.
+ *
+ * Backend: Better Auth framework
+ * Session: HTTP-only cookies (better-auth.session_token)
+ * Session Duration: 7 days with automatic refresh
  */
+
+/**
+ * Determine the API base URL based on environment
+ * Development: http://localhost:7000
+ * Production: https://router.artorizer.com
+ */
+function getBaseURL() {
+  // Check for explicit environment variable (set via build process or window config)
+  if (typeof window !== 'undefined' && window.__API_BASE_URL__) {
+    return window.__API_BASE_URL__;
+  }
+
+  // Auto-detect based on current hostname
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'http://localhost:7000';
+  }
+
+  // Production
+  return 'https://router.artorizer.com';
+}
 
 /**
  * Auth configuration object
  */
 export const authConfig = {
-  /** API base URL for auth endpoints - always use production router */
-  baseURL: 'https://router.artorizer.com',
+  /** API base URL for auth endpoints - environment aware */
+  baseURL: getBaseURL(),
 
   /** Default redirect after login */
   redirectUrl: '/dashboard/dashboard-v2.html',

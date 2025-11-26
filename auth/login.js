@@ -460,14 +460,64 @@ function initOAuthButtons() {
 }
 
 /**
+ * Handle OAuth callback parameters
+ * Better Auth redirects with ?auth=success or ?error=...&error_description=...
+ */
+async function handleOAuthCallback() {
+    const params = new URLSearchParams(window.location.search);
+    const authStatus = params.get('auth');
+    const error = params.get('error');
+    const errorDescription = params.get('error_description');
+
+    // Handle OAuth errors
+    if (error) {
+        const errorMessages = {
+            state_mismatch: 'Your session expired. Please try logging in again.',
+            invalid_grant: 'The login link expired. Please try again.',
+            access_denied: 'You cancelled the login. Click below to try again.',
+            server_error: 'Something went wrong on our end. Please try again.',
+        };
+        const message = errorMessages[error] || errorDescription || `Authentication failed: ${error}`;
+        showError(elements.loginError, message);
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+        return true; // Handled
+    }
+
+    // Handle successful OAuth callback
+    if (authStatus === 'success') {
+        try {
+            // Session cookie should already be set by Better Auth
+            const session = await authManager.getSession();
+            if (session) {
+                // Clean URL and redirect
+                window.history.replaceState({}, document.title, window.location.pathname);
+                const returnUrl = params.get('returnUrl') || authConfig.redirectUrl;
+                window.location.href = returnUrl;
+            }
+        } catch (error) {
+            console.error('Session check after OAuth failed:', error);
+            showError(elements.loginError, 'Sign in failed. Please try again.');
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+        return true; // Handled
+    }
+
+    return false; // Not an OAuth callback
+}
+
+/**
  * Check if user is already authenticated
  */
 async function checkExistingSession() {
+    // Skip if we're handling an OAuth callback
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('auth') || params.get('error')) return;
+
     try {
         const isAuthenticated = await authManager.isAuthenticated();
         if (isAuthenticated) {
             // User already logged in, redirect to returnUrl or dashboard
-            const params = new URLSearchParams(window.location.search);
             const returnUrl = params.get('returnUrl') || authConfig.redirectUrl;
             window.location.href = returnUrl;
         }
@@ -480,8 +530,13 @@ async function checkExistingSession() {
 /**
  * Initialize everything
  */
-function init() {
+async function init() {
     initElements();
+
+    // Handle OAuth callback first (if applicable)
+    const isOAuthCallback = await handleOAuthCallback();
+    if (isOAuthCallback) return; // OAuth callback handled, don't continue init
+
     initFormToggle();
     initFormHandlers();
     initPasswordStrength();

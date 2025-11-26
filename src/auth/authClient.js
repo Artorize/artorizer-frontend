@@ -1,8 +1,22 @@
 /**
  * Auth Client for Artorizer
  *
- * Provides authentication methods matching the Better Auth backend API.
- * Endpoints documented in auth/auth.md
+ * Provides authentication methods using Better Auth backend.
+ * All requests go through the Router (localhost:7000 in dev, router.artorizer.com in prod).
+ *
+ * Endpoints (see docs/auth.md for full documentation):
+ * - POST /auth/register - User registration
+ * - POST /auth/login - Email/username + password login
+ * - POST /auth/logout - Sign out (clears session cookie)
+ * - GET /auth/me - Get current session/user
+ * - GET /auth/check-availability - Check email/username availability
+ * - POST /auth/sign-in/social - Start OAuth flow (Google/GitHub)
+ * - GET /auth/callback/:provider - OAuth callback (handled by router)
+ *
+ * Session Management:
+ * - Cookie: better-auth.session_token (HttpOnly, Secure, SameSite=Lax)
+ * - Duration: 7 days with automatic refresh
+ * - IMPORTANT: Always use credentials: 'include' for cookie auth
  */
 
 import { authConfig, normalizeAvailability } from './authConfig.js';
@@ -31,7 +45,7 @@ export async function initAuthClient(config = {}) {
 
 /**
  * Create auth client with API methods
- * Uses Better Auth /api/auth/* endpoints
+ * Uses Better Auth /auth/* endpoints via the Router
  */
 function createAuthClient(baseURL) {
   return {

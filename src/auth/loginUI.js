@@ -103,43 +103,54 @@ export class LoginUI {
   /**
    * Handle OAuth callback
    * Processes the OAuth redirect after user authorizes
+   *
+   * Better Auth callback flow:
+   * - Success: Redirects to ?auth=success with session cookie set
+   * - Error: Redirects to ?error=ERROR_CODE&error_description=...
    */
   async handleOAuthCallback() {
     const params = new URLSearchParams(window.location.search);
+    const authStatus = params.get('auth');
     const error = params.get('error');
-    const code = params.get('code');
+    const errorDescription = params.get('error_description');
 
     // Handle OAuth errors
     if (error) {
-      this.showError(`Authentication failed: ${error}`);
+      const errorMessages = {
+        state_mismatch: 'Your session expired. Please try logging in again.',
+        invalid_grant: 'The login link expired. Please try again.',
+        access_denied: 'You cancelled the login. Click below to try again.',
+        server_error: 'Something went wrong on our end. Please try again.',
+      };
+      const message = errorMessages[error] || errorDescription || `Authentication failed: ${error}`;
+      this.showError(message);
       // Clean URL
-      window.history.replaceState({}, document.title, '/login.html');
+      window.history.replaceState({}, document.title, authConfig.loginUrl);
       return;
     }
 
-    // Handle successful OAuth callback
-    if (code) {
+    // Handle successful OAuth callback (Better Auth sets ?auth=success)
+    if (authStatus === 'success') {
       this.showLoading('Completing sign in...');
 
-      // Better Auth handles the callback automatically
-      // We just need to wait a moment and check the session
-      setTimeout(async () => {
-        try {
-          const session = await this.authManager.getSession();
-          if (session) {
-            this.redirectAfterLogin();
-          } else {
-            this.showError('Sign in failed. Please try again.');
-            this.hideLoading();
-            window.history.replaceState({}, document.title, '/login.html');
-          }
-        } catch (error) {
-          console.error('Session check failed:', error);
+      try {
+        // Session cookie should already be set by Better Auth
+        const session = await this.authManager.getSession();
+        if (session) {
+          // Clean URL and redirect
+          window.history.replaceState({}, document.title, window.location.pathname);
+          this.redirectAfterLogin();
+        } else {
           this.showError('Sign in failed. Please try again.');
           this.hideLoading();
-          window.history.replaceState({}, document.title, '/login.html');
+          window.history.replaceState({}, document.title, authConfig.loginUrl);
         }
-      }, 1000);
+      } catch (error) {
+        console.error('Session check failed:', error);
+        this.showError('Sign in failed. Please try again.');
+        this.hideLoading();
+        window.history.replaceState({}, document.title, authConfig.loginUrl);
+      }
     }
   }
 
@@ -150,7 +161,7 @@ export class LoginUI {
   async checkExistingSession() {
     // Don't check if we're processing an OAuth callback
     const params = new URLSearchParams(window.location.search);
-    if (params.get('code')) return;
+    if (params.get('auth') || params.get('error')) return;
 
     try {
       const session = await this.authManager.getSession();

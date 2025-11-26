@@ -28,7 +28,7 @@ export async function requireAuth(options = {}) {
     if (!session) {
       // Not authenticated, redirect to login with return URL
       const returnUrl = encodeURIComponent(currentPath + currentSearch);
-      const loginUrl = options.loginUrl || '/login.html';
+      const loginUrl = options.loginUrl || '/auth/login.html';
       window.location.href = `${loginUrl}?returnUrl=${returnUrl}`;
       return null;
     }
@@ -44,7 +44,7 @@ export async function requireAuth(options = {}) {
     console.error('Auth check failed:', error);
 
     // On error, redirect to login
-    const loginUrl = options.loginUrl || '/login.html';
+    const loginUrl = options.loginUrl || '/auth/login.html';
     window.location.href = loginUrl;
     return null;
   }
