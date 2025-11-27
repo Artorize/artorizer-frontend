@@ -965,22 +965,47 @@
     // Position dropdown relative to button
     function positionDropdown() {
       const buttonRect = userMenuButton.getBoundingClientRect();
+
+      // Temporarily show dropdown to measure it (opacity 0)
+      menuDropdown.style.visibility = 'hidden';
+      menuDropdown.style.display = 'block';
       const dropdownRect = menuDropdown.getBoundingClientRect();
+      menuDropdown.style.visibility = 'visible';
 
-      // Position to the right of the button
-      menuDropdown.style.left = `${buttonRect.right + 8}px`;
-      // Align bottom of dropdown with bottom of button
-      menuDropdown.style.top = `${buttonRect.bottom - dropdownRect.height}px`;
-
-      // Make sure it doesn't go off screen
+      const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
-      const dropdownBottom = parseFloat(menuDropdown.style.top) + dropdownRect.height;
-      if (dropdownBottom > viewportHeight - 10) {
-        menuDropdown.style.top = `${viewportHeight - dropdownRect.height - 10}px`;
+
+      // Check if there's enough room to the right of the button
+      const spaceOnRight = viewportWidth - buttonRect.right - 8;
+      const hasRoomOnRight = spaceOnRight >= dropdownRect.width;
+
+      if (hasRoomOnRight) {
+        // Position to the right of the button
+        menuDropdown.style.left = `${buttonRect.right + 8}px`;
+      } else {
+        // Not enough room on right, position above the button instead
+        menuDropdown.style.left = `${buttonRect.left}px`;
       }
-      if (parseFloat(menuDropdown.style.top) < 10) {
-        menuDropdown.style.top = '10px';
+
+      // Calculate vertical position
+      let topPosition;
+      if (hasRoomOnRight) {
+        // Align bottom of dropdown with bottom of button
+        topPosition = buttonRect.bottom - dropdownRect.height;
+      } else {
+        // Position above the button
+        topPosition = buttonRect.top - dropdownRect.height - 8;
       }
+
+      // Make sure it doesn't go off screen vertically
+      if (topPosition < 10) {
+        topPosition = 10;
+      }
+      if (topPosition + dropdownRect.height > viewportHeight - 10) {
+        topPosition = viewportHeight - dropdownRect.height - 10;
+      }
+
+      menuDropdown.style.top = `${topPosition}px`;
     }
 
     // Find the chevron icon container
@@ -1154,17 +1179,43 @@
       return;
     }
 
-    myselfBtn.addEventListener('click', function() {
+    myselfBtn.addEventListener('click', async function() {
+      let userName = 'User';
+
+      // Try to get user from currentUser first
       if (currentUser) {
-        // Use the user's name if available, otherwise use email
-        const userName = currentUser.name || currentUser.email || 'User';
-        authorNameInput.value = userName;
-        // Trigger change event in case anything listens to it
-        authorNameInput.dispatchEvent(new Event('change', { bubbles: true }));
-      } else {
-        // Fallback if user info not available
-        authorNameInput.value = 'User';
+        // Handle various user object formats from different OAuth providers
+        userName = currentUser.name ||
+                   currentUser.displayName ||
+                   currentUser.full_name ||
+                   currentUser.username ||
+                   (currentUser.email ? currentUser.email.split('@')[0] : null) ||
+                   'User';
       }
+
+      // If currentUser is not set, try to fetch from DashboardAuth
+      if (userName === 'User' && window.DashboardAuth) {
+        try {
+          const user = await window.DashboardAuth.getUser();
+          if (user) {
+            userName = user.name ||
+                       user.displayName ||
+                       user.full_name ||
+                       user.username ||
+                       (user.email ? user.email.split('@')[0] : null) ||
+                       'User';
+            // Update currentUser for future calls
+            currentUser = user;
+          }
+        } catch (error) {
+          console.warn('Failed to get user for Myself button:', error);
+        }
+      }
+
+      console.log('[MyselfBtn] Setting author name to:', userName);
+      authorNameInput.value = userName;
+      // Trigger change event in case anything listens to it
+      authorNameInput.dispatchEvent(new Event('change', { bubbles: true }));
       // Focus the input after filling
       authorNameInput.focus();
     });
@@ -1186,7 +1237,10 @@
 
     try {
       // Fetch user's artwork history
-      const response = await fetch(`${window.ArtorizeConfig?.ROUTER_URL || 'https://router.artorizer.com'}/artworks/me?limit=5&skip=0`, {
+      const apiUrl = window.ArtorizeConfig?.ROUTER_URL || 'https://router.artorizer.com';
+      console.log('[EditingHistory] Fetching from:', `${apiUrl}/artworks/me?limit=5&skip=0`);
+
+      const response = await fetch(`${apiUrl}/artworks/me?limit=5&skip=0`, {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -1194,19 +1248,36 @@
         }
       });
 
+      console.log('[EditingHistory] Response status:', response.status);
+
       if (!response.ok) {
-        console.warn('Failed to fetch editing history:', response.status);
+        console.warn('[EditingHistory] Failed to fetch:', response.status);
+        renderHistoryItems(historyList, []);
         return;
       }
 
       const data = await response.json();
-      editingHistory = data.artworks || data || [];
+      console.log('[EditingHistory] API response:', data);
+
+      // Handle different response formats
+      if (Array.isArray(data)) {
+        editingHistory = data;
+      } else if (data.artworks && Array.isArray(data.artworks)) {
+        editingHistory = data.artworks;
+      } else if (data.data && Array.isArray(data.data)) {
+        editingHistory = data.data;
+      } else {
+        editingHistory = [];
+      }
+
+      console.log('[EditingHistory] Parsed history items:', editingHistory.length);
 
       // Render history items
       renderHistoryItems(historyList, editingHistory);
 
     } catch (error) {
-      console.warn('Error fetching editing history:', error);
+      console.warn('[EditingHistory] Error fetching:', error);
+      renderHistoryItems(historyList, []);
     }
   }
 
