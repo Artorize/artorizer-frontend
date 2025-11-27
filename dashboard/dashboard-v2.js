@@ -19,6 +19,8 @@
     protected: null,
     mask: null
   };
+  let completedSteps = new Set();
+  let lastProcessedProtection = null;
 
   // Wait for DOM to be fully loaded
   document.addEventListener('DOMContentLoaded', async function() {
@@ -57,6 +59,8 @@
     initializeDownloadButtons();
     initializeSidebarToggle();
     initializeUserMenu();
+    initializeMyselfButton();
+    initializeEditingHistory();
 
     console.log('Artorize Dashboard V2 initialized successfully');
   });
@@ -200,19 +204,34 @@
 
     function updateIndicator(activeButton) {
       if (!indicator || !activeButton) return;
-      
+
       const left = activeButton.offsetLeft;
       const width = activeButton.offsetWidth;
-      
+
       indicator.style.left = `${left}px`;
       indicator.style.width = `${width}px`;
     }
 
-    // Initialize indicator position
-    const activeBtn = document.querySelector('[role="tab"][data-state="active"]');
-    if (activeBtn) {
-        // Use setTimeout to ensure layout is stable
-        setTimeout(() => updateIndicator(activeBtn), 0);
+    // Initialize indicator position with multiple attempts to ensure layout is ready
+    function initIndicator() {
+      const activeBtn = document.querySelector('[role="tab"][data-state="active"]');
+      if (activeBtn) {
+        updateIndicator(activeBtn);
+      }
+    }
+
+    // Try immediately
+    initIndicator();
+
+    // Try after DOM is stable
+    setTimeout(initIndicator, 0);
+
+    // Try after transitions/animations might complete
+    setTimeout(initIndicator, 100);
+
+    // Also update on window load to catch any late-loading elements
+    if (document.readyState === 'loading') {
+      window.addEventListener('load', initIndicator);
     }
 
     tabButtons.forEach(button => {
@@ -247,10 +266,32 @@
     });
     
     // Update on window resize
+    let resizeTimeout;
     window.addEventListener('resize', () => {
-        const currentActive = document.querySelector('[role="tab"][data-state="active"]');
-        if (currentActive) updateIndicator(currentActive);
+        // Debounce resize updates
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            const currentActive = document.querySelector('[role="tab"][data-state="active"]');
+            if (currentActive) updateIndicator(currentActive);
+        }, 50);
     });
+
+    // Also observe the sidebar for width changes
+    const sidebar = document.querySelector('[aria-expanded]');
+    if (sidebar) {
+      const sidebarObserver = new MutationObserver(() => {
+        // Sidebar state changed, update indicator after transition
+        setTimeout(() => {
+          const currentActive = document.querySelector('[role="tab"][data-state="active"]');
+          if (currentActive) updateIndicator(currentActive);
+        }, 150); // Wait for sidebar transition to complete
+      });
+
+      sidebarObserver.observe(sidebar, {
+        attributes: true,
+        attributeFilter: ['aria-expanded']
+      });
+    }
   }
 
   /**
@@ -304,6 +345,9 @@
     protectButton.setAttribute('data-loading', 'true');
 
     try {
+      // Reset progress tracker for new job
+      resetProgressTracker();
+
       // Prepare form data
       const formData = {
         imageFile: selectedFile,
@@ -395,11 +439,12 @@
     const updateSlider = (x) => {
         const rect = container.getBoundingClientRect();
         if (rect.width === 0) return;
-        
+
         let percentage = ((x - rect.left) / rect.width) * 100;
         percentage = Math.max(0, Math.min(100, percentage));
-        
+
         overlay.style.width = `${percentage}%`;
+        // Slider uses transform: translateX(-50%) so left % works correctly
         slider.style.left = `${percentage}%`;
     };
 
@@ -485,7 +530,7 @@
          comparisonOverlay.style.display = 'block';
          
          // Show Slider
-         comparisonSlider.style.display = 'flex';
+         comparisonSlider.style.display = 'block';
          
          // Enable Download
          if (downloadBtn) {
@@ -522,6 +567,15 @@
   }
 
   /**
+   * Reset progress tracker for a new job
+   */
+  function resetProgressTracker() {
+    completedSteps.clear();
+    lastProcessedProtection = null;
+    console.log('[Progress Tracker] Reset completed steps');
+  }
+
+  /**
    * Update progress tracker based on router callbacks
    *
    * This function processes status updates from the Artorizer router and updates
@@ -543,8 +597,10 @@
    *     }
    *   },
    *   progress?: {
-   *     current_step: string,
-   *     percentage: number
+   *     current_step: string,  // e.g., "Processing imagehash"
+   *     step_number: number,   // Current step number (1-based)
+   *     total_steps: number,   // Total number of steps
+   *     percentage: number     // Overall percentage (0-100)
    *   }
    * }
    *
@@ -565,63 +621,139 @@
     // Protection types match the data-protection attributes in the HTML
     const stepToProtectionMap = {
       'upload': 'upload',
+      'metadata': 'upload',
+      'imagehash': 'upload',
+      'dhash': 'upload',
       'grid': 'fawkes',  // Grid processing maps to Fawkes cloaking
       'poison': 'nightshade',  // Poison processing maps to Nightshade
       'watermark': 'watermark',
       'c2pa': 'c2pa',
       'photoguard': 'photoguard',
-      'mist': 'mist'
+      'mist': 'mist',
+      'fawkes': 'fawkes',  // Direct mapping
+      'nightshade': 'nightshade'  // Direct mapping
     };
 
-    // Parse the status to identify completed and in-progress steps
-    const steps = status.steps || {};
-    const currentStep = status.current_step || '';
+    // Check if we have the new progress format
+    const progress = status.progress || {};
+    if (progress.current_step && progress.step_number) {
+      // Parse the current step name (remove "Processing " prefix if present)
+      let currentStepName = progress.current_step;
+      if (currentStepName.toLowerCase().startsWith('processing ')) {
+        currentStepName = currentStepName.substring(11); // Remove "Processing " (11 chars)
+      }
+      // Normalize to lowercase for consistent mapping
+      currentStepName = currentStepName.toLowerCase().trim();
 
-    // Update each step based on its status
-    Object.entries(steps).forEach(([stepName, stepData]) => {
-      const protection = stepToProtectionMap[stepName];
-      if (!protection) return;
+      const stepNumber = progress.step_number;
+      const percentage = progress.percentage || 0;
 
-      const stepStatus = stepData.status || '';
-      const duration = stepData.duration ? `${stepData.duration.toFixed(1)}s` : null;
+      console.log('[Progress Tracker] Parsed step:', {
+        originalStep: progress.current_step,
+        parsedStep: currentStepName,
+        stepNumber: stepNumber,
+        percentage: percentage
+      });
 
-      // Map status to progress step status
-      if (stepStatus === 'completed' || stepStatus === 'success') {
-        // Call the global updateProgressStep function from HTML
-        if (typeof window.updateProgressStep === 'function') {
-          window.updateProgressStep(protection, 'success', duration);
+      // Map step name to protection type
+      const currentProtection = stepToProtectionMap[currentStepName];
+
+      if (currentProtection) {
+        // If we're tracking a different protection than before, mark the previous one as completed
+        if (lastProcessedProtection && lastProcessedProtection !== currentProtection && !completedSteps.has(lastProcessedProtection)) {
+          console.log('[Progress Tracker] Step transition: completing previous step:', lastProcessedProtection);
+          if (typeof window.updateProgressStep === 'function') {
+            window.updateProgressStep(lastProcessedProtection, 'success');
+            completedSteps.add(lastProcessedProtection);
+          }
         }
-      } else if (stepStatus === 'processing' || stepStatus === 'in-progress') {
-        if (typeof window.updateProgressStep === 'function') {
-          window.updateProgressStep(protection, 'in-progress');
-        }
-      } else if (stepStatus === 'failed' || stepStatus === 'error') {
-        const errorMsg = stepData.error || 'Failed';
-        if (typeof window.updateProgressStep === 'function') {
-          window.updateProgressStep(protection, 'error', errorMsg);
+
+        // Mark current step as in-progress if not already completed
+        if (!completedSteps.has(currentProtection)) {
+          console.log('[Progress Tracker] Updating step:', currentProtection, 'to in-progress');
+          if (typeof window.updateProgressStep === 'function') {
+            window.updateProgressStep(currentProtection, 'in-progress');
+          }
+          lastProcessedProtection = currentProtection;
         }
       }
-    });
 
-    // If we have a current step, mark it as in-progress
-    if (currentStep) {
-      const currentProtection = stepToProtectionMap[currentStep];
-      if (currentProtection && typeof window.updateProgressStep === 'function') {
-        // Only mark as in-progress if not already completed
-        const stepData = steps[currentStep] || {};
-        if (stepData.status !== 'completed' && stepData.status !== 'success') {
-          window.updateProgressStep(currentProtection, 'in-progress');
+      // If percentage is 100 or status is completed, mark current step as complete
+      if (percentage >= 100 || status.status === 'completed') {
+        if (currentProtection && !completedSteps.has(currentProtection)) {
+          console.log('[Progress Tracker] Completing step:', currentProtection);
+          if (typeof window.updateProgressStep === 'function') {
+            window.updateProgressStep(currentProtection, 'success');
+            completedSteps.add(currentProtection);
+          }
         }
+      }
+    }
+
+    // Backward compatibility: check for old format with status.steps
+    const steps = status.steps || {};
+    if (Object.keys(steps).length > 0) {
+      const currentStep = status.current_step || '';
+
+      // Update each step based on its status
+      Object.entries(steps).forEach(([stepName, stepData]) => {
+        const protection = stepToProtectionMap[stepName];
+        if (!protection) return;
+
+        const stepStatus = stepData.status || '';
+        const duration = stepData.duration ? `${stepData.duration.toFixed(1)}s` : null;
+
+        // Map status to progress step status
+        if (stepStatus === 'completed' || stepStatus === 'success') {
+          // Call the global updateProgressStep function from HTML
+          if (typeof window.updateProgressStep === 'function') {
+            window.updateProgressStep(protection, 'success', duration);
+            completedSteps.add(protection);
+          }
+        } else if (stepStatus === 'processing' || stepStatus === 'in-progress') {
+          if (typeof window.updateProgressStep === 'function') {
+            window.updateProgressStep(protection, 'in-progress');
+          }
+        } else if (stepStatus === 'failed' || stepStatus === 'error') {
+          const errorMsg = stepData.error || 'Failed';
+          if (typeof window.updateProgressStep === 'function') {
+            window.updateProgressStep(protection, 'error', errorMsg);
+          }
+        }
+      });
+
+      // If we have a current step, mark it as in-progress
+      if (currentStep) {
+        const currentProtection = stepToProtectionMap[currentStep];
+        if (currentProtection && typeof window.updateProgressStep === 'function') {
+          // Only mark as in-progress if not already completed
+          const stepData = steps[currentStep] || {};
+          if (stepData.status !== 'completed' && stepData.status !== 'success') {
+            window.updateProgressStep(currentProtection, 'in-progress');
+          }
+        }
+      }
+    }
+
+    // When job is completed, mark the last tracked step as complete
+    if (status.status === 'completed' && lastProcessedProtection && !completedSteps.has(lastProcessedProtection)) {
+      console.log('[Progress Tracker] Job completed, marking final step as success:', lastProcessedProtection);
+      if (typeof window.updateProgressStep === 'function') {
+        window.updateProgressStep(lastProcessedProtection, 'success');
+        completedSteps.add(lastProcessedProtection);
       }
     }
 
     // Show percentage if available
-    const progress = status.progress || {};
-    const percentage = progress.percentage || 0;
-    if (percentage > 0) {
-      console.log(`Progress: ${currentStep} - ${Math.round(percentage)}%`);
+    const progressPercentage = progress.percentage || 0;
+    if (progressPercentage > 0) {
+      const currentStepDisplay = progress.current_step || status.current_step || 'Processing';
+      console.log(`Progress: ${currentStepDisplay} - ${Math.round(progressPercentage)}%`);
     }
   }
+
+  // Expose resetProgressTracker to window scope
+  window.resetProgressTracker = resetProgressTracker;
 
   /**
    * Initialize download buttons
@@ -826,15 +958,52 @@
       return;
     }
 
-    // Create user menu dropdown
+    // Create user menu dropdown and append to body to avoid clipping
     const menuDropdown = createUserMenuDropdown();
-    userMenuButton.parentElement.appendChild(menuDropdown);
+    document.body.appendChild(menuDropdown);
+
+    // Position dropdown relative to button
+    function positionDropdown() {
+      const buttonRect = userMenuButton.getBoundingClientRect();
+      const dropdownRect = menuDropdown.getBoundingClientRect();
+
+      // Position to the right of the button
+      menuDropdown.style.left = `${buttonRect.right + 8}px`;
+      // Align bottom of dropdown with bottom of button
+      menuDropdown.style.top = `${buttonRect.bottom - dropdownRect.height}px`;
+
+      // Make sure it doesn't go off screen
+      const viewportHeight = window.innerHeight;
+      const dropdownBottom = parseFloat(menuDropdown.style.top) + dropdownRect.height;
+      if (dropdownBottom > viewportHeight - 10) {
+        menuDropdown.style.top = `${viewportHeight - dropdownRect.height - 10}px`;
+      }
+      if (parseFloat(menuDropdown.style.top) < 10) {
+        menuDropdown.style.top = '10px';
+      }
+    }
+
+    // Find the chevron icon container
+    const chevronContainer = userMenuButton.querySelector('.flex.h-4.w-4');
 
     // Toggle menu on click
     userMenuButton.addEventListener('click', function(e) {
       e.stopPropagation();
       const isOpen = menuDropdown.style.display !== 'none';
-      menuDropdown.style.display = isOpen ? 'none' : 'block';
+      if (!isOpen) {
+        menuDropdown.style.display = 'block';
+        positionDropdown();
+        // Rotate chevron 180 degrees when opening (from 90 to 270)
+        if (chevronContainer) {
+          chevronContainer.style.transform = 'rotate(270deg)';
+        }
+      } else {
+        menuDropdown.style.display = 'none';
+        // Reset chevron to default 90 degrees when closing
+        if (chevronContainer) {
+          chevronContainer.style.transform = 'rotate(90deg)';
+        }
+      }
       userMenuButton.setAttribute('data-state', isOpen ? 'closed' : 'open');
       userMenuButton.setAttribute('aria-expanded', !isOpen);
     });
@@ -845,7 +1014,16 @@
         menuDropdown.style.display = 'none';
         userMenuButton.setAttribute('data-state', 'closed');
         userMenuButton.setAttribute('aria-expanded', 'false');
+        // Reset chevron rotation when closing via outside click
+        if (chevronContainer) {
+          chevronContainer.style.transform = 'rotate(90deg)';
+        }
       }
+    });
+
+    // Reposition on scroll/resize
+    window.addEventListener('resize', () => {
+      if (menuDropdown.style.display !== 'none') positionDropdown();
     });
   }
 
@@ -855,50 +1033,94 @@
   function createUserMenuDropdown() {
     const dropdown = document.createElement('div');
     dropdown.id = 'user-menu-dropdown';
-    dropdown.className = 'absolute left-full bottom-0 ml-2 min-w-[220px] rounded-xl border border-gray-200 bg-background shadow-xl z-[9999]';
-    dropdown.style.display = 'none';
+    dropdown.style.cssText = `
+      position: fixed;
+      min-width: 200px;
+      background: #ffffff;
+      border: 1px solid var(--gray-alpha-200, rgba(0,0,0,0.08));
+      border-radius: 10px;
+      z-index: 9999;
+      display: none;
+      padding: 4px;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.04);
+    `;
 
-    const userName = currentUser?.name || currentUser?.email?.split('@')[0] || 'User';
-    const userEmail = currentUser?.email || '';
+    // Button styles matching sidebar exactly: text-sm font-medium text-gray-600
+    // gap-2 (8px), px-1.5 (6px), h-8 (32px), rounded-lg, icon 1.25rem (20px)
+    const buttonStyle = `
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 6px;
+      height: 32px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #4b5563;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.15s, color 0.15s;
+    `;
 
     dropdown.innerHTML = `
-      <div class="py-2">
-        <!-- User info header -->
-        <div class="px-4 py-3 border-b border-gray-100">
-          <p class="text-sm font-medium text-foreground truncate" data-dropdown-user-name>${userName}</p>
-          <p class="text-xs text-gray-500 truncate" data-dropdown-user-email>${userEmail}</p>
+      <button data-action="editing-history" class="user-menu-item" style="${buttonStyle}"
+        onmouseover="this.style.background='rgba(0,0,0,0.05)'; this.style.color='var(--gray-alpha-950, #111)'"
+        onmouseout="this.style.background='transparent'; this.style.color='#4b5563'">
+        <div style="display: flex; align-items: center; justify-content: center; height: 32px; width: 20px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="1.25rem" height="1.25rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+            <path d="M3 3v5h5"></path>
+            <path d="M12 7v5l4 2"></path>
+          </svg>
         </div>
+        <span style="white-space: nowrap;">Editing history</span>
+      </button>
 
-        <!-- Menu items -->
-        <div class="py-1">
-          <button data-action="settings"
-                  class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-gray-50 transition-colors text-left">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500">
-              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
-              <circle cx="12" cy="12" r="3"></circle>
-            </svg>
-            Settings
-          </button>
-
-          <button data-action="sign-out"
-                  class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors text-left">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-              <polyline points="16 17 21 12 16 7"></polyline>
-              <line x1="21" y1="12" x2="9" y2="12"></line>
-            </svg>
-            Sign out
-          </button>
+      <button data-action="settings" class="user-menu-item" style="${buttonStyle}"
+        onmouseover="this.style.background='rgba(0,0,0,0.05)'; this.style.color='var(--gray-alpha-950, #111)'"
+        onmouseout="this.style.background='transparent'; this.style.color='#4b5563'">
+        <div style="display: flex; align-items: center; justify-content: center; height: 32px; width: 20px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="1.25rem" height="1.25rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
         </div>
-      </div>
+        <span style="white-space: nowrap;">Settings</span>
+      </button>
+
+      <button data-action="sign-out" class="user-menu-item" style="${buttonStyle}"
+        onmouseover="this.style.background='rgba(0,0,0,0.05)'; this.style.color='var(--gray-alpha-950, #111)'"
+        onmouseout="this.style.background='transparent'; this.style.color='#4b5563'">
+        <div style="display: flex; align-items: center; justify-content: center; height: 32px; width: 20px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="1.25rem" height="1.25rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+        </div>
+        <span style="white-space: nowrap;">Sign out</span>
+      </button>
     `;
+
+    // Add editing history handler
+    const historyBtn = dropdown.querySelector('[data-action="editing-history"]');
+    if (historyBtn) {
+      historyBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        // Navigate to editing history page
+        window.location.href = '/dashboard/history.html';
+      });
+    }
 
     // Add settings handler
     const settingsBtn = dropdown.querySelector('[data-action="settings"]');
     if (settingsBtn) {
       settingsBtn.addEventListener('click', function(e) {
         e.preventDefault();
-        // Navigate to settings page or open settings modal
+        // Navigate to settings page
         window.location.href = '/dashboard/settings.html';
       });
     }
@@ -918,6 +1140,153 @@
     }
 
     return dropdown;
+  }
+
+  /**
+   * Initialize "Myself" button for author name
+   */
+  function initializeMyselfButton() {
+    const myselfBtn = document.getElementById('myself-btn');
+    const authorNameInput = document.getElementById('author-name');
+
+    if (!myselfBtn || !authorNameInput) {
+      console.warn('Myself button or author name input not found');
+      return;
+    }
+
+    myselfBtn.addEventListener('click', function() {
+      if (currentUser) {
+        // Use the user's name if available, otherwise use email
+        const userName = currentUser.name || currentUser.email || 'User';
+        authorNameInput.value = userName;
+        // Trigger change event in case anything listens to it
+        authorNameInput.dispatchEvent(new Event('change', { bubbles: true }));
+      } else {
+        // Fallback if user info not available
+        authorNameInput.value = 'User';
+      }
+      // Focus the input after filling
+      authorNameInput.focus();
+    });
+  }
+
+  /**
+   * Initialize editing history in sidebar
+   * Fetches user's artwork history and displays in sidebar
+   */
+  async function initializeEditingHistory() {
+    const historyList = document.getElementById('editing-history-list');
+    if (!historyList) {
+      console.warn('Editing history list element not found');
+      return;
+    }
+
+    // Store history globally for access
+    let editingHistory = [];
+
+    try {
+      // Fetch user's artwork history
+      const response = await fetch(`${window.ArtorizeConfig?.ROUTER_URL || 'https://router.artorizer.com'}/artworks/me?limit=5&skip=0`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        console.warn('Failed to fetch editing history:', response.status);
+        return;
+      }
+
+      const data = await response.json();
+      editingHistory = data.artworks || data || [];
+
+      // Render history items
+      renderHistoryItems(historyList, editingHistory);
+
+    } catch (error) {
+      console.warn('Error fetching editing history:', error);
+    }
+  }
+
+  /**
+   * Render history items in the sidebar list
+   */
+  function renderHistoryItems(container, items) {
+    container.innerHTML = '';
+
+    if (!items || items.length === 0) {
+      container.innerHTML = `
+        <li class="text-xs text-gray-alpha-400 ml-3 py-1 group-aria-expanded/sidebar:opacity-100 opacity-0 transition-opacity duration-150">
+          No history yet
+        </li>
+      `;
+      return;
+    }
+
+    items.forEach((item, index) => {
+      const li = document.createElement('li');
+      li.className = 'group w-full';
+
+      // Get the image name - use artwork_title, original filename, or fallback
+      const imageName = item.artwork_title || item.original_filename || `Image #${index + 1}`;
+
+      li.innerHTML = `
+        <button
+          class="history-item-btn block w-full text-left rounded-lg outline-foreground"
+          data-job-id="${item.job_id || item.id || ''}"
+          data-index="${index}">
+          <div class="relative group rounded-lg overflow-hidden bg-transparent transition-all duration-150 w-[calc(var(--eleven-sidebar-width)-1.8125rem)] hover:text-gray-alpha-950 hover:bg-gray-alpha-100 text-gray-500">
+            <div class="flex items-center gap-2 px-1.5 min-w-36 ml-2">
+              <div class="flex items-center justify-between flex-1 h-7 transition-all duration-150 group-aria-expanded/sidebar:opacity-70 opacity-0 translate-x-1 group-aria-expanded/sidebar:translate-x-0">
+                <p class="text-sm whitespace-nowrap max-w-[160px] truncate">
+                  ${escapeHtml(imageName)}
+                </p>
+              </div>
+            </div>
+          </div>
+        </button>
+      `;
+
+      // Add click handler to load the protected image
+      const btn = li.querySelector('.history-item-btn');
+      btn.addEventListener('click', function() {
+        const jobId = this.dataset.jobId;
+        if (jobId) {
+          loadHistoryItem(jobId, item);
+        }
+      });
+
+      container.appendChild(li);
+    });
+  }
+
+  /**
+   * Escape HTML to prevent XSS
+   */
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  /**
+   * Load a history item's protected image
+   */
+  async function loadHistoryItem(jobId, item) {
+    console.log('Loading history item:', jobId, item);
+
+    // Navigate to view the protected image
+    // For now, we'll just log - this can be expanded to show a modal or navigate to a view page
+    if (item.protected_url || item.cdn_urls?.protected) {
+      const protectedUrl = item.protected_url || item.cdn_urls?.protected;
+      window.open(protectedUrl, '_blank');
+    } else {
+      // Try to construct URL from job_id
+      const cdnUrl = window.ArtorizeConfig?.CDN_URL || 'https://cdn.artorizer.com';
+      window.open(`${cdnUrl}/protected/${jobId}.jpg`, '_blank');
+    }
   }
 
 })();

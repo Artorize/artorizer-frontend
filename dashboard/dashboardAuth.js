@@ -266,6 +266,17 @@
    */
   async function initDashboardAuth() {
     console.log('[DashboardAuth] Initializing...');
+
+    // LOCAL DEBUG MODE: Skip auth on localhost for UI testing
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (isLocalhost) {
+      console.log('[DashboardAuth] Local debug mode - skipping auth');
+      // Provide mock user for local testing
+      const mockUser = { name: 'Local Dev', email: 'dev@localhost', image: null };
+      updateUserProfileUI(mockUser);
+      return { user: mockUser, session: { token: 'local-debug' } };
+    }
+
     showAuthLoading();
 
     try {
