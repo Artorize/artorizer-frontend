@@ -30,12 +30,16 @@
     if (window.DashboardAuth) {
       try {
         const session = await window.DashboardAuth.init();
+        console.log('[Auth] Session response:', session);
         if (!session) {
           // User is being redirected to login
           return;
         }
-        currentUser = session.user;
-        console.log('User authenticated:', currentUser.email);
+        // Extract user from session - handle nested structure {session: {...}, user: {...}}
+        currentUser = session.user || session;
+        console.log('[Auth] User authenticated:', currentUser);
+        console.log('[Auth] User name:', currentUser?.name);
+        console.log('[Auth] User email:', currentUser?.email);
       } catch (error) {
         console.error('Authentication check failed:', error);
         // Continue without auth if DashboardAuth throws
@@ -1180,10 +1184,13 @@
     }
 
     myselfBtn.addEventListener('click', async function() {
+      console.log('[MyselfBtn] Button clicked, currentUser:', currentUser);
+
       let userName = 'User';
 
       // Try to get user from currentUser first
       if (currentUser) {
+        console.log('[MyselfBtn] currentUser.name:', currentUser.name);
         // Handle various user object formats from different OAuth providers
         userName = currentUser.name ||
                    currentUser.displayName ||
@@ -1193,10 +1200,17 @@
                    'User';
       }
 
-      // If currentUser is not set, try to fetch from DashboardAuth
-      if (userName === 'User' && window.DashboardAuth) {
+      // If currentUser is not set or name is still 'User', try to fetch from DashboardAuth
+      if ((!currentUser || userName === 'User') && window.DashboardAuth) {
         try {
-          const user = await window.DashboardAuth.getUser();
+          console.log('[MyselfBtn] Fetching user from DashboardAuth...');
+          const session = await window.DashboardAuth.getSession();
+          console.log('[MyselfBtn] Session response:', session);
+
+          // Extract user from session - handle nested structure
+          const user = session?.user || session;
+          console.log('[MyselfBtn] Extracted user:', user);
+
           if (user) {
             userName = user.name ||
                        user.displayName ||
@@ -1208,11 +1222,11 @@
             currentUser = user;
           }
         } catch (error) {
-          console.warn('Failed to get user for Myself button:', error);
+          console.warn('[MyselfBtn] Failed to get user:', error);
         }
       }
 
-      console.log('[MyselfBtn] Setting author name to:', userName);
+      console.log('[MyselfBtn] Final userName:', userName);
       authorNameInput.value = userName;
       // Trigger change event in case anything listens to it
       authorNameInput.dispatchEvent(new Event('change', { bubbles: true }));
@@ -1285,9 +1299,11 @@
    * Render history items in the sidebar list
    */
   function renderHistoryItems(container, items) {
+    console.log('[EditingHistory] Rendering items:', items);
     container.innerHTML = '';
 
     if (!items || items.length === 0) {
+      console.log('[EditingHistory] No items to render');
       container.innerHTML = `
         <li class="text-xs text-gray-alpha-400 ml-3 py-1 group-aria-expanded/sidebar:opacity-100 opacity-0 transition-opacity duration-150">
           No history yet
@@ -1297,16 +1313,27 @@
     }
 
     items.forEach((item, index) => {
+      console.log('[EditingHistory] Rendering item', index, ':', item);
+
       const li = document.createElement('li');
       li.className = 'group w-full';
 
-      // Get the image name - use artwork_title, original filename, or fallback
-      const imageName = item.artwork_title || item.original_filename || `Image #${index + 1}`;
+      // Get the image name - try multiple possible field names
+      const imageName = item.artwork_title ||
+                        item.artworkTitle ||
+                        item.title ||
+                        item.original_filename ||
+                        item.originalFilename ||
+                        item.filename ||
+                        item.name ||
+                        `Image #${index + 1}`;
+
+      console.log('[EditingHistory] Image name:', imageName);
 
       li.innerHTML = `
         <button
           class="history-item-btn block w-full text-left rounded-lg outline-foreground"
-          data-job-id="${item.job_id || item.id || ''}"
+          data-job-id="${item.job_id || item.jobId || item.id || item._id || ''}"
           data-index="${index}">
           <div class="relative group rounded-lg overflow-hidden bg-transparent transition-all duration-150 w-[calc(var(--eleven-sidebar-width)-1.8125rem)] hover:text-gray-alpha-950 hover:bg-gray-alpha-100 text-gray-500">
             <div class="flex items-center gap-2 px-1.5 min-w-36 ml-2">
@@ -1331,6 +1358,8 @@
 
       container.appendChild(li);
     });
+
+    console.log('[EditingHistory] Rendered', items.length, 'items');
   }
 
   /**
