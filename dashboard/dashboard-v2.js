@@ -1237,24 +1237,34 @@
 
   /**
    * Initialize editing history in sidebar
-   * Fetches user's artwork history and displays in sidebar
+   * Fetches user's artwork history from /artworks/me endpoint and displays in sidebar
+   *
+   * API Reference (from docs/ROUTER-API.md):
+   * - GET /artworks/me - Returns user's artwork history (requires authentication)
+   * - GET /auth/me - Returns only user info {user, session} - NO history data
    */
   async function initializeEditingHistory() {
     const historyList = document.getElementById('editing-history-list');
     if (!historyList) {
-      console.warn('Editing history list element not found');
+      console.warn('[EditingHistory] History list element not found');
       return;
     }
 
     // Store history globally for access
     let editingHistory = [];
+    const apiUrl = window.ArtorizeConfig?.ROUTER_URL || 'https://router.artorizer.com';
+
+    console.log('[EditingHistory] ========================================');
+    console.log('[EditingHistory] FETCHING USER HISTORY');
+    console.log('[EditingHistory] ========================================');
+    console.log('[EditingHistory] API URL:', apiUrl);
 
     try {
-      // Fetch user's artwork history
-      const apiUrl = window.ArtorizeConfig?.ROUTER_URL || 'https://router.artorizer.com';
-      console.log('[EditingHistory] Fetching from:', `${apiUrl}/artworks/me?limit=5&skip=0`);
+      // Fetch user's artwork history from /artworks/me
+      const historyUrl = `${apiUrl}/artworks/me?limit=5&skip=0`;
+      console.log('[EditingHistory] Fetching from:', historyUrl);
 
-      const response = await fetch(`${apiUrl}/artworks/me?limit=5&skip=0`, {
+      const response = await fetch(historyUrl, {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -1263,34 +1273,70 @@
       });
 
       console.log('[EditingHistory] Response status:', response.status);
+      console.log('[EditingHistory] Response ok:', response.ok);
 
       if (!response.ok) {
-        console.warn('[EditingHistory] Failed to fetch:', response.status);
+        const errorText = await response.text();
+        console.error('[EditingHistory] Error response:', errorText);
         renderHistoryItems(historyList, []);
         return;
       }
 
       const data = await response.json();
-      console.log('[EditingHistory] API response:', data);
+
+      // Log the complete raw response for debugging
+      console.log('[EditingHistory] ========================================');
+      console.log('[EditingHistory] RAW API RESPONSE:');
+      console.log('[EditingHistory] ========================================');
+      console.log(JSON.stringify(data, null, 2));
+      console.log('[EditingHistory] ========================================');
+
+      // Also log to make it easy to copy from console
+      console.log('[EditingHistory] Response type:', typeof data);
+      console.log('[EditingHistory] Is array:', Array.isArray(data));
+      console.log('[EditingHistory] Has artworks field:', !!data?.artworks);
+      console.log('[EditingHistory] Has data field:', !!data?.data);
+      console.log('[EditingHistory] Has items field:', !!data?.items);
+      console.log('[EditingHistory] Object keys:', data ? Object.keys(data) : 'null');
 
       // Handle different response formats
       if (Array.isArray(data)) {
         editingHistory = data;
+        console.log('[EditingHistory] Using direct array response');
       } else if (data.artworks && Array.isArray(data.artworks)) {
         editingHistory = data.artworks;
+        console.log('[EditingHistory] Using data.artworks');
       } else if (data.data && Array.isArray(data.data)) {
         editingHistory = data.data;
+        console.log('[EditingHistory] Using data.data');
+      } else if (data.items && Array.isArray(data.items)) {
+        editingHistory = data.items;
+        console.log('[EditingHistory] Using data.items');
       } else {
+        console.warn('[EditingHistory] Unknown response format, cannot extract history');
         editingHistory = [];
       }
 
-      console.log('[EditingHistory] Parsed history items:', editingHistory.length);
+      console.log('[EditingHistory] ========================================');
+      console.log('[EditingHistory] PARSED HISTORY:');
+      console.log('[EditingHistory] Total items:', editingHistory.length);
+      console.log('[EditingHistory] ========================================');
+
+      if (editingHistory.length > 0) {
+        editingHistory.forEach((item, idx) => {
+          console.log(`[EditingHistory] Item ${idx}:`, JSON.stringify(item, null, 2));
+        });
+      } else {
+        console.log('[EditingHistory] No history items found');
+      }
 
       // Render history items
       renderHistoryItems(historyList, editingHistory);
 
     } catch (error) {
-      console.warn('[EditingHistory] Error fetching:', error);
+      console.error('[EditingHistory] ========================================');
+      console.error('[EditingHistory] FETCH ERROR:', error);
+      console.error('[EditingHistory] ========================================');
       renderHistoryItems(historyList, []);
     }
   }
