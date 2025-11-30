@@ -5,7 +5,7 @@
  * Requires authentication - will redirect to login if not authenticated
  */
 
-(function() {
+(function () {
   'use strict';
 
   // State management
@@ -23,7 +23,7 @@
   let lastProcessedProtection = null;
 
   // Wait for DOM to be fully loaded
-  document.addEventListener('DOMContentLoaded', async function() {
+  document.addEventListener('DOMContentLoaded', async function () {
     console.log('Artorize Dashboard V2 initializing...');
 
     // Check authentication first
@@ -82,23 +82,23 @@
     }
 
     // Click to upload
-    uploadZone.addEventListener('click', function(e) {
+    uploadZone.addEventListener('click', function (e) {
       if (e.target.tagName !== 'INPUT') {
         fileInput.click();
       }
     });
 
     // Drag and drop support
-    uploadZone.addEventListener('dragover', function(e) {
+    uploadZone.addEventListener('dragover', function (e) {
       e.preventDefault();
       uploadZone.classList.add('drag-over');
     });
 
-    uploadZone.addEventListener('dragleave', function() {
+    uploadZone.addEventListener('dragleave', function () {
       uploadZone.classList.remove('drag-over');
     });
 
-    uploadZone.addEventListener('drop', function(e) {
+    uploadZone.addEventListener('drop', function (e) {
       e.preventDefault();
       uploadZone.classList.remove('drag-over');
 
@@ -119,7 +119,7 @@
     });
 
     // File input change handler
-    fileInput.addEventListener('change', function(e) {
+    fileInput.addEventListener('change', function (e) {
       const file = this.files[0];
       if (file) {
         handleFileSelect(file);
@@ -168,7 +168,7 @@
     const uploadZone = document.getElementById('upload-zone');
     const resultsSection = document.getElementById('image-results-section');
     const previewImage = document.getElementById('preview-image');
-    
+
     // Hide slider components just in case
     const protectedImg = document.getElementById('comparison-protected');
     const overlay = document.getElementById('comparison-overlay');
@@ -179,8 +179,8 @@
     if (overlay) overlay.style.display = 'none';
     if (slider) slider.style.display = 'none';
     if (downloadBtn) {
-        downloadBtn.disabled = true;
-        downloadBtn.dataset.loading = 'false';
+      downloadBtn.disabled = true;
+      downloadBtn.dataset.loading = 'false';
     }
 
     if (uploadZone) {
@@ -188,13 +188,13 @@
     }
 
     if (resultsSection && previewImage) {
-       const reader = new FileReader();
-       reader.onload = function(e) {
-          previewImage.src = e.target.result;
-          previewImage.style.display = 'block';
-          resultsSection.style.display = 'flex';
-       }
-       reader.readAsDataURL(file);
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        previewImage.src = e.target.result;
+        previewImage.style.display = 'block';
+        resultsSection.style.display = 'flex';
+      }
+      reader.readAsDataURL(file);
     }
   }
 
@@ -239,7 +239,7 @@
     }
 
     tabButtons.forEach(button => {
-      button.addEventListener('click', function() {
+      button.addEventListener('click', function () {
         const targetId = this.getAttribute('aria-controls');
 
         // Update button states
@@ -250,7 +250,7 @@
 
         this.setAttribute('aria-selected', 'true');
         this.setAttribute('data-state', 'active');
-        
+
         // Update indicator
         updateIndicator(this);
 
@@ -268,16 +268,16 @@
         });
       });
     });
-    
+
     // Update on window resize
     let resizeTimeout;
     window.addEventListener('resize', () => {
-        // Debounce resize updates
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(() => {
-            const currentActive = document.querySelector('[role="tab"][data-state="active"]');
-            if (currentActive) updateIndicator(currentActive);
-        }, 50);
+      // Debounce resize updates
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        const currentActive = document.querySelector('[role="tab"][data-state="active"]');
+        if (currentActive) updateIndicator(currentActive);
+      }, 50);
     });
 
     // Also observe the sidebar for width changes
@@ -307,7 +307,7 @@
 
     if (fileInput && uploadArea) {
       // Click upload area to trigger file input
-      uploadArea.addEventListener('click', function(e) {
+      uploadArea.addEventListener('click', function (e) {
         if (e.target.tagName !== 'INPUT') {
           fileInput.click();
         }
@@ -433,47 +433,47 @@
     originalImg.style.objectFit = 'cover'; // Ensure it covers the area if aspect ratios slightly mismatch
 
     const syncWidth = () => {
-        if (!container) return;
-        const rect = container.getBoundingClientRect();
-        if (rect.width > 0) {
-             originalImg.style.width = `${rect.width}px`;
-        }
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      if (rect.width > 0) {
+        originalImg.style.width = `${rect.width}px`;
+      }
     };
 
     const updateSlider = (x) => {
-        const rect = container.getBoundingClientRect();
-        if (rect.width === 0) return;
+      const rect = container.getBoundingClientRect();
+      if (rect.width === 0) return;
 
-        let percentage = ((x - rect.left) / rect.width) * 100;
-        percentage = Math.max(0, Math.min(100, percentage));
+      let percentage = ((x - rect.left) / rect.width) * 100;
+      percentage = Math.max(0, Math.min(100, percentage));
 
-        overlay.style.width = `${percentage}%`;
-        // Slider uses transform: translateX(-50%) so left % works correctly
-        slider.style.left = `${percentage}%`;
+      overlay.style.width = `${percentage}%`;
+      // Slider uses transform: translateX(-50%) so left % works correctly
+      slider.style.left = `${percentage}%`;
     };
 
     // Initial sync
     syncWidth();
-    
+
     // Resize observer to keep width synced (handles window resize and image loading)
     const resizeObserver = new ResizeObserver(() => {
-         syncWidth();
+      syncWidth();
     });
     resizeObserver.observe(container);
 
     // Events
     const startDrag = (e) => {
-        isDragging = true;
-        e.preventDefault(); // Prevent selection
+      isDragging = true;
+      e.preventDefault(); // Prevent selection
     };
-    
+
     const stopDrag = () => {
-        isDragging = false;
+      isDragging = false;
     };
-    
+
     const doDrag = (clientX) => {
-        if (!isDragging) return;
-        updateSlider(clientX);
+      if (!isDragging) return;
+      updateSlider(clientX);
     };
 
     slider.addEventListener('mousedown', startDrag);
@@ -483,12 +483,12 @@
     slider.addEventListener('touchstart', startDrag);
     window.addEventListener('touchend', stopDrag);
     window.addEventListener('touchmove', (e) => doDrag(e.touches[0].clientX));
-    
+
     // Click to jump
     container.addEventListener('click', (e) => {
-        // Prevent jumping if clicking the slider handle itself
-        if (e.target === slider || slider.contains(e.target)) return;
-        updateSlider(e.clientX);
+      // Prevent jumping if clicking the slider handle itself
+      if (e.target === slider || slider.contains(e.target)) return;
+      updateSlider(e.clientX);
     });
   }
 
@@ -501,12 +501,12 @@
 
     try {
       showStatus('Downloading images...', 'info');
-      
+
       const [originalBlob, protectedBlob] = await Promise.all([
         uploader.downloadVariant(result.job_id, 'original'),
         uploader.downloadVariant(result.job_id, 'protected')
       ]);
-      
+
       images.original = originalBlob;
       images.protected = protectedBlob;
 
@@ -522,36 +522,36 @@
       const container = document.getElementById('image-comparison-container');
 
       if (resultsSection) {
-         // Hide preview
-         if (previewImage) previewImage.style.display = 'none';
+        // Hide preview
+        if (previewImage) previewImage.style.display = 'none';
 
-         // Setup Protected (Background)
-         comparisonProtected.src = URL.createObjectURL(protectedBlob);
-         comparisonProtected.style.display = 'block';
+        // Setup Protected (Background)
+        comparisonProtected.src = URL.createObjectURL(protectedBlob);
+        comparisonProtected.style.display = 'block';
 
-         // Setup Original (Foreground)
-         comparisonOriginal.src = URL.createObjectURL(originalBlob);
-         comparisonOverlay.style.display = 'block';
-         
-         // Show Slider
-         comparisonSlider.style.display = 'block';
-         
-         // Enable Download
-         if (downloadBtn) {
-             downloadBtn.disabled = false;
-         }
-         
-         // Reset slider to 50%
-         comparisonOverlay.style.width = '50%';
-         comparisonSlider.style.left = '50%';
+        // Setup Original (Foreground)
+        comparisonOriginal.src = URL.createObjectURL(originalBlob);
+        comparisonOverlay.style.display = 'block';
 
-         // Initialize slider
-         initializeSlider(container, comparisonOverlay, comparisonOriginal, comparisonSlider);
-         
-         // Scroll to results
-         setTimeout(() => {
-            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-         }, 300);
+        // Show Slider
+        comparisonSlider.style.display = 'block';
+
+        // Enable Download
+        if (downloadBtn) {
+          downloadBtn.disabled = false;
+        }
+
+        // Reset slider to 50%
+        comparisonOverlay.style.width = '50%';
+        comparisonSlider.style.left = '50%';
+
+        // Initialize slider
+        initializeSlider(container, comparisonOverlay, comparisonOriginal, comparisonSlider);
+
+        // Scroll to results
+        setTimeout(() => {
+          resultsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
       }
 
     } catch (error) {
@@ -898,7 +898,7 @@
     const headerContainer = logoContainer?.parentElement;
 
     // Handle toggle button click
-    toggleButton.addEventListener('click', function(e) {
+    toggleButton.addEventListener('click', function (e) {
       e.stopPropagation();
       const isExpanded = sidebar.getAttribute('aria-expanded') === 'true';
 
@@ -916,7 +916,7 @@
           logoContainer.style.opacity = '0';
           logoContainer.style.position = 'absolute';
         }
-        
+
         // Show and center the expand icon container
         expandIconContainer.style.display = 'flex';
         expandIconContainer.style.position = 'relative';
@@ -925,10 +925,10 @@
         expandIconContainer.style.height = 'var(--eleven-header-height)';
         expandIconContainer.style.transform = 'none';
         expandIconContainer.style.left = 'auto';
-        
+
         // Update toggle button icon to expand icon (though hidden)
         toggleButton.innerHTML = expandSVG;
-        
+
         // Reset toggle button container
         toggleButtonContainer.style.position = 'absolute';
         toggleButtonContainer.style.left = 'auto';
@@ -958,7 +958,7 @@
     });
 
     // Also handle click on expand icon when collapsed
-    expandIconContainer.addEventListener('click', function(e) {
+    expandIconContainer.addEventListener('click', function (e) {
       e.stopPropagation();
       toggleButton.click();
     });
@@ -1028,7 +1028,7 @@
     const chevronContainer = userMenuButton.querySelector('.flex.h-4.w-4');
 
     // Toggle menu on click
-    userMenuButton.addEventListener('click', function(e) {
+    userMenuButton.addEventListener('click', function (e) {
       e.stopPropagation();
       const isOpen = menuDropdown.style.display !== 'none';
       if (!isOpen) {
@@ -1050,7 +1050,7 @@
     });
 
     // Close menu when clicking outside
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
       if (!userMenuButton.contains(e.target) && !menuDropdown.contains(e.target)) {
         menuDropdown.style.display = 'none';
         userMenuButton.setAttribute('data-state', 'closed');
@@ -1149,7 +1149,7 @@
     // Add editing history handler
     const historyBtn = dropdown.querySelector('[data-action="editing-history"]');
     if (historyBtn) {
-      historyBtn.addEventListener('click', function(e) {
+      historyBtn.addEventListener('click', function (e) {
         e.preventDefault();
         // Navigate to editing history page
         window.location.href = '/dashboard/history.html';
@@ -1159,7 +1159,7 @@
     // Add settings handler
     const settingsBtn = dropdown.querySelector('[data-action="settings"]');
     if (settingsBtn) {
-      settingsBtn.addEventListener('click', function(e) {
+      settingsBtn.addEventListener('click', function (e) {
         e.preventDefault();
         // Navigate to settings page
         window.location.href = '/dashboard/settings.html';
@@ -1169,7 +1169,7 @@
     // Add sign-out handler
     const signOutBtn = dropdown.querySelector('[data-action="sign-out"]');
     if (signOutBtn) {
-      signOutBtn.addEventListener('click', async function(e) {
+      signOutBtn.addEventListener('click', async function (e) {
         e.preventDefault();
         if (window.DashboardAuth) {
           await window.DashboardAuth.signOut();
@@ -1195,7 +1195,7 @@
       return;
     }
 
-    myselfBtn.addEventListener('click', async function() {
+    myselfBtn.addEventListener('click', async function () {
       console.log('[MyselfBtn] Button clicked, currentUser:', currentUser);
 
       let userName = 'User';
@@ -1205,11 +1205,11 @@
         console.log('[MyselfBtn] currentUser.name:', currentUser.name);
         // Handle various user object formats from different OAuth providers
         userName = currentUser.name ||
-                   currentUser.displayName ||
-                   currentUser.full_name ||
-                   currentUser.username ||
-                   (currentUser.email ? currentUser.email.split('@')[0] : null) ||
-                   'User';
+          currentUser.displayName ||
+          currentUser.full_name ||
+          currentUser.username ||
+          (currentUser.email ? currentUser.email.split('@')[0] : null) ||
+          'User';
       }
 
       // If currentUser is not set or name is still 'User', try to fetch from DashboardAuth
@@ -1225,11 +1225,11 @@
 
           if (user) {
             userName = user.name ||
-                       user.displayName ||
-                       user.full_name ||
-                       user.username ||
-                       (user.email ? user.email.split('@')[0] : null) ||
-                       'User';
+              user.displayName ||
+              user.full_name ||
+              user.username ||
+              (user.email ? user.email.split('@')[0] : null) ||
+              'User';
             // Update currentUser for future calls
             currentUser = user;
           }
@@ -1262,101 +1262,55 @@
       return;
     }
 
-    // Store history globally for access
-    let editingHistory = [];
     const apiUrl = window.ArtorizeConfig?.ROUTER_URL || 'https://router.artorizer.com';
-
-    console.log('[EditingHistory] ========================================');
-    console.log('[EditingHistory] FETCHING USER HISTORY');
-    console.log('[EditingHistory] ========================================');
-    console.log('[EditingHistory] API URL:', apiUrl);
+    console.log('[EditingHistory] Fetching user history from:', apiUrl);
 
     try {
       // Fetch user's artwork history from /artworks/me
       const historyUrl = `${apiUrl}/artworks/me?limit=5&skip=0`;
-      console.log('[EditingHistory] Fetching from:', historyUrl);
 
       const response = await fetch(historyUrl, {
         method: 'GET',
-        credentials: 'include',
+        credentials: 'include', // Include session cookie
         headers: {
           'Content-Type': 'application/json'
         }
       });
 
-      console.log('[EditingHistory] Response status:', response.status);
-      console.log('[EditingHistory] Response ok:', response.ok);
-
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('[EditingHistory] Error response:', errorText);
-
-        // Handle 404 - endpoint not yet implemented on router
+        // Handle different error types
         if (response.status === 404) {
-          console.warn('[EditingHistory] /artworks/me endpoint not available on router. History feature requires router proxy setup.');
+          console.warn('[EditingHistory] /artworks/me endpoint not available. History feature requires router setup.');
           renderHistoryItems(historyList, [], 'History feature coming soon');
+        } else if (response.status === 401) {
+          console.warn('[EditingHistory] User not authenticated');
+          renderHistoryItems(historyList, [], 'Please log in to view history');
         } else {
-          renderHistoryItems(historyList, []);
+          console.error('[EditingHistory] Error fetching history:', response.status);
+          renderHistoryItems(historyList, [], 'Unable to load history');
         }
         return;
       }
 
       const data = await response.json();
+      console.log('[EditingHistory] Response:', data);
 
-      // Log the complete raw response for debugging
-      console.log('[EditingHistory] ========================================');
-      console.log('[EditingHistory] RAW API RESPONSE:');
-      console.log('[EditingHistory] ========================================');
-      console.log(JSON.stringify(data, null, 2));
-      console.log('[EditingHistory] ========================================');
+      // Extract artworks array from response
+      // Expected format: { artworks: [...], total: number, userId: string }
+      const artworks = data.artworks || [];
 
-      // Also log to make it easy to copy from console
-      console.log('[EditingHistory] Response type:', typeof data);
-      console.log('[EditingHistory] Is array:', Array.isArray(data));
-      console.log('[EditingHistory] Has artworks field:', !!data?.artworks);
-      console.log('[EditingHistory] Has data field:', !!data?.data);
-      console.log('[EditingHistory] Has items field:', !!data?.items);
-      console.log('[EditingHistory] Object keys:', data ? Object.keys(data) : 'null');
-
-      // Handle different response formats
-      if (Array.isArray(data)) {
-        editingHistory = data;
-        console.log('[EditingHistory] Using direct array response');
-      } else if (data.artworks && Array.isArray(data.artworks)) {
-        editingHistory = data.artworks;
-        console.log('[EditingHistory] Using data.artworks');
-      } else if (data.data && Array.isArray(data.data)) {
-        editingHistory = data.data;
-        console.log('[EditingHistory] Using data.data');
-      } else if (data.items && Array.isArray(data.items)) {
-        editingHistory = data.items;
-        console.log('[EditingHistory] Using data.items');
+      if (artworks.length > 0) {
+        console.log(`[EditingHistory] Loaded ${artworks.length} artwork(s)`);
       } else {
-        console.warn('[EditingHistory] Unknown response format, cannot extract history');
-        editingHistory = [];
-      }
-
-      console.log('[EditingHistory] ========================================');
-      console.log('[EditingHistory] PARSED HISTORY:');
-      console.log('[EditingHistory] Total items:', editingHistory.length);
-      console.log('[EditingHistory] ========================================');
-
-      if (editingHistory.length > 0) {
-        editingHistory.forEach((item, idx) => {
-          console.log(`[EditingHistory] Item ${idx}:`, JSON.stringify(item, null, 2));
-        });
-      } else {
-        console.log('[EditingHistory] No history items found');
+        console.log('[EditingHistory] No artworks found');
       }
 
       // Render history items
-      renderHistoryItems(historyList, editingHistory);
+      renderHistoryItems(historyList, artworks);
 
     } catch (error) {
-      console.error('[EditingHistory] ========================================');
-      console.error('[EditingHistory] FETCH ERROR:', error);
-      console.error('[EditingHistory] ========================================');
-      renderHistoryItems(historyList, []);
+      console.error('[EditingHistory] Error:', error.message);
+      renderHistoryItems(historyList, [], 'Failed to load history');
     }
   }
 
@@ -1367,11 +1321,9 @@
    * @param {string} [emptyMessage] - Custom message when no items (defaults to 'No history yet')
    */
   function renderHistoryItems(container, items, emptyMessage = 'No history yet') {
-    console.log('[EditingHistory] Rendering items:', items);
     container.innerHTML = '';
 
     if (!items || items.length === 0) {
-      console.log('[EditingHistory] No items to render');
       container.innerHTML = `
         <li class="text-xs text-gray-alpha-400 ml-3 py-1 group-aria-expanded/sidebar:opacity-100 opacity-0 transition-opacity duration-150">
           ${emptyMessage}
@@ -1381,27 +1333,23 @@
     }
 
     items.forEach((item, index) => {
-      console.log('[EditingHistory] Rendering item', index, ':', item);
-
       const li = document.createElement('li');
       li.className = 'group w-full';
 
-      // Get the image name - try multiple possible field names
-      const imageName = item.artwork_title ||
-                        item.artworkTitle ||
-                        item.title ||
-                        item.original_filename ||
-                        item.originalFilename ||
-                        item.filename ||
-                        item.name ||
-                        `Image #${index + 1}`;
+      // Get the image name - try multiple possible field names from API response
+      const imageName = item.title ||
+        item.artwork_title ||
+        item.artworkTitle ||
+        item.artist ||
+        `Artwork #${index + 1}`;
 
-      console.log('[EditingHistory] Image name:', imageName);
+      // Get the artwork ID - MongoDB ObjectId from the response
+      const artworkId = item._id || item.id || '';
 
       li.innerHTML = `
         <button
           class="history-item-btn block w-full text-left rounded-lg outline-foreground"
-          data-job-id="${item.job_id || item.jobId || item.id || item._id || ''}"
+          data-artwork-id="${artworkId}"
           data-index="${index}">
           <div class="relative group rounded-lg overflow-hidden bg-transparent transition-all duration-150 w-[calc(var(--eleven-sidebar-width)-1.8125rem)] hover:text-gray-alpha-950 hover:bg-gray-alpha-100 text-gray-500">
             <div class="flex items-center gap-2 px-1.5 min-w-36 ml-2">
@@ -1417,17 +1365,17 @@
 
       // Add click handler to load the protected image
       const btn = li.querySelector('.history-item-btn');
-      btn.addEventListener('click', function() {
-        const jobId = this.dataset.jobId;
-        if (jobId) {
-          loadHistoryItem(jobId, item);
+      btn.addEventListener('click', function () {
+        const artworkId = this.dataset.artworkId;
+        if (artworkId) {
+          loadHistoryItem(artworkId, item);
         }
       });
 
       container.appendChild(li);
     });
 
-    console.log('[EditingHistory] Rendered', items.length, 'items');
+    console.log(`[EditingHistory] Rendered ${items.length} item(s)`);
   }
 
   /**
@@ -1441,20 +1389,19 @@
 
   /**
    * Load a history item's protected image
+   * Uses the router API endpoint to fetch the protected variant
    */
-  async function loadHistoryItem(jobId, item) {
-    console.log('Loading history item:', jobId, item);
+  async function loadHistoryItem(artworkId, item) {
+    console.log('[EditingHistory] Loading artwork:', artworkId);
 
-    // Navigate to view the protected image
-    // For now, we'll just log - this can be expanded to show a modal or navigate to a view page
-    if (item.protected_url || item.cdn_urls?.protected) {
-      const protectedUrl = item.protected_url || item.cdn_urls?.protected;
-      window.open(protectedUrl, '_blank');
-    } else {
-      // Try to construct URL from job_id
-      const cdnUrl = window.ArtorizeConfig?.CDN_URL || 'https://cdn.artorizer.com';
-      window.open(`${cdnUrl}/protected/${jobId}.jpg`, '_blank');
-    }
+    const apiUrl = window.ArtorizeConfig?.ROUTER_URL || 'https://router.artorizer.com';
+
+    // Construct URL to protected image using the backend/router API
+    // GET /artworks/{id}?variant=protected
+    const protectedUrl = `${apiUrl}/artworks/${artworkId}?variant=protected`;
+
+    // Open in new tab
+    window.open(protectedUrl, '_blank');
   }
 
 })();
