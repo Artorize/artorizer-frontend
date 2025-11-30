@@ -739,13 +739,25 @@
       }
     }
 
-    // When job is completed, mark the last tracked step as complete
-    if (status.status === 'completed' && lastProcessedProtection && !completedSteps.has(lastProcessedProtection)) {
-      console.log('[Progress Tracker] Job completed, marking final step as success:', lastProcessedProtection);
-      if (typeof window.updateProgressStep === 'function') {
-        window.updateProgressStep(lastProcessedProtection, 'success');
-        completedSteps.add(lastProcessedProtection);
-      }
+    // When job is completed, mark ALL pending steps as complete
+    if (status.status === 'completed') {
+      console.log('[Progress Tracker] Job completed, marking all pending steps as success');
+
+      // Get all progress steps from the UI and mark any pending ones as complete
+      const allSteps = document.querySelectorAll('[data-protection]');
+      allSteps.forEach(step => {
+        const protection = step.getAttribute('data-protection');
+        const conclusion = step.getAttribute('data-conclusion');
+
+        // Mark any step that isn't already completed/success as success
+        if (conclusion !== 'success' && conclusion !== 'failure' && !completedSteps.has(protection)) {
+          console.log('[Progress Tracker] Marking step as success:', protection);
+          if (typeof window.updateProgressStep === 'function') {
+            window.updateProgressStep(protection, 'success');
+            completedSteps.add(protection);
+          }
+        }
+      });
     }
 
     // Show percentage if available
@@ -1278,7 +1290,14 @@
       if (!response.ok) {
         const errorText = await response.text();
         console.error('[EditingHistory] Error response:', errorText);
-        renderHistoryItems(historyList, []);
+
+        // Handle 404 - endpoint not yet implemented on router
+        if (response.status === 404) {
+          console.warn('[EditingHistory] /artworks/me endpoint not available on router. History feature requires router proxy setup.');
+          renderHistoryItems(historyList, [], 'History feature coming soon');
+        } else {
+          renderHistoryItems(historyList, []);
+        }
         return;
       }
 
@@ -1343,8 +1362,11 @@
 
   /**
    * Render history items in the sidebar list
+   * @param {HTMLElement} container - The container element for the list
+   * @param {Array} items - The history items to render
+   * @param {string} [emptyMessage] - Custom message when no items (defaults to 'No history yet')
    */
-  function renderHistoryItems(container, items) {
+  function renderHistoryItems(container, items, emptyMessage = 'No history yet') {
     console.log('[EditingHistory] Rendering items:', items);
     container.innerHTML = '';
 
@@ -1352,7 +1374,7 @@
       console.log('[EditingHistory] No items to render');
       container.innerHTML = `
         <li class="text-xs text-gray-alpha-400 ml-3 py-1 group-aria-expanded/sidebar:opacity-100 opacity-0 transition-opacity duration-150">
-          No history yet
+          ${emptyMessage}
         </li>
       `;
       return;
