@@ -123,6 +123,32 @@
   }
 
   /**
+   * Start periodic session validation
+   * Checks session every 5 minutes and redirects to login if expired
+   */
+  function startSessionValidation() {
+    // Check session every 5 minutes
+    setInterval(async () => {
+      console.log('[DashboardAuth] Validating session...');
+
+      // Force cache refresh by clearing it first
+      clearCache();
+
+      const session = await getSession();
+
+      if (!session) {
+        console.warn('[DashboardAuth] Session expired, redirecting to login...');
+        // Store current URL for return after login
+        const returnUrl = window.location.pathname + window.location.search;
+        const loginUrl = `${AUTH_CONFIG.loginUrl}?returnUrl=${encodeURIComponent(returnUrl)}`;
+        window.location.href = loginUrl;
+      } else {
+        console.log('[DashboardAuth] Session valid');
+      }
+    }, 5 * 60 * 1000); // 5 minutes
+  }
+
+  /**
    * Get current user from session
    * @returns {Promise<Object | null>}
    */
@@ -291,6 +317,9 @@
       // Initialize sign-out buttons
       initSignOutButtons();
 
+      // Start periodic session validation
+      startSessionValidation();
+
       hideAuthLoading();
 
       return session;
@@ -310,7 +339,8 @@
     requireAuth,
     signOut,
     clearCache,
-    updateUserProfileUI
+    updateUserProfileUI,
+    startSessionValidation
   };
 
 })();

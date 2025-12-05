@@ -97,6 +97,11 @@ function updateProgressStep(protection, status, time) {
   console.log(`[Progress] Updating step ${protection} to ${status}`, time);
 
   const header = step.querySelector('.CheckStep-header .d-flex');
+  if (!header) {
+    console.warn(`[Progress] Header element not found for protection: ${protection}`);
+    return;
+  }
+
   const name = protectionNames[protection] || protection;
 
   let iconHTML = '';

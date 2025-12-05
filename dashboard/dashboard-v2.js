@@ -329,6 +329,24 @@
    * Handle protect artwork submission
    */
   async function handleProtectArtwork() {
+    // Validate session before submission
+    if (window.DashboardAuth) {
+      try {
+        const session = await window.DashboardAuth.getSession();
+        if (!session) {
+          showStatus('Session expired. Please log in again.', 'error');
+          setTimeout(() => {
+            window.DashboardAuth.requireAuth();
+          }, 2000);
+          return;
+        }
+      } catch (error) {
+        console.error('[Auth] Session validation failed:', error);
+        showStatus('Authentication error. Please try again.', 'error');
+        return;
+      }
+    }
+
     // Validate file selection
     if (!selectedFile) {
       showStatus('Please select an image file first', 'error');
@@ -1267,7 +1285,7 @@
 
     try {
       // Fetch user's artwork history from /artworks/me
-      const historyUrl = `${apiUrl}/artworks/me?limit=5&skip=0`;
+      const historyUrl = `${apiUrl}/artworks/me`;
 
       const response = await fetch(historyUrl, {
         method: 'GET',
