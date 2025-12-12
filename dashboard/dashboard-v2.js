@@ -388,12 +388,22 @@
       // Submit artwork
       showStatus('Preparing upload...', 'info');
 
+      // Mark upload step as in-progress
+      if (window.updateProgressStep) {
+        window.updateProgressStep('upload', 'in-progress');
+      }
+
       const submitResult = await uploader.submitArtwork(formData, (percent) => {
         if (typeof percent === 'number' && !Number.isNaN(percent)) {
           const rounded = Math.max(0, Math.min(100, Math.round(percent)));
           showStatus(`Uploading artwork... ${rounded}%`, 'info');
         }
       });
+
+      // Mark upload step as complete
+      if (window.updateProgressStep) {
+        window.updateProgressStep('upload', 'success');
+      }
 
       currentJobId = submitResult.job_id;
 

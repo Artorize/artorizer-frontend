@@ -1,13 +1,14 @@
 (function () {
   'use strict';
 
-console.log('[Dashboard Enhancements] Version: 1.0.1 | Last Updated: 2025-12-12 15:35 UTC');
+console.log('[Dashboard Enhancements] Version: 1.0.2 | Last Updated: 2025-12-12 15:45 UTC');
 
 // State management
 const selectedProtections = new Set();
 
 // Protection name mapping
 const protectionNames = {
+  'upload': 'Uploading Artwork',
   'fawkes': 'Fawkes Protection',
   'photoguard': 'PhotoGuard Protection',
   'mist': 'MIST Protection',
@@ -55,6 +56,9 @@ function updateProgressTracker() {
     `;
     return;
   }
+
+  // Always add upload as the first step
+  protections.unshift('upload');
 
   // Generate progress steps - all start as pending
   let stepsHTML = '';
