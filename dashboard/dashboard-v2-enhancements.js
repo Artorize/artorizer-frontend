@@ -88,13 +88,15 @@ function updateProgressTracker() {
 //        updateProgressStep('fawkes', 'error', 'Failed') - mark failed
 // Supported status: 'pending', 'in-progress'/'processing', 'success'/'completed', 'error'/'failed'
 function updateProgressStep(protection, status, time) {
-  const step = document.querySelector(`[data-protection="${protection}"]`);
+  // Target only progress tracker items, not protection cards
+  const container = document.getElementById('progress-tracker-content');
+  const step = container ? container.querySelector(`[data-protection="${protection}"]`) : null;
   if (!step) {
     console.log(`[Progress] Step not found for protection: ${protection}`);
     return;
   }
 
-  console.log(`[Progress] Updating step ${protection} to ${status}`, time);
+  console.log(`[Progress] Updating step ${protection} to ${status}`, time !== undefined ? time : '');
 
   const header = step.querySelector('.CheckStep-header .d-flex');
   if (!header) {
@@ -140,6 +142,8 @@ function updateProgressStep(protection, status, time) {
 // Expose helpers to the global window scope for reuse
 window.updateProgressStep = updateProgressStep;
 window.toggleProtection = toggleProtection;
+window.toggleWatermarkDropdown = toggleWatermarkDropdown;
+window.selectWatermarkStrategy = selectWatermarkStrategy;
 
 // Initialize tab switching functionality
 function initializeTabs() {
