@@ -1,6 +1,8 @@
 (function () {
   'use strict';
 
+console.log('[Dashboard Enhancements] Version: 1.0.1 | Last Updated: 2025-12-12 15:35 UTC');
+
 // State management
 const selectedProtections = new Set();
 
