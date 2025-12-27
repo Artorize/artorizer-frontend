@@ -50,7 +50,10 @@ function updateProgressTracker() {
     // Show empty state
     container.innerHTML = `
       <div class="flex flex-col items-center justify-center py-12 text-center">
-        <img src="assets/svg/icons/icon-check-circle-large.svg" alt="icon-check-circle-large" class="text-gray-300 mb-4" />
+        <svg class="w-16 h-16 text-gray-300 mb-4" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="24" cy="24" r="22" stroke="currentColor" stroke-width="4" stroke-dasharray="6 4"/>
+          <path d="M16 24l6 6 10-12" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
         <p class="text-sm text-subtle">Select protection layers to begin</p>
       </div>
     `;
@@ -117,15 +120,23 @@ function updateProgressStep(protection, status, time) {
   let textClass = '';
 
   if (status === 'success' || status === 'completed') {
-    iconHTML = `<img src="assets/svg/icons/icon-check.svg" alt="icon-check" class="mr-3 flex-shrink-0 ml-1" />`;
+    iconHTML = `<svg class="mr-3 flex-shrink-0 ml-1 text-green-600" title="This step passed" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true">
+      <path d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16Zm3.78-9.72a.751.751 0 0 0-.018-1.042.751.751 0 0 0-1.042-.018L6.75 9.19 5.28 7.72a.751.751 0 0 0-1.042.018.751.751 0 0 0-.018 1.042l2 2a.75.75 0 0 0 1.06 0Z" fill="currentColor"></path>
+    </svg>`;
     timeHTML = `<div class="text-mono text-normal text-small float-right text-xs">${time || '0.0s'}</div>`;
     step.setAttribute('data-conclusion', 'success');
   } else if (status === 'in-progress' || status === 'processing') {
-    iconHTML = `<img src="assets/svg/icons/icon-check-1606.svg" alt="icon-check" class="anim-rotate mr-2 flex-shrink-0" />`;
+    iconHTML = `<svg width="16" height="16" fill="none" class="anim-rotate mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" aria-label="In progress">
+      <path opacity=".5" d="M8 15A7 7 0 108 1a7 7 0 000 14v0z" stroke="currentColor" stroke-width="2"></path>
+      <path d="M15 8a7 7 0 01-7 7" stroke="currentColor" stroke-width="2"></path>
+      <path d="M8 12a4 4 0 100-8 4 4 0 000 8z" fill="currentColor"></path>
+    </svg>`;
     timeHTML = `<div class="text-mono text-normal text-small float-right text-xs">...</div>`;
     step.setAttribute('data-conclusion', 'in-progress');
   } else if (status === 'error' || status === 'failed') {
-    iconHTML = `<img src="assets/svg/icons/icon-error.svg" alt="icon-error" class="mr-3 flex-shrink-0 ml-1" />`;
+    iconHTML = `<svg class="mr-3 flex-shrink-0 ml-1 text-red-600" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true">
+      <path d="M2.343 13.657A8 8 0 1 1 13.658 2.343 8 8 0 0 1 2.343 13.657ZM6.03 4.97a.751.751 0 0 0-1.042.018.751.751 0 0 0-.018 1.042L6.94 8 4.97 9.97a.749.749 0 0 0 .326 1.275.749.749 0 0 0 .734-.215L8 9.06l1.97 1.97a.749.749 0 0 0 1.275-.326.749.749 0 0 0-.215-.734L9.06 8l1.97-1.97a.749.749 0 0 0-.326-1.275.749.749 0 0 0-.734.215L8 6.94Z" fill="currentColor"></path>
+    </svg>`;
     timeHTML = `<div class="text-mono text-normal text-small float-right text-xs text-red-600">${time || 'Failed'}</div>`;
     step.setAttribute('data-conclusion', 'failure');
   } else {
