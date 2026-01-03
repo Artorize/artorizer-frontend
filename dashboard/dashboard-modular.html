@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en" style="--eleven-sidebar-width:16rem;--eleven-sidebar-collapsed:0;--eleven-player-height:0rem;color-scheme:light" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Artorizer Dashboard</title>
+  <meta name="description"
+        content="Artorizer Dashboard - Transform your creative vision into stunning 3D art with our AI-powered platform.">
+  <link rel="icon"
+        href="data:image/x-icon;base64,AAABAAMAMDAAAAEAIACoJQAANgAAACAgAAABACAAqBAAAN4lAAAQEAAAAQAgAGgEAACGNgAAKAAAADAAAABgAAAAAQAgAAAAAAAAJAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////GP///3L///+8////4/////r/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////+v///+P///+7////cf///xgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP///wX///+B////9P////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////T///9/////BAAAAAAAAAAAAAAAAAAAAAAAAAA="
+        type="image/x-icon" sizes="256x256">
+  <!-- Production Note: dashboard-v2.css contains compiled Tailwind CSS + custom styles. -->
+  <link rel="stylesheet" href="dashboard-v2.css">
+  <link rel="stylesheet" href="dashboard-v2-flatpickr.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+</head>
+<body class="rebrand-body flex flex-col min-h-100dvh relative bg-background text-foreground chakra-ui-light __variable_854f3f __variable_dfb837"
+      style="--font-sans:inter;opacity:1;overscroll-behavior:none">
+
+<div id=app-root class="lg:p-3 min-h-100dvh flex flex-col">
+    <div class=Toastify></div>
+    <div id=authenticated-root data-authed=true
+         class="lg:-m-3 logged-in w-full lg:w-[calc(100%+1.5rem)] flex-1 flex flex-col" style=opacity:1>
+        <div style=position:fixed;top:1px;left:1px;width:1px;height:0px;padding:0px;margin:-1px;overflow:hidden;clip:rect(0px,0px,0px,0px);white-space:nowrap;border-width:0px;display:none></div>
+
+        <!-- SIDEBAR COMPONENT - Edit in components/sidebar.html -->
+        <div data-component="sidebar"></div>
+
+        <div id=content class="max-lg:!pl-0 flex h-full flex-1 flex-col lg:min-h-screen pl-[--eleven-sidebar-width]">
+            <div class="fixed top-0 right-0 max-h-0 flex justify-center items-start z-[100] max-md:!w-full transition-[width] duration-150"
+                 style="width:calc(100% - var(--eleven-sidebar-width))">
+                <div class="relative stack justify-start" style="transform:translateY(-100px) rotateX(40deg)">
+                    <div class=relative>
+                        <div class="relative w-[280px] py-2.5 pb-1.5 px-3.5 bg-background overflow-hidden"
+                             style="box-shadow:rgba(0,0,0,0.075) 0px 2px 4px,rgba(0,0,0,0.075) 0px 4px 8px,rgba(0,0,0,0.075) 0px 12px 24px;width:280px;border-radius:16px">
+                            <div class="hstack items-center justify-between gap-2 pb-1">
+                                <div class="w-full stack justify-center items-start max-w-[calc(100%-5.5rem)]"><p
+                                        class="text-sm text-foreground font-semibold truncate max-w-full">Calling
+                                    assistant
+                                    <div class="w-full relative h-4 text-gray-alpha-950 font-medium"><span
+                                            class="absolute max-w-full pr-1" style=opacity:1;transform:none><p
+                                            class="text-xs text-subtle font-medium truncate max-w-full">Disconnected</p></span>
+                                    </div>
+                                </div>
+                                <div class="relative h-9 w-9 shrink-0 grow-0 bg-gray-alpha-50 rounded-full self-start [&amp;_canvas]:w-full [&amp;_canvas]:h-full"></div>
+                                <button aria-label="End call" disabled
+                                        class="relative inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent bg-background border border-gray-alpha-200 hover:bg-gray-alpha-50 active:bg-gray-alpha-100 radix-state-open:bg-gray-alpha-50 hover:border-gray-alpha-300 text-foreground shadow-none active:border-gray-alpha-300 disabled:bg-background disabled:text-gray-300 disabled:border-gray-alpha-200 radix-state-open:border-gray-alpha-300 center p-0 shrink-0 rounded-full h-9 w-9 disabled:opacity-50">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                         stroke-linejoin="round"
+                                         class="lucide lucide-phone-off text-foreground w-[18px] h-[18px]">
+                                        <path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-3.33-2.67m-2.67-3.34a19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91"></path>
+                                        <line x1="22" x2="2" y1="2" y2="22"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div data-testid=audio-player hidden
+                 class="inter fixed bottom-0 z-40 pr-0 w-full max-lg:!w-[100%] transition-[width] duration-150 sf-hidden"
+                 style="width:calc(100% - var(--eleven-sidebar-width,0rem))"></div>
+            <div style=--eleven-footer-height:0rem;--eleven-banner-height:0rem>
+
+                <!-- HEADER COMPONENT - Edit in components/header.html -->
+                <div data-component="header"></div>
+
+                <div class="stack min-h-[var(--h-screen-dvh)] max-w-[100vw] pt-[calc(var(--eleven-header-height)+var(--eleven-banner-height))] box-border max-[1023px]:pt-[calc(var(--eleven-header-height)+var(--eleven-banner-height))] max-[1023px]:pb-[calc(var(--eleven-player-height)+var(--eleven-footer-height))] lg:transition-[padding_200ms_cubic-bezier(0.42,0,0.58,1)] lg:w-full lg:mx-auto lg:pb-[var(--eleven-player-height)]">
+                    <main class="relative flex-[1_1_0] overflow-hidden">
+                        <div class="overlay flex flex-col">
+                            <div class="hstack flex-1 max-h-full">
+                                <div class="relative @container self-stretch stack grow h-full [--px:1rem] pb-4 xl:[--px:3rem] xl:pb-12 gap-4 2xl:[--px:5rem] 2xl:pb-20 [--max-w:1000px]">
+                                    <div class="relative h-full flex-1 min-h-0"
+                                         style="--textarea-px:calc(max(50% - 0.5*var(--max-w),0px) + var(--px))">
+                                        <div class="flex-1 h-full lg:flex-none relative overflow-y-auto max-h-full py-20 pb-40"
+                                             style="padding-inline:calc(max(50% - 0.5*var(--max-w),0px) + var(--px))">
+                                            <div class="flex justify-center items-center h-full" style=opacity:1>
+
+                                                <!-- UPLOAD ZONE COMPONENT - Edit in components/upload-zone.html -->
+                                                <div data-component="upload-zone"></div>
+
+                                            </div>
+                                        </div>
+                                        <div class="absolute inset-x-0 bottom-0 h-8 pointer-events-none bg-gradient-to-b from-transparent to-background"></div>
+                                    </div>
+                                    <div class="mx-auto w-full bg-background stack justify-end relative duration-300 z-20"
+                                         style=max-width:var(--max-w);padding-inline:var(--px);transition-property:padding-bottom>
+                                        <div class="relative stack justify-end w-full"
+                                             style=height:0px;opacity:1;margin-bottom:0px;transform:none></div>
+                                        <div class="stack gap-3" style=opacity:1>
+                                            <div class="hidden md:grid grid-cols-1 @md:grid-cols-[auto,auto] gap-3 justify-between items-center">
+                                                <div class="relative order-1 @md:order-none flex gap-2 items-center min-w-0">
+                                                    <div class="text-xs text-subtle font-normal min-w-0">
+                                                        <div class="hstack gap-1 md:gap-2 items-center whitespace-nowrap min-w-0">
+                                                            <div class=flex style=opacity:1>
+                                                                <div class=css-o6x0z7 aria-valuemax=100 aria-valuemin=0
+                                                                     aria-valuenow=0 role=progressbar>
+                                                                    <svg viewBox="0 0 100 100" class="css-r94w0k">
+                                                                        <circle cx="50" cy="50" r="42" stroke-width="10px"
+                                                                                class="chakra-progress__track css-131d71n"></circle>
+                                                                        <circle cx="50" cy="50" r="42" stroke-width="10px"
+                                                                                class="chakra-progress__indicator css-osbmls"
+                                                                                stroke-linecap="round"
+                                                                                stroke-dashoffset="66"
+                                                                                stroke-dasharray="0 264"></circle>
+                                                                    </svg>
+                                                                </div>
+                                                            </div>
+                                                            <span class="overflow-hidden overflow-ellipsis"
+                                                                  data-state=closed>300,000 credits remaining</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="@md:absolute top-full left-[22px] @md:mt-1"></div>
+                                                </div>
+                                                <div class="hstack gap-3 items-center justify-between"><p
+                                                        class="text-xs text-subtle font-normal hstack items-center whitespace-nowrap">
+                                                    0:00 total duration
+                                                    <div class="hstack gap-2 items-center justify-between">
+                                                        <button type=button aria-label="Download all" id="download-all-btn"
+                                                                data-testid=tts-download-all-button data-loading=false
+                                                                disabled
+                                                                class="relative items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent bg-background border border-gray-alpha-200 hover:bg-gray-alpha-50 active:bg-gray-alpha-100 radix-state-open:bg-gray-alpha-50 hover:border-gray-alpha-300 text-foreground shadow-none active:border-gray-alpha-300 disabled:bg-background disabled:text-gray-300 disabled:border-gray-alpha-200 radix-state-open:border-gray-alpha-300 rounded-[10px] center p-0 h-9 w-9 flex"
+                                                                data-state=closed>
+                                                            <svg width="1.2rem" height="1.2rem"
+                                                                 class="w-[18px] h-[18px] w-3.5 h-3.5"
+                                                                 viewBox="0 0 16 16" fill="none"
+                                                                 xmlns="http://www.w3.org/2000/svg">
+                                                                <path d="M8.66677 1.99986C8.66677 1.63167 8.36829 1.33319 8.0001 1.33319C7.63191 1.33319 7.33344 1.63167 7.33344 1.99986V8.39038L5.13817 6.19512C4.87782 5.93477 4.45571 5.93477 4.19536 6.19512C3.93501 6.45547 3.93501 6.87758 4.19536 7.13793L7.5287 10.4713C7.78905 10.7316 8.21116 10.7316 8.47151 10.4713L11.8048 7.13793C12.0652 6.87758 12.0652 6.45547 11.8048 6.19512C11.5445 5.93477 11.1224 5.93477 10.862 6.19512L8.66677 8.39038V1.99986Z"
+                                                                      fill="currentColor"></path>
+                                                                <path d="M2.0001 9.33319C2.36829 9.33319 2.66677 9.63167 2.66677 9.99986V12.6665C2.66677 12.8433 2.73701 13.0129 2.86203 13.1379C2.98705 13.263 3.15662 13.3332 3.33344 13.3332H12.6668C12.8436 13.3332 13.0131 13.263 13.1382 13.1379C13.2632 13.0129 13.3334 12.8433 13.3334 12.6665V9.99986C13.3334 9.63167 13.6319 9.33319 14.0001 9.33319C14.3683 9.33319 14.6668 9.63167 14.6668 9.99986V12.6665C14.6668 13.197 14.4561 13.7057 14.081 14.0807C13.7059 14.4558 13.1972 14.6665 12.6668 14.6665H3.33344C2.803 14.6665 2.29429 14.4558 1.91922 14.0807C1.54415 13.7057 1.33344 13.197 1.33344 12.6665V9.99986C1.33344 9.63167 1.63191 9.33319 2.0001 9.33319Z"
+                                                                      fill="currentColor"></path>
+                                                            </svg>
+                                                        </button>
+                                                        <button data-testid=voice-changer-clear-queue-button
+                                                                aria-label="Clear queue" disabled
+                                                                class="relative items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent bg-background border border-gray-alpha-200 hover:bg-gray-alpha-50 active:bg-gray-alpha-100 radix-state-open:bg-gray-alpha-50 hover:border-gray-alpha-300 text-foreground shadow-none active:border-gray-alpha-300 disabled:bg-background disabled:text-gray-300 disabled:border-gray-alpha-200 radix-state-open:border-gray-alpha-300 rounded-[10px] center p-0 h-9 w-9 hidden @2xl:flex"
+                                                                data-state=closed>
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                                 stroke-width="2" stroke-linecap="round"
+                                                                 stroke-linejoin="round"
+                                                                 class="lucide lucide-trash w-[18px] h-[18px] w-3.5 h-3.5">
+                                                                <path d="M3 6h18"></path>
+                                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                                                            </svg>
+                                                        </button>
+                                                        <button aria-label="Protect artwork" id="protect-button"
+                                                                data-testid=protect-artwork data-loading=false disabled
+                                                                class="relative inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent bg-foreground text-background shadow-none hover:bg-gray-800 radix-state-open:bg-gray-700 active:bg-gray-700 disabled:bg-gray-400 disabled:text-gray-100 h-9 px-3 rounded-[10px] col-span-2 md:col-span-1">
+                                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                                                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                                                <path d="M9 12l2 2 4-4"></path>
+                                                            </svg>
+                                                            Protect Artwork
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <section class="stack hidden md:flex w-[420px] xl:w-[500px] border-l">
+                                    <div class="stack h-full">
+                                        <div class="relative flex-1 min-h-0 overflow-hidden">
+                                            <div class="w-full h-full overflow-y-auto overflow-x-hidden stack gap-4 p-5 pt-2"
+                                                 style=opacity:1;visibility:visible;transform:none>
+                                                <div dir=ltr data-orientation=horizontal>
+                                                    <div role=tablist aria-orientation=horizontal
+                                                         class="relative inline-flex text-subtle gap-3.5 w-full h-11 pt-0.5 border-b border-gray-alpha-200"
+                                                         tabindex=0 data-orientation=horizontal style=outline:none>
+                                                        <div id="tab-active-indicator" class="absolute bottom-0 h-[2.5px] transition-all duration-300 ease-in-out z-10" style="left: 0; width: 0; background-color: #111;"></div>
+                                                        <button type=button role=tab data-tab=configuration aria-selected=true
+                                                                aria-controls=tab-configuration
+                                                                data-state=active id=tab-trigger-configuration
+                                                                class="tab-button whitespace-nowrap transition-all focus-ring inline-flex -mb-[1px] items-center justify-center px-0 py-1 text-sm">
+                                                            Configuration
+                                                        </button>
+                                                        <button type=button role=tab data-tab=progress aria-selected=false
+                                                                aria-controls=tab-progress
+                                                                data-state=inactive id=tab-trigger-progress
+                                                                class="tab-button whitespace-nowrap transition-all focus-ring inline-flex -mb-[1px] items-center justify-center px-0 py-1 text-sm">
+                                                            Progress
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="relative flex-1 min-h-0 mt-2">
+                                                    <!-- CONFIGURATION PANEL COMPONENT - Edit in components/config-panel.html -->
+                                                    <div data-component="config-panel"></div>
+
+                                                    <!-- PROGRESS PANEL COMPONENT - Edit in components/progress-panel.html -->
+                                                    <div data-component="progress-panel"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+
+                    </main>
+                </div>
+            </div>
+        </div>
+    </div>
+    <span id=__chakra_env hidden class=sf-hidden></span>
+    <div class="hidden sf-hidden"></div>
+</div>
+
+<!-- Component Loader - loads HTML components from /components/ folder -->
+<script src="component-loader.js"></script>
+
+<!-- Artorize Dashboard Scripts -->
+<script src="config.js"></script>
+<script src="dashboardAuth.js?v=20251205"></script>
+<script src="sacParser.js" defer></script>
+<script src="artworkUploader.js" defer></script>
+<script src="dashboard-v2-enhancements.js?v=20251212b" defer></script>
+
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr" defer></script>
+<script data-template-shadow-root src="dashboard-v2.js?v=20251212b" defer></script>
+
+
+</body>
+</html>

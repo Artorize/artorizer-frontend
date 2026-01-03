@@ -22,8 +22,8 @@
   let completedSteps = new Set();
   let lastProcessedProtection = null;
 
-  // Wait for DOM to be fully loaded
-  document.addEventListener('DOMContentLoaded', async function () {
+  // Main initialization logic
+  async function initializeDashboard() {
     console.log('Artorize Dashboard V2 initializing...');
 
     // Check authentication first
@@ -67,6 +67,18 @@
     initializeEditingHistory();
 
     console.log('Artorize Dashboard V2 initialized successfully');
+  }
+
+  // Wait for DOM to be fully loaded
+  document.addEventListener('DOMContentLoaded', async function () {
+    // Check if we are in modular mode and components are pending
+    if (document.querySelector('[data-component]')) {
+      console.log('Modular dashboard detected: Waiting for components...');
+      document.addEventListener('components:ready', initializeDashboard);
+    } else {
+      // Standard dashboard or components already loaded
+      initializeDashboard();
+    }
   });
 
   /**
@@ -439,6 +451,9 @@
 
       // Display result
       await displayResult(result);
+
+      // Refresh editing history so new item appears immediately
+      await refreshEditingHistory();
 
     } catch (error) {
       console.error('Submission error:', error);
@@ -1341,6 +1356,12 @@
       renderHistoryItems(historyList, [], 'Failed to load history');
     }
   }
+
+  async function refreshEditingHistory() {
+    await initializeEditingHistory();
+  }
+
+  window.refreshEditingHistory = refreshEditingHistory;
 
   /**
    * Render history items in the sidebar list

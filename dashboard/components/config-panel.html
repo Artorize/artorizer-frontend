@@ -1,0 +1,184 @@
+                                                    <div id="tab-configuration" role="tabpanel" class="tab-pane h-full absolute top-0 left-0 right-0" data-state="active" style="opacity:1; transform:none">
+                                                        <div class="stack h-full overflow-hidden">
+                                                            <div class="-mx-5 flex-1 stack px-5 scroll-py-12" style="position:relative; overflow-y:auto; overflow-x:visible">
+
+                                                                <!-- Protection Layers -->
+                                                                <div class="stack gap-4 mb-6">
+                                                                    <h3 class="text-sm font-medium text-foreground">Protection Layers</h3>
+
+                                                                    <div class="stack gap-3">
+                                                                        <!-- Fawkes -->
+                                                                        <div class="protection-card cursor-pointer p-3 border border-gray-200 rounded-[10px] transition-all duration-200 hover:border-gray-300 hover:shadow-sm"
+                                                                             data-protection="fawkes"
+                                                                             onclick="toggleProtection(this)">
+                                                                            <div class="flex-1">
+                                                                                <div class="text-sm font-medium text-foreground">Fawkes</div>
+                                                                                <p class="text-xs text-subtle mt-0.5">Privacy protection against facial recognition</p>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <!-- PhotoGuard -->
+                                                                        <div class="protection-card cursor-pointer p-3 border border-gray-200 rounded-[10px] transition-all duration-200 hover:border-gray-300 hover:shadow-sm"
+                                                                             data-protection="photoguard"
+                                                                             onclick="toggleProtection(this)">
+                                                                            <div class="flex-1">
+                                                                                <div class="text-sm font-medium text-foreground">PhotoGuard</div>
+                                                                                <p class="text-xs text-subtle mt-0.5">Adversarial protection against image manipulation</p>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <!-- MIST -->
+                                                                        <div class="protection-card cursor-pointer p-3 border border-gray-200 rounded-[10px] transition-all duration-200 hover:border-gray-300 hover:shadow-sm"
+                                                                             data-protection="mist"
+                                                                             onclick="toggleProtection(this)">
+                                                                            <div class="flex-1">
+                                                                                <div class="text-sm font-medium text-foreground">MIST</div>
+                                                                                <p class="text-xs text-subtle mt-0.5">Prevents AI model training on your artwork</p>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <!-- Nightshade -->
+                                                                        <div class="protection-card cursor-pointer p-3 border border-gray-200 rounded-[10px] transition-all duration-200 hover:border-gray-300 hover:shadow-sm"
+                                                                             data-protection="nightshade"
+                                                                             onclick="toggleProtection(this)">
+                                                                            <div class="flex-1">
+                                                                                <div class="text-sm font-medium text-foreground">Nightshade</div>
+                                                                                <p class="text-xs text-subtle mt-0.5">Data poisoning protection for AI datasets</p>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <!-- C2PA Manifest -->
+                                                                        <div class="protection-card cursor-pointer p-3 border border-gray-200 rounded-[10px] transition-all duration-200 hover:border-gray-300 hover:shadow-sm"
+                                                                             data-protection="c2pa"
+                                                                             onclick="toggleProtection(this)">
+                                                                            <div class="flex-1">
+                                                                                <div class="text-sm font-medium text-foreground">C2PA Manifest</div>
+                                                                                <p class="text-xs text-subtle mt-0.5">Content authenticity and provenance metadata</p>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <!-- Watermark Strategy -->
+                                                                        <div class="stack gap-2">
+                                                                            <label for="watermark-strategy-button" class="text-sm font-medium text-foreground">Watermark Strategy</label>
+                                                                            <div class="relative">
+                                                                                <button type="button"
+                                                                                        id="watermark-strategy-button"
+                                                                                        role="combobox"
+                                                                                        aria-expanded="false"
+                                                                                        aria-controls="watermark-strategy-dropdown"
+                                                                                        data-state="closed"
+                                                                                        class="flex gap-0.5 items-center justify-between whitespace-nowrap transition-colors shadow-none focus:outline-none focus:ring-1 focus:ring-foreground disabled:cursor-not-allowed duration-75 disabled:opacity-50 group/select-trigger bg-background border border-gray-200 hover:border-gray-300 active:border-gray-300 hover:bg-gray-50 active:bg-gray-50 text-foreground disabled:bg-background disabled:border-gray-200 h-9 pl-4 pr-3 py-2 text-sm rounded-lg w-full"
+                                                                                        onclick="toggleWatermarkDropdown()">
+                                                                                    <span translate="no" style="pointer-events:none; padding-left: 12px;" id="watermark-strategy-label">Invisible Watermark</span>
+                                                                                    <div class="flex group-radix-state-open/select-trigger:rotate-180 h-4 w-4 items-center justify-center opacity-50 group-hover/select-trigger:opacity-70 group-radix-state-open/select-trigger:opacity-70 rotate-0 transition-transform duration-200">
+                                                                                        <img src="assets/svg/icons/icon-chevron-down-select.svg" alt="icon-chevron-down-select" class="" />
+                                                                                    </div>
+                                                                                </button>
+
+                                                                                <!-- Dropdown Menu -->
+                                                                                <div id="watermark-strategy-dropdown"
+                                                                                     role="listbox"
+                                                                                     class="absolute z-50 mt-1 w-full rounded-lg border border-gray-200 bg-background shadow-lg hidden"
+                                                                                     style="display: none;">
+                                                                                    <div class="p-1">
+                                                                                        <div role="option"
+                                                                                             data-value="invisible-watermark"
+                                                                                             class="watermark-option relative flex cursor-pointer select-none items-center rounded-md px-3 py-2 text-sm outline-none hover:bg-gray-50 focus:bg-gray-50 transition-colors"
+                                                                                             onclick="selectWatermarkStrategy('invisible-watermark', 'Invisible Watermark')">
+                                                                                            Invisible Watermark
+                                                                                        </div>
+                                                                                        <div role="option"
+                                                                                             data-value="visible-watermark"
+                                                                                             class="watermark-option relative flex cursor-pointer select-none items-center rounded-md px-3 py-2 text-sm outline-none hover:bg-gray-50 focus:bg-gray-50 transition-colors"
+                                                                                             onclick="selectWatermarkStrategy('visible-watermark', 'Tree Ring Watermark')">
+                                                                                            Tree Ring Watermark
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+
+                                                                                <!-- Hidden select for form compatibility -->
+                                                                                <select id="watermark-strategy" style="display: none;">
+                                                                                    <option value="invisible-watermark" selected>Invisible Watermark</option>
+                                                                                    <option value="visible-watermark">Tree Ring Watermark</option>
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- Artwork Metadata -->
+                                                                <div class="stack gap-4">
+                                                                    <h3 class="text-sm font-medium text-foreground">Artwork Metadata</h3>
+
+                                                                    <div class="stack gap-3">
+                                                                        <div class="stack gap-2">
+                                                                                                                        <label for="author-name" class="text-sm font-medium text-foreground">Author Name</label>
+                                                                                                                        <div class="hstack gap-2">
+                                                                                                                            <input type="text" id="author-name" placeholder="Artist name"
+                                                                                                                                   class="flex h-9 w-full rounded-[10px] border border-gray-200 bg-background px-3 py-2 text-sm transition-colors placeholder:text-subtle focus:outline-none hover:border-gray-300">
+                                                                                                                            <button type="button" id="myself-btn" title="Use my name"
+                                                                                                                                    class="inline-flex items-center justify-center whitespace-nowrap text-xs font-medium transition-colors duration-75 focus-ring bg-background border border-gray-alpha-200 hover:bg-gray-alpha-50 active:bg-gray-alpha-100 h-9 px-3 rounded-[10px]">
+                                                                                                                                Me
+                                                                                                                            </button>
+                                                                                                                        </div>
+                                                                        </div>
+
+                                                                        <div class="stack gap-2">
+                                                                            <label for="creation-date-display" class="text-sm font-medium text-foreground">Creation Date</label>
+                                                                            <div class="hstack gap-2">
+                                                                                <div class="relative flex-1">
+                                                                                    <input type="text" id="creation-date-display" readonly placeholder="Select date"
+                                                                                           class="flex h-9 w-full rounded-[10px] border border-gray-200 bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:border-gray-800 hover:border-gray-300 cursor-pointer">
+                                                                                    <input type="hidden" id="creation-date">
+
+                                                                                    <!-- Custom Calendar Popup -->
+                                                                                    <div id="calendar-popup" class="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-[10px] shadow-lg p-4 z-50 hidden" style="width: 280px;">
+                                                                                        <!-- Calendar Header -->
+                                                                                        <div class="flex items-center justify-between mb-4">
+                                                                                            <button type="button" id="prev-month" class="p-1 hover:bg-gray-100 rounded">
+                                                                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                                                                    <polyline points="15 18 9 12 15 6"></polyline>
+                                                                                                </svg>
+                                                                                            </button>
+                                                                                            <div id="calendar-month-year" class="text-sm font-medium text-foreground"></div>
+                                                                                            <button type="button" id="next-month" class="p-1 hover:bg-gray-100 rounded">
+                                                                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                                                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                                                                                </svg>
+                                                                                            </button>
+                                                                                        </div>
+
+                                                                                        <!-- Calendar Grid -->
+                                                                                        <div class="calendar-grid">
+                                                                                            <!-- Week day headers -->
+                                                                                            <div class="grid grid-cols-7 gap-1 mb-2">
+                                                                                                <div class="text-xs text-gray-500 text-center py-1">Su</div>
+                                                                                                <div class="text-xs text-gray-500 text-center py-1">Mo</div>
+                                                                                                <div class="text-xs text-gray-500 text-center py-1">Tu</div>
+                                                                                                <div class="text-xs text-gray-500 text-center py-1">We</div>
+                                                                                                <div class="text-xs text-gray-500 text-center py-1">Th</div>
+                                                                                                <div class="text-xs text-gray-500 text-center py-1">Fr</div>
+                                                                                                <div class="text-xs text-gray-500 text-center py-1">Sa</div>
+                                                                                            </div>
+
+                                                                                            <!-- Calendar days -->
+                                                                                            <div id="calendar-days" class="grid grid-cols-7 gap-1"></div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <button type="button" id="today-btn" title="Set to today"
+                                                                                        class="inline-flex items-center justify-center whitespace-nowrap text-xs font-medium transition-colors duration-75 focus-ring bg-background border border-gray-alpha-200 hover:bg-gray-alpha-50 active:bg-gray-alpha-100 h-9 px-3 rounded-[10px]">
+                                                                                    Today
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="stack gap-2">
+                                                                                                                        <label for="description" class="text-sm font-medium text-foreground">Description (Optional)</label>
+                                                                                                                        <textarea id="description" rows="3" placeholder="Describe your artwork..."
+                                                                                                                                  class="flex min-h-[80px] w-full rounded-[10px] border border-gray-200 bg-background px-3 py-2 text-sm transition-colors placeholder:text-subtle focus:outline-none hover:border-gray-300 resize-none"></textarea>                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>

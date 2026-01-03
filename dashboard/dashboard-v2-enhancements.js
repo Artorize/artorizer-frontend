@@ -468,19 +468,31 @@ function initializeDatePicker() {
   });
 }
 
-// Initialize when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    initializeTabs();
-    initializeWatermarkListener();
-    updateProgressTracker();
-    initializeDatePicker();
-  });
-} else {
+// Initialize enhancers
+function initEnhancements() {
   initializeTabs();
   initializeWatermarkListener();
   updateProgressTracker();
   initializeDatePicker();
+}
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    // Check if we are in modular mode and components are pending
+    if (document.querySelector('[data-component]')) {
+      document.addEventListener('components:ready', initEnhancements);
+    } else {
+      initEnhancements();
+    }
+  });
+} else {
+  // Check if we are in modular mode and components are pending
+  if (document.querySelector('[data-component]')) {
+    document.addEventListener('components:ready', initEnhancements);
+  } else {
+    initEnhancements();
+  }
 }
 
 })();

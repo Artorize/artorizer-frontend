@@ -1,0 +1,58 @@
+                <header class="hidden lg:block fixed top-0 right-0 z-[10] transition-[width] duration-150 group/header-fixed h-[calc(var(--eleven-header-height)+var(--eleven-banner-height))] border-b"
+                        style="width:calc(100% - var(--eleven-sidebar-width))">
+                    <div class="h-[var(--eleven-header-height)] w-full mx-auto hstack items-center gap-3.5 bg-background/90 backdrop-blur-[8px] border-b max-w-[100vw] px-5"
+                         style=opacity:1;visibility:visible>
+                        <div><h3 data-testid=page-title
+                                 class="font-waldenburg-ht text-lg text-foreground font-semibold">Export protector</h3>
+                        </div>
+                        <nav class="inline-flex text-subtle border border-subtle items-center justify-center rounded-[10px] bg-none h-9 p-1 border-none"></nav>
+                        <div class=flex-1></div>
+                        <div class="hstack items-center max-h-full w-fit gap-2 empty:hidden">
+                            <div class=contents>
+                                <div class="hidden lg:contents">
+                                    <button type=button aria-haspopup=dialog aria-expanded=false
+                                            aria-controls=radix-:r1g1: data-state=closed
+                                            class="relative inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors duration-75 focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent bg-background border border-gray-alpha-200 hover:bg-gray-alpha-50 active:bg-gray-alpha-100 radix-state-open:bg-gray-alpha-50 hover:border-gray-alpha-300 text-foreground shadow-none active:border-gray-alpha-300 disabled:bg-background disabled:text-gray-300 disabled:border-gray-alpha-200 radix-state-open:border-gray-alpha-300 h-8 px-2.5 rounded-lg text-xm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                             stroke-linejoin="round"
+                                             class="lucide lucide-message-circle w-4 h-4 text-[inherit] opacity-100 -ml-[3px] mr-[5px]">
+                                            <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"></path>
+                                        </svg>
+                                        Feedback
+                                    </button>
+                                    <a href=https://elevenlabs.io/docs/product-guides/playground/voice-changer
+                                       target=_blank
+                                       class="relative inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors duration-75 focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent bg-background border border-gray-alpha-200 hover:bg-gray-alpha-50 active:bg-gray-alpha-100 radix-state-open:bg-gray-alpha-50 hover:border-gray-alpha-300 text-foreground shadow-none active:border-gray-alpha-300 disabled:bg-background disabled:text-gray-300 disabled:border-gray-alpha-200 radix-state-open:border-gray-alpha-300 h-8 px-2.5 rounded-lg text-xm w-full">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                             stroke-linejoin="round"
+                                             class="lucide lucide-book-text w-4 h-4 text-[inherit] opacity-100 -ml-[3px] mr-[5px]">
+                                            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"></path>
+                                            <path d="M8 11h8"></path>
+                                            <path d="M8 7h6"></path>
+                                        </svg>
+                                        Documentation</a>
+                                    <div class="hstack items-center gap-3">
+                                        <button class="inline-flex justify-center whitespace-nowrap font-medium transition-colors duration-75 focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent bg-background border border-gray-alpha-200 hover:bg-gray-alpha-50 active:bg-gray-alpha-100 radix-state-open:bg-gray-alpha-50 hover:border-gray-alpha-300 text-foreground shadow-none active:border-gray-alpha-300 disabled:bg-background disabled:text-gray-300 disabled:border-gray-alpha-200 radix-state-open:border-gray-alpha-300 px-2.5 rounded-lg text-xm group relative hstack items-center gap-1.5 h-8 ps-2 w-full">
+                                            <div class=hstack>
+                                                <div class="rounded-full w-5 h-5 min-w-5 min-h-5 overflow-hidden bg-gray-solid-100 shrink-0">
+                                                    <img alt="Ask El" loading=lazy width=20 height=20 decoding=async
+                                                         data-nimg=1 style=color:transparent srcset
+                                                         src="data:image/webp;base64,UklGRvwCAABXRUJQVlA4WAoAAAAQAAAAHwAAHwAAQUxQSFoBAAABkHPbtrG9+ve5T2wnnW2ntO10dlLZ+AO2KpZundK2K9vJc+85++Pz3SciJgClJgLU7jpwyrRR/dqWB+CQXRxkyO47P0kaP17a2FqQSBaH8kMukWRI09RI88dbw0lpDrWPGS0EJUlTH4wfFyUiJTk0v0Wvxqymyv0OrphD4ydMjWVVz2MQAIJGNxkYUQO3QgCHg/SMap5T4RxGq1kcKl/XACrcoTK2ciXQx9OiBd6vjwMMjG7KodWv5cHA7T1+03IwXhnMkM+38UyZ7wz6nMYyzUf70SwH49s276g5KC+4Sww5eC7DRmo847/e6PCHFs3zPAT7GKIp58Kh3VdapMAzAiRYTG9RlB87wAGCfUwtgppOQYJiFQ8xaFksmM6FQ4nidhpDyGJB+XMiEpQimPCMpl6LmXozXuoGh9LFodGmB8z49/I4kQSZnaDmiM23v5H65uzaHlUhDiUCVlA4IHwBAACQBwCdASogACAAPoU2lkelIyIhMAwAoBCJbACsL5D6SniXeXrMA9gKDgtpY/CjrNN/hG/Rmxvrf6eeZhNfXyKo6mQUTRAA/voamQASL7O0a/FKv/2Ie1GS4seQUNFcfn3389K1hr+P1ccMX8WrseHsafWUoaIoZARDwMPZjSqgF90AdLJB+FZaj4N1D/vqhCmzTUQZWTneFmTn3C/io/sgAGqphs79s7EaRmvBVPWUKCXn8AQ9crh55QVMW6xstjqH941L5aWe431gv7bbCvxsoFrFDi1xLKFKjaZnzZq2Oas0FVFW8Y48RWT1wuJZ/xmhw16kER2hHScV8D2dJ6x42Heylm2SqV16e2is/aepkj5gurO15GWTTO7zLtoftqg1Z0167sMJ1yJ4lnh1wrJoBb6dio2O61Cnwp/WQJP+q214LdVx8k0V/zaC5bi4GoQXjZ7X+rUkJCAwC0LNez3BiBc/+sIHSEX02r7RROa5o4QaS5lRoyXCogAAAA=="
+                                                         sizes></div>
+                                                <div class="rounded-full w-5 h-5 min-w-5 min-h-5 overflow-hidden bg-gray-100 -ml-2 border-2 border-background shrink-0">
+                                                    <img alt="Neil huang" loading=lazy width=20 height=20 decoding=async
+                                                         data-nimg=1 style=color:transparent srcset
+                                                         src="data:image/webp;base64,UklGRtQAAABXRUJQVlA4IMgAAABQBQCdASogACAAPpE8mUiloyIhMBgIALASCWYAsR8hq47ye2XfwjATBJ+ym0hWxOIXkAAA/m10EiO2LJmoDeQkuePCRHkAD8La3n0J//jeP27/t3rYwTh7KLv2FzLWre/B8H/4uSyyIiHjcyDJTyr5weVcWvI+R78FurZKCDcbHMX9vc4s6OJS9t/rLBD7n8Db3MlVes3hKU3KA/mX67pZ4XOc1UEolHWT4RkEq2+McLEu58b+Fxf+LI1IgVSzD373MrvnQUAAAA=="
+                                                         sizes></div>
+                                            </div>
+                                            <div class=mr-1>Talk to El</div>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+                <header class="lg:hidden fixed top-0 h-[calc(var(--eleven-header-height)+var(--eleven-banner-height))] w-full bg-background/90 backdrop-blur-[8px] stack z-[10] sf-hidden"></header>
