@@ -1204,8 +1204,13 @@
     if (settingsBtn) {
       settingsBtn.addEventListener('click', function (e) {
         e.preventDefault();
-        // Navigate to settings page
-        window.location.href = '/dashboard/settings.html';
+        // Open settings modal
+        if (window.openSettingsModal) {
+          window.openSettingsModal();
+        } else {
+          // Fallback: navigate to dashboard
+          window.location.href = '/dashboard/dashboard-modular.html';
+        }
       });
     }
 

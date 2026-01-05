@@ -31,7 +31,7 @@ export const authConfig = {
   baseURL: getBaseURL(),
 
   /** Default redirect after login */
-  redirectUrl: '/dashboard/dashboard-v2.html',
+  redirectUrl: '/dashboard/dashboard-modular.html',
 
   /** Login page URL */
   loginUrl: '/auth/login.html',

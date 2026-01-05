@@ -98,7 +98,7 @@ export class MockAuthBackend {
 
       // Simulate OAuth callback redirect
       // In real auth, this would be handled by the OAuth provider
-      const redirectUrl = callbackURL || '/dashboard/dashboard-v2.html';
+      const redirectUrl = callbackURL || '/dashboard/dashboard-modular.html';
       await this.delay(300);
 
       // Simulate callback with code parameter

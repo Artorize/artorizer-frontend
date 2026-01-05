@@ -1,6 +1,6 @@
 /**
- * Settings Page Logic
- * Handles username update and artwork history management
+ * Settings Modal Logic
+ * Handles username update and artwork history management in a modal dialog
  */
 
 (function() {
@@ -9,9 +9,59 @@
   let isUpdating = false;
   let isLoadingHistory = false;
   let isDeleting = false;
+  let isInitialized = false;
+
+  const modal = document.getElementById('settings-modal');
+  const modalContent = modal?.querySelector('.settings-modal-content');
+  const modalBackdrop = modal?.querySelector('.settings-modal-backdrop');
+  const closeButtons = modal?.querySelectorAll('.settings-modal-close');
 
   /**
-   * Initialize settings page
+   * Open settings modal and initialize content
+   */
+  function openSettingsModal() {
+    if (!modal) {
+      console.error('Settings modal not found');
+      return;
+    }
+
+    modal.classList.remove('hidden');
+
+    requestAnimationFrame(() => {
+      if (modalBackdrop) modalBackdrop.style.opacity = '1';
+      if (modalContent) {
+        modalContent.style.opacity = '1';
+        modalContent.style.transform = 'scale(1)';
+      }
+    });
+
+    if (!isInitialized) {
+      initSettings();
+      isInitialized = true;
+    } else {
+      loadArtworkHistory();
+    }
+  }
+
+  /**
+   * Close settings modal
+   */
+  function closeSettingsModal() {
+    if (!modal) return;
+
+    if (modalBackdrop) modalBackdrop.style.opacity = '0';
+    if (modalContent) {
+      modalContent.style.opacity = '0';
+      modalContent.style.transform = 'scale(0.95)';
+    }
+
+    setTimeout(() => {
+      modal.classList.add('hidden');
+    }, 200);
+  }
+
+  /**
+   * Initialize settings modal functionality
    */
   async function initSettings() {
     const usernameInput = document.getElementById('username-input');
@@ -23,20 +73,16 @@
       return;
     }
 
-    // Load current username on page load
     await loadCurrentUsername();
 
-    // Setup save button handler
     saveUsernameBtn.addEventListener('click', handleUsernameSave);
 
-    // Setup enter key handler
     usernameInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         handleUsernameSave();
       }
     });
 
-    // Load artwork history
     await loadArtworkHistory();
   }
 
@@ -79,7 +125,6 @@
 
     const newUsername = usernameInput.value.trim();
 
-    // Validation
     if (!newUsername) {
       showStatus(usernameStatus, 'Username cannot be empty', 'error');
       return;
@@ -95,7 +140,6 @@
       return;
     }
 
-    // Check for valid characters (alphanumeric, underscore, hyphen)
     const usernameRegex = /^[a-zA-Z0-9_-]+$/;
     if (!usernameRegex.test(newUsername)) {
       showStatus(usernameStatus, 'Username can only contain letters, numbers, underscores, and hyphens', 'error');
@@ -124,7 +168,6 @@
         showStatus(usernameStatus, data.message || 'Username already taken', 'error');
       } else if (response.status === 401) {
         showStatus(usernameStatus, 'Please log in to update your username', 'error');
-        // Redirect to login after a short delay
         setTimeout(() => {
           window.location.href = '/auth/login.html';
         }, 2000);
@@ -185,7 +228,6 @@
           historyList.appendChild(item);
         });
 
-        // Add clear all button if there are artworks
         if (data.artworks.length > 0) {
           const clearAllBtn = createClearAllButton();
           historyList.appendChild(clearAllBtn);
@@ -219,7 +261,7 @@
    */
   function createHistoryItem(artwork) {
     const li = document.createElement('li');
-    li.className = 'history-item flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-alpha-200';
+    li.className = 'history-item';
 
     const infoDiv = document.createElement('div');
     infoDiv.className = 'flex-1 min-w-0';
@@ -242,7 +284,7 @@
     infoDiv.appendChild(date);
 
     const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'delete-btn ml-3 px-3 py-1 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed';
+    deleteBtn.className = 'delete-btn';
     deleteBtn.textContent = 'Delete';
     deleteBtn.addEventListener('click', () => deleteArtwork(artwork.id, deleteBtn));
 
@@ -294,13 +336,11 @@
       });
 
       if (response.ok) {
-        // Remove the history item from DOM
         const historyItem = button.closest('.history-item');
         if (historyItem) {
           historyItem.remove();
         }
 
-        // Check if history list is empty
         const historyList = document.getElementById('history-list');
         if (historyList && historyList.children.length === 0) {
           const historyEmpty = document.getElementById('history-empty');
@@ -361,19 +401,16 @@
       });
 
       if (response.ok) {
-        // Clear the history list
         const historyList = document.getElementById('history-list');
         if (historyList) {
           historyList.innerHTML = '';
         }
 
-        // Show empty state
         const historyEmpty = document.getElementById('history-empty');
         if (historyEmpty) {
           historyEmpty.classList.remove('hidden');
         }
 
-        // Remove clear all button
         clearAllBtn.closest('li')?.remove();
       } else if (response.status === 401) {
         alert('Please log in to clear your history');
@@ -420,10 +457,34 @@
     }
   }
 
-  // Initialize when DOM is ready
+  /**
+   * Setup modal event listeners
+   */
+  function setupModalListeners() {
+    if (closeButtons) {
+      closeButtons.forEach(btn => {
+        btn.addEventListener('click', closeSettingsModal);
+      });
+    }
+
+    if (modalBackdrop) {
+      modalBackdrop.addEventListener('click', closeSettingsModal);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !modal?.classList.contains('hidden')) {
+        closeSettingsModal();
+      }
+    });
+  }
+
+  // Export function to open modal
+  window.openSettingsModal = openSettingsModal;
+
+  // Setup modal listeners when DOM is ready
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initSettings);
+    document.addEventListener('DOMContentLoaded', setupModalListeners);
   } else {
-    initSettings();
+    setupModalListeners();
   }
 })();

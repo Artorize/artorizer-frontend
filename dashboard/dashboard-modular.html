@@ -174,7 +174,7 @@
                                                     <div role=tablist aria-orientation=horizontal
                                                          class="relative inline-flex text-subtle gap-3.5 w-full h-11 pt-0.5 border-b border-gray-alpha-200"
                                                          tabindex=0 data-orientation=horizontal style=outline:none>
-                                                        <div id="tab-active-indicator" class="absolute bottom-0 h-[2.5px] transition-all duration-300 ease-in-out z-10" style="left: 0; width: 0; background-color: #111;"></div>
+                                                        <div id="tab-active-indicator" class="absolute bottom-0 h-[2.5px] transition-all duration-300 ease-in-out z-20 pointer-events-none" style="left: 0; width: 0; background-color: #111;"></div>
                                                         <button type=button role=tab data-tab=configuration aria-selected=true
                                                                 aria-controls=tab-configuration
                                                                 data-state=active id=tab-trigger-configuration
@@ -225,7 +225,60 @@
 <!-- Flatpickr JS -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr" defer></script>
 <script data-template-shadow-root src="dashboard-v2.js?v=20251212b" defer></script>
+<script src="settings.js" defer></script>
 
+<!-- Settings Modal -->
+<div id="settings-modal" class="settings-modal hidden fixed inset-0 z-[60] flex items-center justify-center">
+    <div class="settings-modal-backdrop absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-200 opacity-0" data-modal-backdrop></div>
+    <div class="settings-modal-content relative bg-white rounded-lg border border-gray-alpha-200 shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-hidden flex flex-col transform scale-95 opacity-0 transition-all duration-200">
+        <div class="settings-modal-header flex items-center justify-between p-6 border-b border-gray-alpha-200">
+            <h2 class="text-xl font-semibold text-foreground">Settings</h2>
+            <button class="settings-modal-close p-1 hover:bg-gray-alpha-100 rounded-lg transition-colors" aria-label="Close settings">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 6 6 18"></path>
+                    <path d="m6 6 12 12"></path>
+                </svg>
+            </button>
+        </div>
+        <div class="settings-modal-body flex-1 overflow-y-auto p-6">
+            <div class="settings-username-section mb-6">
+                <h3 class="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1.25rem" height="1.25rem" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.3258 5.88235C10.3258 7.47423 9.06066 8.76471 7.5 8.76471C5.93934 8.76471 4.67418 7.47423 4.67418 5.88235C4.67418 4.29047 5.93934 3 7.5 3C9.06066 3 10.3258 4.29047 10.3258 5.88235Z"></path>
+                        <path d="M7.5 11.2353C5.09526 11.2353 3.20018 12.515 2.19824 14.4158C1.52238 15.6981 2.67793 17 4.10519 17H10.8948C12.3221 17 13.4776 15.6981 12.8018 14.4158C11.7998 12.515 9.90473 11.2353 7.5 11.2353Z"></path>
+                    </svg>
+                    Username
+                </h3>
+                <div class="flex items-center gap-3">
+                    <input type="text" id="username-input"
+                           class="flex-1 px-3 py-2 border border-gray-alpha-200 rounded-lg text-sm text-foreground bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Enter your username">
+                    <button id="save-username-btn"
+                            class="px-4 py-2 bg-foreground text-background rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed">
+                        Save
+                    </button>
+                </div>
+                <p id="username-status" class="text-xs mt-2 text-gray-alpha-500"></p>
+            </div>
+
+            <div class="settings-history-section">
+                <h3 class="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1.25rem" height="1.25rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.0 0 0-6.74 2.74L3 8"></path>
+                        <path d="M3 3v5h5"></path>
+                        <path d="M12 7v5l4 2"></path>
+                    </svg>
+                    Editing History
+                </h3>
+                <div id="history-loading" class="text-sm text-gray-alpha-500 py-4">Loading history...</div>
+                <div id="history-empty" class="text-sm text-gray-alpha-500 py-4 hidden">No artwork history yet</div>
+                <div id="history-error" class="text-sm text-red-500 py-4 hidden"></div>
+                <ul id="history-list" class="space-y-2">
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>
