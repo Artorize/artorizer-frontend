@@ -140,6 +140,34 @@ select:hover {
     margin-right: 0.5rem;
 }
 
+/* Background utilities */
+.bg-white {
+    background-color: hsl(0, 0%, 100%);
+}
+
+.bg-black\/50 {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Backdrop utilities */
+.backdrop-blur-sm {
+    backdrop-filter: blur(4px);
+}
+
+/* Size utilities */
+.max-w-2xl {
+    max-width: 42rem;
+}
+
+.max-h-\[80vh\] {
+    max-height: 80vh;
+}
+
+/* Shadow utilities */
+.shadow-xl {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
 /* Text utilities */
 .text-sm {
     font-size: 0.875rem;
@@ -8581,6 +8609,16 @@ textarea:focus {
     display: flex;
 }
 
+/* Ensure modal overlays page content and centers correctly */
+.settings-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 120;
+    padding: 1.5rem;
+    align-items: center;
+    justify-content: center;
+}
+
 /* Modal backdrop animation */
 .settings-modal:not(.hidden) .settings-modal-backdrop {
     opacity: 1;
@@ -8592,33 +8630,144 @@ textarea:focus {
     transform: scale(1);
 }
 
+/* Settings modal content styling */
+.settings-modal-content {
+    border-radius: 10px !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+    width: min(34rem, calc(100% - 2.5rem));
+    max-height: min(55rem, 80vh);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Settings modal header */
+.settings-modal-header {
+    background-color: hsl(0, 0%, 100%);
+}
+
+/* Settings modal close button */
+.settings-modal-close {
+    color: hsl(240, 4%, 46%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.settings-modal-close:hover {
+    color: hsl(240, 3%, 6%);
+}
+
 /* History item styles */
 .history-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0.75rem;
-    background-color: hsl(0, 0%, 98%);
-    border-radius: 0.5rem;
-    border: 1px solid var(--gray-alpha-200);
+    background-color: hsl(0, 0%, 100%);
+    border-radius: 10px;
+    border: 1px solid hsl(240, 5%, 90%);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.history-item:hover {
+    border-color: hsl(240, 5%, 85%);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 .delete-btn {
     margin-left: 0.75rem;
-    padding: 0.25rem 0.75rem;
-    font-size: 0.75rem;
-    color: rgb(220, 38, 38);
-    background-color: transparent;
-    border-radius: 0.375rem;
-    transition: color 0.15s, background-color 0.15s;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: hsl(0, 84%, 60%);
+    background-color: hsl(0, 100%, 97%);
+    border: 1px solid hsl(0, 100%, 90%);
+    border-radius: 8px;
+    transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+    cursor: pointer;
 }
 
 .delete-btn:hover {
-    color: rgb(153, 27, 27);
-    background-color: rgb(254, 226, 226);
+    color: hsl(0, 84%, 45%);
+    background-color: hsl(0, 100%, 92%);
+    border-color: hsl(0, 100%, 85%);
 }
 
 .delete-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+/* Settings input styling - matches config panel */
+.settings-modal input[type="text"] {
+    border-radius: 10px !important;
+    border: 1px solid hsl(240, 5%, 90%) !important;
+    background-color: hsl(240, 5%, 100%) !important;
+    transition: border-color 0.15s ease !important;
+    min-width: 0;
+}
+
+.settings-modal input[type="text"]:hover {
+    border-color: hsl(240, 5%, 85%) !important;
+}
+
+.settings-modal input[type="text"]:focus {
+    border-color: hsl(240, 3%, 6%) !important;
+}
+
+/* Settings button styling - matches config panel */
+.settings-modal button:not(.settings-modal-close):not(.delete-btn) {
+    border-radius: 10px !important;
+    font-weight: 500;
+    transition: background-color 0.15s ease;
+}
+
+.settings-modal button#save-username-btn {
+    background-color: hsl(240, 3%, 6%) !important;
+    color: hsl(240, 5%, 100%) !important;
+}
+
+.settings-modal button#save-username-btn:hover:not(:disabled) {
+    background-color: hsl(240, 3%, 16%) !important;
+}
+
+.settings-modal button#save-username-btn:disabled {
+    background-color: hsl(240, 5%, 82%) !important;
+    color: hsl(240, 5%, 70%) !important;
+    cursor: not-allowed;
+}
+
+/* Clear all button styling */
+.settings-modal button#clear-all-btn {
+    border-radius: 10px !important;
+    font-weight: 500;
+}
+
+/* Status message styling */
+.settings-modal #username-status {
+    min-height: 1.25rem;
+}
+
+/* Settings modal layout fixes */
+.settings-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    overflow-y: auto;
+}
+
+.settings-username-section .flex {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.settings-username-section input[type="text"] {
+    flex: 1 1 220px;
+    min-width: 0;
+}
+
+.settings-modal button {
+    white-space: nowrap;
 }

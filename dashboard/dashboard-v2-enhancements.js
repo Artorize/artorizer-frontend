@@ -425,7 +425,9 @@ function initializeDatePicker() {
   };
 
   // Show/hide calendar
-  displayInput.addEventListener('click', () => {
+  displayInput.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     calendarPopup.classList.toggle('hidden');
     if (!calendarPopup.classList.contains('hidden')) {
       renderCalendar();
@@ -449,6 +451,7 @@ function initializeDatePicker() {
   // Today button
   todayBtn.addEventListener('click', (e) => {
     e.preventDefault();
+    e.stopPropagation();
     const today = new Date();
     selectedDate = today;
     currentDate = new Date(today);
