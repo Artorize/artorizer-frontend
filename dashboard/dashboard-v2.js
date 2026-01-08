@@ -1407,7 +1407,7 @@
           data-index="${index}">
           <div class="relative group rounded-lg overflow-hidden bg-transparent transition-all duration-150 w-[calc(var(--eleven-sidebar-width)-1.8125rem)] hover:text-gray-alpha-950 hover:bg-gray-alpha-100 text-gray-500">
             <div class="flex items-center gap-2 px-1.5 min-w-36 ml-2">
-              <div class="flex items-center justify-between flex-1 h-7 transition-all duration-150 group-aria-expanded/sidebar:opacity-70 opacity-0 translate-x-1 group-aria-expanded/sidebar:translate-x-0">
+              <div class="flex items-center justify-between flex-1 h-7 transition-all duration-150 group-aria-expanded/sidebar:opacity-100 opacity-0 translate-x-1 group-aria-expanded/sidebar:translate-x-0">
                 <p class="text-sm whitespace-nowrap max-w-[160px] truncate">
                   ${escapeHtml(imageName)}
                 </p>

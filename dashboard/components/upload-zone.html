@@ -30,13 +30,13 @@
 </div>
 <!-- Image Results Section (will be populated dynamically after upload) -->
 <div id="image-results-section" class="w-full flex flex-col items-center justify-center mt-4" style="display: none;">
-    <div id="image-comparison-container" class="relative w-full max-w-[800px] select-none overflow-hidden rounded-[14px] shadow-lg group">
+    <div id="image-comparison-container" class="relative w-full max-w-[800px] max-h-[70vh] select-none overflow-hidden rounded-[14px] shadow-lg group">
         <!-- Protected Image (Background) -->
-        <img id="comparison-protected" class="w-full h-auto block select-none pointer-events-none" src="" alt="Protected" draggable="false" style="display: none;">
+        <img id="comparison-protected" class="w-full h-auto max-h-[70vh] object-contain block select-none pointer-events-none" src="" alt="Protected" draggable="false" style="display: none;">
 
         <!-- Original Image (Foreground - Clipped) -->
         <div id="comparison-overlay" class="absolute top-0 left-0 h-full w-[50%] overflow-hidden" style="display: none;">
-             <img id="comparison-original" class="absolute top-0 left-0 max-w-none h-full select-none pointer-events-none" src="" alt="Original" draggable="false">
+             <img id="comparison-original" class="absolute top-0 left-0 max-w-none h-full max-h-[70vh] object-contain select-none pointer-events-none" src="" alt="Original" draggable="false">
         </div>
 
         <!-- Slider Handle -->
@@ -58,6 +58,6 @@
         </div>
 
         <!-- Simple Single Image Display (for preview before processing) -->
-        <img id="preview-image" class="w-full h-auto block rounded-[14px]" src="" alt="Preview" style="display: none;">
+        <img id="preview-image" class="w-full h-auto max-h-[70vh] object-contain block rounded-[14px]" src="" alt="Preview" style="display: none;">
     </div>
 </div>
