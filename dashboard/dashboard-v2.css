@@ -8640,31 +8640,46 @@ textarea:focus {
 
 /* Settings modal content styling */
 .settings-modal-content {
-    border-radius: 10px !important;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+    /* Enhanced floating window effect - stronger shadow for better depth */
+    border-radius: 12px !important;
+    border: 1px solid hsl(240, 5%, 82%) !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1) !important;
     width: min(34rem, calc(100% - 2.5rem));
     max-height: min(55rem, 80vh);
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    background-color: hsl(0, 0%, 100%);
 }
 
 /* Settings modal header */
 .settings-modal-header {
     background-color: hsl(0, 0%, 100%);
+    /* Ensure proper padding - 1.5rem (24px) on all sides */
+    padding: 1.5rem;
+    border-bottom: 1px solid hsl(240, 5%, 90%);
 }
 
 /* Settings modal close button */
 .settings-modal-close {
-    color: hsl(240, 4%, 46%);
+    color: hsl(240, 3%, 25%);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     transition: color 0.15s ease, background-color 0.15s ease;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
 }
 
 .settings-modal-close:hover {
     color: hsl(240, 3%, 6%);
+    background-color: hsl(240, 5%, 92%);
+}
+
+.settings-modal-close svg {
+    width: 20px;
+    height: 20px;
 }
 
 /* History item styles */
@@ -8711,34 +8726,42 @@ textarea:focus {
 /* Settings input styling - matches config panel */
 .settings-modal input[type="text"] {
     border-radius: 10px !important;
-    border: 1px solid hsl(240, 5%, 90%) !important;
+    border: 1px solid hsl(240, 5%, 82%) !important;
     background-color: hsl(240, 5%, 100%) !important;
-    transition: border-color 0.15s ease !important;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
     min-width: 0;
+    padding: 0.625rem 0.75rem !important;
+    min-height: 40px;
 }
 
 .settings-modal input[type="text"]:hover {
-    border-color: hsl(240, 5%, 85%) !important;
+    border-color: hsl(240, 5%, 75%) !important;
 }
 
 .settings-modal input[type="text"]:focus {
-    border-color: hsl(240, 3%, 6%) !important;
+    border-color: hsl(217, 91%, 60%) !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+    outline: none !important;
 }
 
 /* Settings button styling - matches config panel */
 .settings-modal button:not(.settings-modal-close):not(.delete-btn) {
     border-radius: 10px !important;
     font-weight: 500;
-    transition: background-color 0.15s ease;
+    transition: background-color 0.15s ease, transform 0.1s ease;
+    min-height: 40px;
+    padding: 0.625rem 1rem !important;
 }
 
 .settings-modal button#save-username-btn {
-    background-color: hsl(240, 3%, 6%) !important;
-    color: hsl(240, 5%, 100%) !important;
+    background-color: hsl(217, 91%, 60%) !important;
+    color: hsl(0, 0%, 100%) !important;
 }
 
 .settings-modal button#save-username-btn:hover:not(:disabled) {
-    background-color: hsl(240, 3%, 16%) !important;
+    background-color: hsl(217, 91%, 55%) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 .settings-modal button#save-username-btn:disabled {
@@ -8762,8 +8785,10 @@ textarea:focus {
 .settings-modal-body {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 2rem;
     overflow-y: auto;
+    /* Ensure proper padding - 1.5rem (24px) on all sides */
+    padding: 1.5rem;
 }
 
 .settings-username-section .flex {
@@ -8778,4 +8803,96 @@ textarea:focus {
 
 .settings-modal button {
     white-space: nowrap;
+}
+
+/* History list styles */
+.history-list-container {
+  position: relative;
+}
+
+.history-list-container--collapsed {
+  max-height: 280px;
+  overflow: hidden;
+}
+
+.history-list-container--collapsed::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1));
+  pointer-events: none;
+}
+
+.history-list-container--expanded {
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+}
+
+.history-list-container--expanded::-webkit-scrollbar {
+  width: 6px;
+}
+
+.history-list-container--expanded::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.history-list-container--expanded::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.history-list-container--expanded::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+/* History list items spacing */
+.history-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Settings modal section improvements */
+.settings-username-section,
+.settings-history-section {
+  /* Ensure sections are properly contained */
+  padding: 0;
+  margin: 0;
+}
+
+.settings-username-section h3,
+.settings-history-section h3 {
+  /* Improve section title styling */
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: hsl(240, 3%, 6%);
+  margin-bottom: 1rem;
+  letter-spacing: -0.01em;
+}
+
+.settings-username-section h3 svg,
+.settings-history-section h3 svg {
+  /* Icon styling */
+  color: hsl(240, 4%, 46%);
+  flex-shrink: 0;
+}
+
+/* History section text improvements */
+.settings-history-section .text-sm {
+  color: hsl(240, 4%, 40%);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+#history-loading,
+#history-empty,
+#history-error {
+  padding: 1rem 0;
+  color: hsl(240, 4%, 50%);
 }

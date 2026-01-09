@@ -10,6 +10,8 @@
   let isLoadingHistory = false;
   let isDeleting = false;
   let isInitialized = false;
+  let showingAllHistory = false;
+  let allArtworks = [];
 
   const modal = document.getElementById('settings-modal');
   const modalContent = modal?.querySelector('.settings-modal-content');
@@ -223,15 +225,10 @@
           return;
         }
 
-        data.artworks.forEach(artwork => {
-          const item = createHistoryItem(artwork);
-          historyList.appendChild(item);
-        });
+        allArtworks = data.artworks;
+        showingAllHistory = false;
+        renderHistory();
 
-        if (data.artworks.length > 0) {
-          const clearAllBtn = createClearAllButton();
-          historyList.appendChild(clearAllBtn);
-        }
       } else if (response.status === 401) {
         historyLoading.classList.add('hidden');
         showError('Please log in to view your artwork history');
@@ -257,11 +254,63 @@
   }
 
   /**
+   * Render history with view all/show less toggle
+   */
+  function renderHistory() {
+    const historyList = document.getElementById('history-list');
+    if (!historyList) return;
+
+    historyList.innerHTML = '';
+
+    const artworksToShow = showingAllHistory ? allArtworks : allArtworks.slice(0, 5);
+
+    // Create wrapper for scrollable area when showing all
+    const listContainer = document.createElement('ul');
+    listContainer.className = 'history-list-container';
+
+    if (showingAllHistory) {
+      listContainer.className += ' history-list-container--expanded';
+    } else if (allArtworks.length > 5) {
+      listContainer.className += ' history-list-container--collapsed';
+    }
+
+    artworksToShow.forEach(artwork => {
+      const item = createHistoryItem(artwork);
+      listContainer.appendChild(item);
+    });
+
+    historyList.appendChild(listContainer);
+
+    // Add toggle button if more than 5 items
+    if (allArtworks.length > 5) {
+      const toggleBtn = document.createElement('button');
+      toggleBtn.className = 'view-all-history-btn w-full mt-3 py-2 px-4 text-sm font-medium text-foreground bg-gray-alpha-50 hover:bg-gray-alpha-100 rounded-lg transition-colors';
+      toggleBtn.textContent = showingAllHistory ? 'Show Less' : `View All History (${allArtworks.length})`;
+      toggleBtn.addEventListener('click', toggleHistoryView);
+      historyList.appendChild(toggleBtn);
+    }
+
+    // Add clear all button
+    if (allArtworks.length > 0) {
+      const clearAllBtn = createClearAllButton();
+      historyList.appendChild(clearAllBtn);
+    }
+  }
+
+  /**
+   * Toggle between showing all history and showing only 5 items
+   */
+  function toggleHistoryView() {
+    showingAllHistory = !showingAllHistory;
+    renderHistory();
+  }
+
+  /**
    * Create a history item element
    */
   function createHistoryItem(artwork) {
     const li = document.createElement('li');
-    li.className = 'history-item';
+    li.className = 'history-item flex items-center justify-between gap-2 py-2 px-3 bg-white hover:bg-gray-alpha-50 rounded-lg transition-colors';
 
     const infoDiv = document.createElement('div');
     infoDiv.className = 'flex-1 min-w-0';
@@ -284,7 +333,7 @@
     infoDiv.appendChild(date);
 
     const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'delete-btn';
+    deleteBtn.className = 'delete-btn px-3 py-1 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors';
     deleteBtn.textContent = 'Delete';
     deleteBtn.addEventListener('click', () => deleteArtwork(artwork.id, deleteBtn));
 
@@ -298,7 +347,7 @@
    * Create clear all button
    */
   function createClearAllButton() {
-    const container = document.createElement('li');
+    const container = document.createElement('div');
     container.className = 'mt-4 pt-4 border-t border-gray-alpha-200';
 
     const clearAllBtn = document.createElement('button');
@@ -336,21 +385,21 @@
       });
 
       if (response.ok) {
-        const historyItem = button.closest('.history-item');
-        if (historyItem) {
-          historyItem.remove();
-        }
+        // Remove from allArtworks array
+        allArtworks = allArtworks.filter(a => a.id !== artworkId);
 
-        const historyList = document.getElementById('history-list');
-        if (historyList && historyList.children.length === 0) {
+        // Refresh the view
+        if (allArtworks.length === 0) {
           const historyEmpty = document.getElementById('history-empty');
           if (historyEmpty) {
             historyEmpty.classList.remove('hidden');
           }
-          const clearAllBtn = document.getElementById('clear-all-btn');
-          if (clearAllBtn) {
-            clearAllBtn.closest('li')?.remove();
+          const historyList = document.getElementById('history-list');
+          if (historyList) {
+            historyList.innerHTML = '';
           }
+        } else {
+          renderHistory();
         }
       } else if (response.status === 401) {
         alert('Please log in to delete artwork');
@@ -401,17 +450,19 @@
       });
 
       if (response.ok) {
-        const historyList = document.getElementById('history-list');
-        if (historyList) {
-          historyList.innerHTML = '';
-        }
+        // Clear allArtworks array
+        allArtworks = [];
 
+        // Show empty state
         const historyEmpty = document.getElementById('history-empty');
         if (historyEmpty) {
           historyEmpty.classList.remove('hidden');
         }
 
-        clearAllBtn.closest('li')?.remove();
+        const historyList = document.getElementById('history-list');
+        if (historyList) {
+          historyList.innerHTML = '';
+        }
       } else if (response.status === 401) {
         alert('Please log in to clear your history');
         setTimeout(() => {
