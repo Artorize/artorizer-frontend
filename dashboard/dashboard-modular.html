@@ -13,8 +13,65 @@
   <link rel="icon"
         href="data:image/x-icon;base64,AAABAAMAMDAAAAEAIACoJQAANgAAACAgAAABACAAqBAAAN4lAAAQEAAAAQAgAGgEAACGNgAAKAAAADAAAABgAAAAAQAgAAAAAAAAJAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////GP///3L///+8////4/////r/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////+v///+P///+7////cf///xgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP///wX///+B////9P////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////T///9/////BAAAAAAAAAAAAAAAAAAAAAAAAAA="
         type="image/x-icon" sizes="256x256">
-  <!-- Production Note: dashboard-v2.css contains compiled Tailwind CSS + custom styles. -->
-  <link rel="stylesheet" href="dashboard-v2.css">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      plugins: [
+        // Note: group-aria-expanded variants are disabled for sidebar to prevent display issues
+        // The dashboard-v2.css (backup version) doesn't use these variants for the sidebar
+        // Only enable for main-nav-item which is needed for other elements
+        function({ addVariant }) {
+          // Only enable for main-nav-item
+          addVariant('group-aria-expanded/main-nav-item', '.group\\/main-nav-item[aria-expanded="true"] &')
+        }
+      ],
+      theme: {
+        extend: {
+          colors: {
+            'foreground': 'hsl(240, 3%, 6%)',
+            'background': 'hsl(0, 0%, 100%)',
+            'subtle': 'hsl(240, 4%, 46%)',
+            'gray-alpha-50': 'hsl(240, 5%, 96%)',
+            'gray-alpha-100': 'hsl(240, 5%, 92%)',
+            'gray-alpha-150': 'hsl(240, 5%, 90%)',
+            'gray-alpha-200': 'hsl(240, 5%, 88%)',
+            'gray-alpha-300': 'hsl(240, 5%, 82%)',
+            'gray-alpha-400': 'hsl(240, 5%, 70%)',
+            'gray-alpha-500': 'hsl(240, 5%, 50%)',
+            'gray-alpha-950': 'hsl(240, 5%, 10%)',
+            'sidebar-background': 'hsl(0, 0%, 98%)',
+            'sidebar-foreground': 'hsl(240, 5.3%, 26.1%)',
+            'sidebar-primary': 'hsl(240, 5.9%, 10%)',
+            'sidebar-primary-foreground': 'hsl(0, 0%, 98%)',
+            'sidebar-accent': 'hsl(240, 4.8%, 95.9%)',
+            'sidebar-accent-foreground': 'hsl(240, 5.9%, 10%)',
+            'sidebar-border': 'hsl(220, 13%, 91%)',
+            'sidebar-ring': 'hsl(217.2, 91.2%, 59.8%)',
+          },
+          fontFamily: {
+            sans: ['Inter', 'Segoe UI', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+          spacing: {
+            'eleven-sidebar-width': '16rem',
+            'eleven-header-height': '4rem',
+            'eleven-banner-height': '0rem',
+            'eleven-footer-height': '4.5rem',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Force Creative Platform text to be hidden - matches backup version behavior */
+    div.hidden.group-aria-expanded\/sidebar\:flex.items-center.justify-between.flex-1.h-8,
+    [class*="hidden"][class*="group-aria-expanded/sidebar:flex"][class*="flex-1"][class*="h-8"] {
+      display: none !important;
+    }
+  </style>
+  <!-- Custom Dashboard Styles - Only non-Tailwind custom styles -->
+  <link rel="stylesheet" href="dashboard-custom.css">
+  <!-- Flatpickr Datepicker -->
   <link rel="stylesheet" href="dashboard-v2-flatpickr.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
