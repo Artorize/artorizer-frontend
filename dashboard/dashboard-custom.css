@@ -1181,6 +1181,64 @@ main:has(#watermark-strategy-button) {
 }
 
 /* ============================================
+   FIX: WATERMARK STRATEGY DROPDOWN BORDER CLIPPING
+   ============================================ */
+
+/* Fix the outermost stack container that clips the dropdown */
+#tab-configuration > .stack.h-full.overflow-hidden {
+    overflow: visible !important;
+}
+
+/* Fix the inner scrollable container */
+#tab-configuration > .stack > div[style*="overflow-y"] {
+    overflow-x: visible !important;
+    overflow-y: auto !important;
+}
+
+/* Fix the dropdown positioning - extend slightly beyond to show borders */
+#watermark-strategy-dropdown {
+    position: absolute !important;
+    left: -1px !important;
+    right: -1px !important;
+    width: auto !important;
+    box-sizing: border-box !important;
+}
+
+/* Ensure borders are fully visible */
+#watermark-strategy-dropdown[role="listbox"] {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Also fix for any ancestor with overflow-hidden */
+section:has(#watermark-strategy-dropdown) {
+    overflow: visible !important;
+}
+
+/* Fix the right panel section */
+section.stack:has(#watermark-strategy-button) {
+    overflow: visible !important;
+}
+
+/* Ensure relative parent allows overflow */
+.relative:has(#watermark-strategy-dropdown) {
+    overflow: visible !important;
+}
+
+/* Fix all ancestors in the config panel */
+#tab-configuration,
+#tab-configuration > *,
+#tab-configuration .stack {
+    overflow: visible !important;
+}
+
+/* But keep the scrollable area scrollable */
+#tab-configuration > .stack > div[style*="overflow"] {
+    overflow-y: auto !important;
+    overflow-x: visible !important;
+}
+
+/* ============================================
    CRITICAL FIX: OVERLAY CONTAINER POSITION
    ============================================ */
 
