@@ -136,13 +136,27 @@
                                     <ul id="editing-history-list" class="stack gap-0.5">
                                         <!-- History items will be populated by JavaScript -->
                                     </ul>
-                                    <a href="/dashboard/history.html" class="flex items-center gap-1 text-xs text-gray-alpha-500 hover:text-gray-alpha-950 ml-3 mt-2 transition-colors duration-150 group-aria-expanded/sidebar:opacity-100 opacity-0">
-                                        View all history
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M5 12h14"></path>
-                                            <path d="m12 5 7 7-7 7"></path>
-                                        </svg>
-                                    </a>
+                                    <div class="flex items-center justify-between gap-2 ml-3 mt-2 group-aria-expanded/sidebar:opacity-100 opacity-0 transition-opacity duration-150">
+                                        <a href="/dashboard/history.html" class="flex items-center gap-1 text-xs text-gray-alpha-500 hover:text-gray-alpha-950 transition-colors duration-150">
+                                            View all history
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M5 12h14"></path>
+                                                <path d="m12 5 7 7-7 7"></path>
+                                            </svg>
+                                        </a>
+                                        <button type="button"
+                                                id="clear-history-btn"
+                                                title="Clear history"
+                                                onclick="clearEditingHistory()"
+                                                class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap text-xs font-medium transition-all duration-150 border border-gray-200 rounded-[10px] bg-gray-alpha-50 text-gray-600 hover:bg-gray-alpha-100 hover:border-gray-300 hover:text-gray-alpha-950 focus:outline-none focus:ring-1 focus:ring-gray-300 active:bg-gray-alpha-150 px-3 py-1.5">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M3 6h18"></path>
+                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                                            </svg>
+                                            <span class="sr-only">Clear history</span>
+                                        </button>
+                                    </div>
                             </ul>
                         </div>
                     </div>

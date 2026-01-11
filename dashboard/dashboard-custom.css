@@ -1843,6 +1843,22 @@ section.stack:has(#watermark-strategy-button) {
 }
 
 /* ============================================
+   ACCESSIBILITY UTILITIES
+   ============================================ */
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* ============================================
    CURSOR UTILITIES
    ============================================ */
 
@@ -2006,5 +2022,37 @@ div[class*="grid-cols-[auto,auto"] {
 /* Ensure the grid items don't stretch too wide */
 .min-w-0 {
     min-width: 0;
+}
+
+/* ============================================
+   DRAG AND DROP STYLING
+   ============================================ */
+
+/* Upload zone drag state */
+#upload-zone.drag-over {
+    outline-color: hsl(240, 5%, 26%) !important;
+    background-color: hsl(240, 5%, 94%) !important;
+}
+
+/* Results section drag state - allows dropping new image to process */
+#image-results-section.drag-over {
+    background-color: hsl(240, 5%, 96%) !important;
+    border: 2px dashed hsl(240, 5%, 50%) !important;
+    border-radius: 14px;
+}
+
+#image-results-section.drag-over::after {
+    content: 'Drop image to process';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: hsl(240, 5%, 26%);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    pointer-events: none;
 }
 

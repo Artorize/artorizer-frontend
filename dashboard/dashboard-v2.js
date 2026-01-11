@@ -87,6 +87,7 @@
   function initializeUploadHandlers() {
     const uploadZone = document.getElementById('upload-zone');
     const fileInput = document.getElementById('image-upload');
+    const resultsSection = document.getElementById('image-results-section');
 
     if (!uploadZone || !fileInput) {
       console.warn('Upload elements not found');
@@ -100,7 +101,7 @@
       }
     });
 
-    // Drag and drop support
+    // Drag and drop support for upload zone
     uploadZone.addEventListener('dragover', function (e) {
       e.preventDefault();
       uploadZone.classList.add('drag-over');
@@ -129,6 +130,41 @@
         }
       }
     });
+
+    // Drag and drop support for results section (allows dropping new image to process)
+    if (resultsSection) {
+      resultsSection.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        resultsSection.classList.add('drag-over');
+      });
+
+      resultsSection.addEventListener('dragleave', function (e) {
+        // Only remove class if leaving the results section, not entering a child
+        if (!resultsSection.contains(e.relatedTarget)) {
+          resultsSection.classList.remove('drag-over');
+        }
+      });
+
+      resultsSection.addEventListener('drop', function (e) {
+        e.preventDefault();
+        resultsSection.classList.remove('drag-over');
+
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          const file = files[0];
+          if (file.type.startsWith('image/')) {
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fileInput.files = dataTransfer.files;
+
+            const event = new Event('change', { bubbles: true });
+            fileInput.dispatchEvent(event);
+          } else {
+            showStatus('Please upload an image file', 'error');
+          }
+        }
+      });
+    }
 
     // File input change handler
     fileInput.addEventListener('change', function (e) {
@@ -1456,6 +1492,32 @@
 
     // Open in new tab
     window.open(protectedUrl, '_blank');
+  }
+
+
+  /**
+   * Clear editing history
+   * Clears the displayed history items
+   */
+  function clearEditingHistory() {
+    const historyList = document.getElementById("editing-history-list");
+    if (!historyList) {
+      console.warn("[EditingHistory] History list element not found");
+      return;
+    }
+
+    // Confirm with user before clearing
+    if (!confirm("Are you sure you want to clear your editing history?")) {
+      return;
+    }
+
+    console.log("[EditingHistory] Clearing history...");
+
+    // Clear the displayed list
+    historyList.innerHTML = "";
+
+    // Show empty state message
+    renderHistoryItems(historyList, [], "History cleared");
   }
 
 })();
