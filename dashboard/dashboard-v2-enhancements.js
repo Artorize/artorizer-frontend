@@ -308,6 +308,12 @@ function selectPlatform(platform, label) {
     sidebarLabel.textContent = label;
   }
 
+  // Update the short mode label next to logo
+  const modeLabel = document.getElementById('platform-mode-label');
+  if (modeLabel) {
+    modeLabel.textContent = platform === 'static-edit' ? 'Static' : 'Export';
+  }
+
   // Update the radio button label (legacy)
   const labelEl = document.getElementById('platform-radio-label');
   if (labelEl) {
