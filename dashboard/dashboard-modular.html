@@ -284,6 +284,101 @@
 <script data-template-shadow-root src="dashboard-v2.js?v=20251212b" defer></script>
 <script src="settings.js" defer></script>
 
+<!-- Platform Dropdown Popper -->
+<div id="platform-dropdown" class="hidden fixed z-[50]" data-radix-popper-content-wrapper="" style="position: fixed; min-width: max-content;">
+    <div data-side="bottom" data-align="start" role="menu" aria-orientation="vertical" data-state="closed"
+         class="platform-dropdown-menu">
+        <!-- Static Edit Option -->
+        <div role="menuitem" class="platform-menu-item-wrapper selected" data-platform="static-edit">
+            <button class="platform-menu-item" onclick="selectPlatform('static-edit', 'Static Edit')">
+                <div class="platform-menu-icon platform-menu-icon--edit">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 20h9"></path>
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                    </svg>
+                </div>
+                <div class="platform-menu-text">
+                    <span class="platform-menu-title">Static Edit</span>
+                    <span class="platform-menu-subtitle">Edit and protect your artwork</span>
+                </div>
+            </button>
+        </div>
+        <!-- Separator -->
+        <div role="separator" class="platform-menu-separator"></div>
+        <!-- Export to Website Option -->
+        <div role="menuitem" class="platform-menu-item-wrapper" data-platform="export-website">
+            <button class="platform-menu-item" onclick="selectPlatform('export-website', 'Export to Website')">
+                <div class="platform-menu-icon platform-menu-icon--export">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                    </svg>
+                </div>
+                <div class="platform-menu-text">
+                    <span class="platform-menu-title">Export to Website</span>
+                    <span class="platform-menu-subtitle">Embed artwork on your site</span>
+                </div>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Embed Code Popup -->
+<div id="embed-code-popup" class="embed-popup hidden">
+    <div class="embed-popup-backdrop" onclick="closeEmbedCodePopup()"></div>
+    <div class="embed-popup-content">
+        <div class="embed-popup-header">
+            <div class="embed-popup-header-left">
+                <div class="embed-popup-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="16 18 22 12 16 6"></polyline>
+                        <polyline points="8 6 2 12 8 18"></polyline>
+                    </svg>
+                </div>
+                <h2 class="embed-popup-title">Export to Website</h2>
+            </div>
+            <button class="embed-popup-close" onclick="closeEmbedCodePopup()" aria-label="Close">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 6 6 18"></path>
+                    <path d="m6 6 12 12"></path>
+                </svg>
+            </button>
+        </div>
+        <div class="embed-popup-body">
+            <p class="embed-popup-description">Select an artwork and copy the embed code for your website.</p>
+
+            <!-- Artwork Selection -->
+            <div class="embed-artwork-select">
+                <label class="embed-select-label">Select Artwork</label>
+                <div class="embed-select-wrapper">
+                    <select id="embed-artwork-select" class="embed-select" onchange="updateEmbedCode()">
+                        <option value="" disabled selected>Choose an artwork...</option>
+                    </select>
+                    <svg class="embed-select-chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m6 9 6 6 6-6"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Embed Code -->
+            <div class="embed-code-container">
+                <pre id="embed-code-content" class="embed-code-block">&lt;iframe src="https://artorizer.com/embed/YOUR_ARTWORK_ID" width="100%" height="600" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;</pre>
+            </div>
+            <p class="embed-popup-hint">Select an artwork above to generate the embed code.</p>
+            <div class="embed-popup-actions">
+                <button id="copy-embed-btn" class="embed-copy-btn" onclick="copyEmbedCode()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
+                        <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
+                    </svg>
+                    Copy Code
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Settings Modal -->
 <div id="settings-modal" class="settings-modal hidden fixed inset-0 z-[60] flex items-center justify-center">
     <div class="settings-modal-backdrop absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-200 opacity-0" data-modal-backdrop></div>

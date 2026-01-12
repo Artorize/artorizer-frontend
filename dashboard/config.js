@@ -19,6 +19,9 @@ const ArtorizeConfig = {
   // CDN base URL for protected images and SAC masks (no trailing slash)
   CDN_URL: 'https://cdn.artorizer.com',
 
+  // Embed URL base for embedded artworks (no trailing slash)
+  EMBED_URL: 'https://artorizer.com/embed',
+
   // Optional: Auth token if your router requires authentication
   AUTH_TOKEN: null,
 

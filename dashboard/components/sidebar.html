@@ -1,3 +1,9 @@
+<script>
+// Redirect to dashboard-modular.html if this file is loaded directly
+if (window.location.pathname.includes('sidebar.html') || window.location.pathname.includes('/components/sidebar')) {
+    window.location.replace('../dashboard-modular.html');
+}
+</script>
         <div aria-expanded=true
              class="hidden lg:block fixed h-full left-0 z-[41] cursor-e-resize aria-expanded:cursor-default bg-background/90 transition-[width] duration-150 backdrop-blur-md border-r group/sidebar"
              style=width:var(--eleven-sidebar-width,16rem)>
@@ -34,7 +40,8 @@
                         <div class="flex items-center relative w-full">
                             <button class="group/main-nav-item rounded-lg outline-foreground"
                                     aria-label="Platform switcher. Click to switch platforms." type=button
-                                    id=radix-:r1eo: aria-haspopup=menu aria-expanded=false data-state=closed>
+                                    id=radix-:r1eo: aria-haspopup=menu aria-expanded=false data-state=closed
+                                    onclick="togglePlatformDropdown()">
                                 <div class="relative group rounded-lg overflow-hidden bg-transparent transition-all duration-150 w-[calc(var(--eleven-sidebar-width)-1.8125rem)] text-gray-alpha-950 ring-1 ring-inset ring-gray-alpha-200 hover:ring-gray-alpha-300 group-aria-expanded/main-nav-item:ring-gray-alpha-300"
                                      data-state=closed>
                                     <div class="flex items-center justify-center w-full group-aria-expanded/sidebar:justify-start group-aria-expanded/sidebar:px-1.5 group-aria-expanded/sidebar:min-w-36" style="gap: 0.5rem;">
@@ -69,8 +76,8 @@
                                             </div>
                                         </div>
                                         <div class="hidden group-aria-expanded/sidebar:flex items-center justify-between flex-1 h-8">
-                                            <p class="text-sm font-medium whitespace-nowrap">
-                                                Creative Platform
+                                            <p id="current-platform-label" class="text-sm font-medium whitespace-nowrap">
+                                                Static Edit
                                             </p>
                                             <div class="flex items-center ml-auto mr-0.5 justify-center w-4 h-4">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
@@ -92,7 +99,7 @@
                             <ul class="w-fit stack gap-4 lg:gap-5 shrink-0 p-3.5 pb-2 absolute top-0 left-0 right-0"
                                 aria-label="Main navigation" style=opacity:1;transform:none>
                                 <li>
-                                    <!-- Simplified navigation - Only Export protector shown -->
+                                    <!-- Simplified navigation - Export protector -->
                                     <ul class="stack gap-1">
                                         <li class="group w-full">
                                             <div class="relative w-fit">
@@ -136,25 +143,16 @@
                                     <ul id="editing-history-list" class="stack gap-0.5">
                                         <!-- History items will be populated by JavaScript -->
                                     </ul>
-                                    <div class="flex items-center justify-between gap-2 ml-3 mt-2 group-aria-expanded/sidebar:opacity-100 opacity-0 transition-opacity duration-150">
-                                        <a href="/dashboard/history.html" class="flex items-center gap-1 text-xs text-gray-alpha-500 hover:text-gray-alpha-950 transition-colors duration-150">
+                                    <div class="flex items-center gap-2 ml-3 mt-2 group-aria-expanded/sidebar:opacity-100 opacity-0 transition-opacity duration-150">
+                                        <button type="button"
+                                                id="view-all-history-btn"
+                                                onclick="toggleHistoryModal()"
+                                                class="flex items-center gap-1 text-xs text-gray-alpha-500 hover:text-gray-alpha-950 transition-colors duration-150">
                                             View all history
                                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                 <path d="M5 12h14"></path>
                                                 <path d="m12 5 7 7-7 7"></path>
                                             </svg>
-                                        </a>
-                                        <button type="button"
-                                                id="clear-history-btn"
-                                                title="Clear history"
-                                                onclick="clearEditingHistory()"
-                                                class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap text-xs font-medium transition-all duration-150 border border-gray-200 rounded-[10px] bg-gray-alpha-50 text-gray-600 hover:bg-gray-alpha-100 hover:border-gray-300 hover:text-gray-alpha-950 focus:outline-none focus:ring-1 focus:ring-gray-300 active:bg-gray-alpha-150 px-3 py-1.5">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M3 6h18"></path>
-                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                                            </svg>
-                                            <span class="sr-only">Clear history</span>
                                         </button>
                                     </div>
                             </ul>
