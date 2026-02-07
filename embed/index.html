@@ -3,522 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Artwork - Protected by Artorizer</title>
-
-    <!-- Dynamic meta tags will be populated by JavaScript -->
+    <title>Protected Artwork</title>
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Artorizer">
     <meta name="twitter:card" content="summary_large_image">
-
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Artorize Embed Script -->
     <script src="https://cdn.artorizer.com/dist/embed.js" defer></script>
-
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
-            color: #ffffff;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            width: 100%;
-            margin: 0 auto;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-top: 20px;
-        }
-
-        .logo-link {
-            display: inline-block;
-            text-decoration: none;
-            color: #ffffff;
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            transition: opacity 0.2s;
-        }
-
-        .logo-link:hover {
-            opacity: 0.8;
-        }
-
-        .logo-link span {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .artwork-container {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            margin-bottom: 30px;
-        }
-
-        .artwork-info {
-            margin-bottom: 25px;
-            text-align: center;
-        }
-
-        .artwork-title {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: #ffffff;
-            line-height: 1.2;
-        }
-
-        .artwork-artist {
-            font-size: 18px;
-            color: #a0a0b0;
-            margin-bottom: 5px;
-        }
-
-        .artwork-date {
-            font-size: 14px;
-            color: #707080;
-        }
-
-        .artwork-display {
-            position: relative;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 20px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 12px;
-            overflow: hidden;
-            min-height: 400px;
-        }
-
-        .artorize-image {
-            max-width: 100%;
-            max-height: 80vh;
-            width: auto;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-        }
-
-        .loading-spinner {
-            text-align: center;
-            padding: 60px 20px;
-            color: #a0a0b0;
-        }
-
-        .spinner {
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .protected-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(102, 126, 234, 0.15);
-            border: 1px solid rgba(102, 126, 234, 0.3);
-            border-radius: 24px;
-            padding: 8px 16px;
-            font-size: 13px;
-            font-weight: 500;
-            color: #a0b0ff;
-            margin-bottom: 20px;
-        }
-
-        .protected-badge::before {
-            content: "🛡️";
-            font-size: 16px;
-        }
-
-        .action-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s;
-            cursor: pointer;
-            border: none;
-            font-family: inherit;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #ffffff;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.05);
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .error-container {
-            text-align: center;
-            padding: 60px 20px;
-        }
-
-        .error-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
-        }
-
-        .error-title {
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #ff6b6b;
-        }
-
-        .error-message {
-            font-size: 16px;
-            color: #a0a0b0;
-            margin-bottom: 30px;
-        }
-
-        .footer {
-            text-align: center;
-            padding: 30px 20px;
-            color: #707080;
-            font-size: 14px;
-        }
-
-        .footer a {
-            color: #a0b0ff;
-            text-decoration: none;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
-        }
-
-        .copy-notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(102, 126, 234, 0.95);
-            color: #ffffff;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            opacity: 0;
-            transform: translateY(-20px);
-            transition: all 0.3s;
-            pointer-events: none;
-            z-index: 1000;
-        }
-
-        .copy-notification.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        @media (max-width: 768px) {
-            .artwork-container {
-                padding: 20px;
-            }
-
-            .artwork-title {
-                font-size: 24px;
-            }
-
-            .artwork-artist {
-                font-size: 16px;
-            }
-
-            .action-buttons {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-                justify-content: center;
-            }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; overflow: hidden; background: transparent; }
+        .artorize-image { max-width: 100%; max-height: 100vh; display: block; margin: 0 auto; }
+        #error { display: none; text-align: center; padding: 40px; font-family: sans-serif; color: #666; }
     </style>
 </head>
 <body>
-    <div class="copy-notification" id="copyNotification">
-        Link copied to clipboard!
-    </div>
-
-    <div class="container">
-        <div class="header">
-            <a href="https://artorizer.com" class="logo-link">
-                <span>Artorizer</span>
-            </a>
-        </div>
-
-        <div class="artwork-container">
-            <div id="loadingState" class="loading-spinner">
-                <div class="spinner"></div>
-                <p>Loading artwork...</p>
-            </div>
-
-            <div id="errorState" class="error-container" style="display: none;">
-                <div class="error-icon">⚠️</div>
-                <h2 class="error-title">Artwork Not Found</h2>
-                <p class="error-message">The artwork you're looking for doesn't exist or has been removed.</p>
-                <a href="https://artorizer.com" class="btn btn-primary">Go to Artorizer</a>
-            </div>
-
-            <div id="artworkContent" style="display: none;">
-                <div class="artwork-info">
-                    <h1 class="artwork-title" id="artworkTitle">Untitled Artwork</h1>
-                    <p class="artwork-artist" id="artworkArtist">Unknown Artist</p>
-                    <p class="artwork-date" id="artworkDate"></p>
-                </div>
-
-                <div class="artwork-display">
-                    <div
-                        class="artorize-image"
-                        id="artworkImage"
-                        data-src=""
-                        data-sac=""
-                        data-opacity="0.5"
-                        data-alt="Protected artwork">
-                    </div>
-                </div>
-
-                <div style="text-align: center;">
-                    <div class="protected-badge">
-                        Protected by Artorizer
-                    </div>
-                </div>
-
-                <div class="action-buttons">
-                    <button class="btn btn-secondary" id="copyLinkBtn">
-                        <span>🔗</span>
-                        Copy Link
-                    </button>
-                    <a href="https://artorizer.com" class="btn btn-primary">
-                        <span>🎨</span>
-                        View on Artorizer
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="footer">
-            <p>Powered by <a href="https://artorizer.com">Artorizer</a> - Professional AI Art Protection</p>
-            <p style="margin-top: 10px; font-size: 12px;">This artwork is protected by advanced watermarking technology</p>
-        </div>
-    </div>
+    <div id="artworkImage" class="artorize-image" data-src="" data-sac="" data-opacity="0.5" data-alt="Protected artwork"></div>
+    <div id="error">Artwork not found.</div>
 
     <script>
-        // Extract artwork ID from URL path
-        function getArtworkIdFromUrl() {
-            const pathParts = window.location.pathname.split('/');
-            const embedIndex = pathParts.indexOf('embed');
-            if (embedIndex !== -1 && pathParts.length > embedIndex + 1) {
-                return pathParts[embedIndex + 1];
-            }
-            return null;
-        }
+        (async function() {
+            const parts = window.location.pathname.split('/');
+            const idx = parts.indexOf('embed');
+            const id = idx !== -1 && parts.length > idx + 1 ? parts[idx + 1] : null;
 
-        // Show notification
-        function showNotification(message) {
-            const notification = document.getElementById('copyNotification');
-            notification.textContent = message;
-            notification.classList.add('show');
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
-        }
-
-        // Copy link to clipboard
-        function copyLinkToClipboard() {
-            const currentUrl = window.location.href;
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(currentUrl)
-                    .then(() => showNotification('Link copied to clipboard!'))
-                    .catch(() => showNotification('Failed to copy link'));
-            } else {
-                // Fallback for older browsers
-                const textArea = document.createElement('textarea');
-                textArea.value = currentUrl;
-                textArea.style.position = 'fixed';
-                textArea.style.left = '-999999px';
-                document.body.appendChild(textArea);
-                textArea.select();
-                try {
-                    document.execCommand('copy');
-                    showNotification('Link copied to clipboard!');
-                } catch (err) {
-                    showNotification('Failed to copy link');
-                }
-                document.body.removeChild(textArea);
-            }
-        }
-
-        // Format date
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            return date.toLocaleDateString('en-US', options);
-        }
-
-        // Update meta tags for social sharing
-        function updateMetaTags(metadata) {
-            const title = `${metadata.title} by ${metadata.artist} - Protected by Artorizer`;
-            const description = `View this protected artwork on Artorizer. Created on ${formatDate(metadata.createdAt)}`;
-            const imageUrl = `https://cdn.artorizer.com/api/artworks/${metadata.id}?variant=protected`;
-
-            document.title = title;
-
-            // Update or create meta tags
-            const metaTags = [
-                { property: 'og:title', content: title },
-                { property: 'og:description', content: description },
-                { property: 'og:image', content: imageUrl },
-                { property: 'og:url', content: window.location.href },
-                { name: 'twitter:title', content: title },
-                { name: 'twitter:description', content: description },
-                { name: 'twitter:image', content: imageUrl },
-                { name: 'description', content: description }
-            ];
-
-            metaTags.forEach(tag => {
-                const identifier = tag.property ? 'property' : 'name';
-                const value = tag.property || tag.name;
-                let element = document.querySelector(`meta[${identifier}="${value}"]`);
-
-                if (!element) {
-                    element = document.createElement('meta');
-                    element.setAttribute(identifier, value);
-                    document.head.appendChild(element);
-                }
-                element.setAttribute('content', tag.content);
-            });
-        }
-
-        // Load and display artwork
-        async function loadArtwork() {
-            const artworkId = getArtworkIdFromUrl();
-
-            if (!artworkId) {
-                showError();
-                return;
-            }
+            if (!id) { document.getElementById('error').style.display = 'block'; return; }
 
             try {
-                // Fetch metadata
-                const metadataUrl = `https://cdn.artorizer.com/api/artworks/${artworkId}/metadata`;
-                const response = await fetch(metadataUrl);
+                const res = await fetch(`https://cdn.artorizer.com/api/artworks/${id}/metadata`);
+                if (!res.ok) throw new Error();
+                const meta = await res.json();
 
-                if (!response.ok) {
-                    throw new Error('Artwork not found');
-                }
+                const el = document.getElementById('artworkImage');
+                el.setAttribute('data-src', `https://cdn.artorizer.com/api/artworks/${id}?variant=protected`);
+                el.setAttribute('data-sac', `https://cdn.artorizer.com/api/artworks/${id}/mask`);
+                el.setAttribute('data-alt', meta.title || 'Protected artwork');
 
-                const metadata = await response.json();
+                // OG tags for social sharing
+                const title = `${meta.title || 'Artwork'} - Artorizer`;
+                document.title = title;
+                setMeta('og:title', title);
+                setMeta('og:image', `https://cdn.artorizer.com/api/artworks/${id}?variant=protected`);
+                setMeta('og:url', window.location.href);
+                setMeta('twitter:title', title);
+                setMeta('twitter:image', `https://cdn.artorizer.com/api/artworks/${id}?variant=protected`);
 
-                // Update page content
-                document.getElementById('artworkTitle').textContent = metadata.title || 'Untitled Artwork';
-                document.getElementById('artworkArtist').textContent = metadata.artist || 'Unknown Artist';
-                document.getElementById('artworkDate').textContent = metadata.createdAt ? `Created on ${formatDate(metadata.createdAt)}` : '';
-
-                // Update meta tags
-                updateMetaTags({ ...metadata, id: artworkId });
-
-                // Set up the Artorize image element
-                const imageElement = document.getElementById('artworkImage');
-                imageElement.setAttribute('data-src', `https://cdn.artorizer.com/api/artworks/${artworkId}?variant=protected`);
-                imageElement.setAttribute('data-sac', `https://cdn.artorizer.com/api/artworks/${artworkId}/mask`);
-                imageElement.setAttribute('data-alt', `${metadata.title} by ${metadata.artist}`);
-
-                // Show content, hide loading
-                document.getElementById('loadingState').style.display = 'none';
-                document.getElementById('artworkContent').style.display = 'block';
-
-                // Initialize Artorize embed (if not already initialized)
-                if (window.Artorize && window.Artorize.init) {
-                    window.Artorize.init();
-                }
-
-            } catch (error) {
-                console.error('Error loading artwork:', error);
-                showError();
+                if (window.Artorize && window.Artorize.init) window.Artorize.init();
+            } catch (e) {
+                document.getElementById('error').style.display = 'block';
             }
-        }
 
-        // Show error state
-        function showError() {
-            document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('errorState').style.display = 'block';
-        }
-
-        // Set up event listeners
-        document.addEventListener('DOMContentLoaded', () => {
-            loadArtwork();
-
-            const copyBtn = document.getElementById('copyLinkBtn');
-            if (copyBtn) {
-                copyBtn.addEventListener('click', copyLinkToClipboard);
+            function setMeta(key, content) {
+                const attr = key.startsWith('og:') ? 'property' : 'name';
+                let el = document.querySelector(`meta[${attr}="${key}"]`);
+                if (!el) { el = document.createElement('meta'); el.setAttribute(attr, key); document.head.appendChild(el); }
+                el.setAttribute('content', content);
             }
-        });
+        })();
 
-        // Initialize Artorize when script loads
         window.addEventListener('load', () => {
-            if (window.Artorize && window.Artorize.init) {
-                window.Artorize.init();
-            }
+            if (window.Artorize && window.Artorize.init) window.Artorize.init();
         });
     </script>
 </body>
