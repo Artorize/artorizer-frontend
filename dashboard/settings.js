@@ -258,34 +258,31 @@
    */
   function renderHistory() {
     const historyList = document.getElementById('history-list');
+    const artworkCountEl = document.getElementById('settings-artwork-count');
     if (!historyList) return;
 
     historyList.innerHTML = '';
 
-    const artworksToShow = showingAllHistory ? allArtworks : allArtworks.slice(0, 5);
-
-    // Create wrapper for scrollable area when showing all
-    const listContainer = document.createElement('ul');
-    listContainer.className = 'history-list-container';
-
-    if (showingAllHistory) {
-      listContainer.className += ' history-list-container--expanded';
-    } else if (allArtworks.length > 5) {
-      listContainer.className += ' history-list-container--collapsed';
+    // Update artwork count
+    if (artworkCountEl) {
+      artworkCountEl.textContent = allArtworks.length === 1 ? '1 artwork' : `${allArtworks.length} artworks`;
     }
 
+    const artworksToShow = showingAllHistory ? allArtworks : allArtworks.slice(0, 5);
+
+    // Render list items directly (no wrapper needed with new styling)
     artworksToShow.forEach(artwork => {
       const item = createHistoryItem(artwork);
-      listContainer.appendChild(item);
+      historyList.appendChild(item);
     });
-
-    historyList.appendChild(listContainer);
 
     // Add toggle button if more than 5 items
     if (allArtworks.length > 5) {
       const toggleBtn = document.createElement('button');
-      toggleBtn.className = 'view-all-history-btn w-full mt-3 py-2 px-4 text-sm font-medium text-foreground bg-gray-alpha-50 hover:bg-gray-alpha-100 rounded-lg transition-colors';
-      toggleBtn.textContent = showingAllHistory ? 'Show Less' : `View All History (${allArtworks.length})`;
+      toggleBtn.className = 'artorize-btn artorize-btn-sm artorize-btn-secondary view-all-history-btn';
+      toggleBtn.innerHTML = showingAllHistory
+        ? `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>Show Less`
+        : `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>View All (${allArtworks.length})`;
       toggleBtn.addEventListener('click', toggleHistoryView);
       historyList.appendChild(toggleBtn);
     }
@@ -306,39 +303,70 @@
   }
 
   /**
-   * Create a history item element
+   * Create a history item element (shadcn-style)
    */
   function createHistoryItem(artwork) {
     const li = document.createElement('li');
-    li.className = 'history-item flex items-center justify-between gap-2 py-2 px-3 bg-white hover:bg-gray-alpha-50 rounded-lg transition-colors';
+    li.className = 'settings-history-item';
 
-    const infoDiv = document.createElement('div');
-    infoDiv.className = 'flex-1 min-w-0';
+    // Icon
+    const iconDiv = document.createElement('div');
+    iconDiv.className = 'settings-history-icon';
+    iconDiv.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg>`;
 
-    const title = document.createElement('div');
-    title.className = 'text-sm font-medium text-foreground truncate';
+    // Content
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'settings-history-content';
+
+    const title = document.createElement('p');
+    title.className = 'settings-history-title';
     title.textContent = artwork.title || 'Untitled';
 
-    const artist = document.createElement('div');
-    artist.className = 'text-xs text-gray-alpha-500 truncate';
-    artist.textContent = artwork.artist || 'Unknown Artist';
+    const subtitle = document.createElement('p');
+    subtitle.className = 'settings-history-subtitle';
+    subtitle.textContent = artwork.artist || 'Unknown Artist';
 
-    const date = document.createElement('div');
-    date.className = 'text-xs text-gray-alpha-400';
+    contentDiv.appendChild(title);
+    contentDiv.appendChild(subtitle);
+
+    // Meta (date + status badge)
+    const metaDiv = document.createElement('div');
+    metaDiv.className = 'settings-history-meta';
+
+    // Status badge
+    const isPublic = artwork.isPublic || artwork.visibility === 'public';
+    const badge = document.createElement('span');
+    badge.className = `artorize-badge ${isPublic ? 'artorize-badge-success' : 'artorize-badge-default'}`;
+    badge.innerHTML = isPublic
+      ? `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Public`
+      : `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Private`;
+
+    // Date
+    const dateSpan = document.createElement('span');
+    dateSpan.className = 'settings-history-date';
     const createdAt = new Date(artwork.createdAt);
-    date.textContent = createdAt.toLocaleDateString() + ' ' + createdAt.toLocaleTimeString();
+    dateSpan.textContent = createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
-    infoDiv.appendChild(title);
-    infoDiv.appendChild(artist);
-    infoDiv.appendChild(date);
+    metaDiv.appendChild(badge);
+    metaDiv.appendChild(dateSpan);
+
+    // Actions
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'settings-history-actions';
 
     const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'delete-btn px-3 py-1 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors';
-    deleteBtn.textContent = 'Delete';
+    deleteBtn.className = 'settings-delete-btn';
+    deleteBtn.title = 'Delete artwork';
+    deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>`;
     deleteBtn.addEventListener('click', () => deleteArtwork(artwork.id, deleteBtn));
 
-    li.appendChild(infoDiv);
-    li.appendChild(deleteBtn);
+    actionsDiv.appendChild(deleteBtn);
+
+    // Assemble
+    li.appendChild(iconDiv);
+    li.appendChild(contentDiv);
+    li.appendChild(metaDiv);
+    li.appendChild(actionsDiv);
 
     return li;
   }
@@ -348,12 +376,13 @@
    */
   function createClearAllButton() {
     const container = document.createElement('div');
-    container.className = 'mt-4 pt-4 border-t border-gray-alpha-200';
+    container.style.cssText = 'margin-top: var(--art-space-4); padding-top: var(--art-space-4); border-top: 1px solid var(--art-border-subtle);';
 
     const clearAllBtn = document.createElement('button');
     clearAllBtn.id = 'clear-all-btn';
-    clearAllBtn.className = 'w-full px-4 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed disabled:text-gray-500';
-    clearAllBtn.textContent = 'Clear All History';
+    clearAllBtn.className = 'artorize-btn artorize-btn-sm artorize-btn-danger';
+    clearAllBtn.style.width = '100%';
+    clearAllBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>Clear All History`;
     clearAllBtn.addEventListener('click', clearAllHistory);
 
     container.appendChild(clearAllBtn);

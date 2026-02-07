@@ -1,30 +1,33 @@
+<!-- Components/Sidebar.html -->
+<!-- Uses the same structure as dashboard-modular.html but extracted for cleaner management -->
 <script>
 // Redirect to dashboard-modular.html if this file is loaded directly
 if (window.location.pathname.includes('sidebar.html') || window.location.pathname.includes('/components/sidebar')) {
     window.location.replace('../dashboard-modular.html');
 }
 </script>
-        <div aria-expanded=true
+        <div aria-expanded="true"
              class="hidden lg:block fixed h-full left-0 z-[41] cursor-e-resize aria-expanded:cursor-default bg-background/90 transition-[width] duration-150 backdrop-blur-md border-r group/sidebar"
-             style=width:var(--eleven-sidebar-width,16rem)>
-            <div id=sidebar-portal-root></div>
-            <a class=sr-only href=#content>Skip to content</a>
+             style="width:var(--eleven-sidebar-width,16rem)">
+            <div id="sidebar-portal-root"></div>
+            <a class="sr-only" href="#content">Skip to content</a>
             <div class="relative stack w-full h-full pb-3 overflow-hidden scroll-smooth max-h-screen">
                 <div class="hstack justify-between items-center px-3 w-full relative z-20">
                     <div class="flex justify-between -mb-4 relative group/header-logo items-center w-full"
-                         style=height:var(--eleven-header-height)>
+                         style="height:var(--eleven-header-height)">
                         <div class="flex opacity-100 group-aria-expanded/sidebar:group-focus-within/header-logo:opacity-100 group-focus-within/header-logo:opacity-0 group-aria-expanded/sidebar:group-hover/sidebar:opacity-100 group-hover/sidebar:opacity-0 transition-opacity duration-100">
                             <div class="flex items-center translate-x-[13px] group-aria-expanded/sidebar:translate-x-2 transition-transform duration-150">
-                                <div class="flex items-center dark:invert h-[18px] w-[109.125px] [&amp;_svg]:!h-[18px] lg:[&amp;_svg]:!h-[18px]">
-                                    <div>
-                                        <img src="assets/svg/logos/logo-artorize.svg" alt="logo-artorize" class="" />
-                                    </div>
-                                </div>
+                                <span class="artorize-brand-text">Artorize</span>
                             </div>
                         </div>
-                        <div class="transition-all absolute right-0.5 duration-100 translate-x-0 opacity-0 group-aria-expanded/sidebar:opacity-100 focus-within:!opacity-100 group-hover/sidebar:opacity-100">
-                            <button data-state=closed
-                                    class="relative inline-flex items-center justify-center whitespace-nowrap text-sm font-medium focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent bg-transparent hover:bg-gray-alpha-100 radix-state-open:text-foreground radix-state-open:bg-gray-alpha-200 active:bg-gray-alpha-200 disabled:bg-transparent disabled:text-gray-400 rounded-[10px] pointer-events-auto cursor-e-resize group-aria-expanded/sidebar:cursor-w-resize p-0 h-8 w-8 text-gray-500 hover:text-gray-alpha-950 duration-100 transition-colors">
+                        <div class="sidebar-toggle-btn-container transition-all absolute right-0.5 duration-100 translate-x-0">
+                            <!-- Collapsed "A" brand - shown when collapsed and NOT hovering -->
+                            <div class="artorize-collapsed-brand flex items-center justify-center h-8 w-8">
+                                <span class="artorize-brand-text text-xl">A</span>
+                            </div>
+                            <!-- Expand icon button - shown when expanded OR when collapsed+hovering -->
+                            <button data-state="closed"
+                                    class="sidebar-expand-btn relative inline-flex items-center justify-center whitespace-nowrap text-sm font-medium focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent bg-transparent hover:bg-gray-alpha-100 radix-state-open:text-foreground radix-state-open:bg-gray-alpha-200 active:bg-gray-alpha-200 disabled:bg-transparent disabled:text-gray-400 rounded-[10px] pointer-events-auto cursor-e-resize group-aria-expanded/sidebar:cursor-w-resize p-0 h-8 w-8 text-gray-500 hover:text-gray-alpha-950 duration-100 transition-colors">
                                 <svg width="20px" height="20px" viewBox="0 0 20 20" fill="none"
                                      xmlns="http://www.w3.org/2000/svg" color="currentColor" class="w-5 h-5">
                                     <rect x="7" y="6.5" width="7" height="1.5" rx="0.75" transform="rotate(90 7 6.5)"
@@ -35,70 +38,10 @@ if (window.location.pathname.includes('sidebar.html') || window.location.pathnam
                         </div>
                     </div>
                 </div>
-                <nav class="flex h-full flex-1 flex-col grow min-h-0" id=main-nav>
-                    <div class="px-3.5 w-full flex flex-col relative z-20 mt-2">
-                        <div class="flex items-center relative w-full">
-                            <button class="group/main-nav-item rounded-lg outline-foreground"
-                                    aria-label="Platform switcher. Click to switch platforms." type=button
-                                    id=radix-:r1eo: aria-haspopup=menu aria-expanded=false data-state=closed
-                                    onclick="togglePlatformDropdown()">
-                                <div class="relative group rounded-lg overflow-hidden bg-transparent transition-all duration-150 w-[calc(var(--eleven-sidebar-width)-1.8125rem)] text-gray-alpha-950 ring-1 ring-inset ring-gray-alpha-200 hover:ring-gray-alpha-300 group-aria-expanded/main-nav-item:ring-gray-alpha-300"
-                                     data-state=closed>
-                                    <div class="flex items-center justify-center w-full group-aria-expanded/sidebar:justify-start group-aria-expanded/sidebar:px-1.5 group-aria-expanded/sidebar:min-w-36" style="gap: 0.5rem;">
-                                        <div class="center h-8" style="flex-shrink: 0;">
-                                            <div class="w-5 h-5 flex items-center justify-center rounded-md relative text-white bg-black">
-                                                <div class="flex absolute inset-0 w-full h-full rounded-[inherit] overflow-hidden">
-                                                    <img src=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAACXBIWXMAACxLAAAsSwGlPZapAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAC5aSURBVHgBTZ1vgt04ktwBkHyvpB7bx/BHH8I39tU801WPJICNXwSoXu2qJVW94p9EZmRkZAJT//f/+b//b4zrd2t7K2Ue+37UrbWt9/tdS236tZU5t1pK249j1tn3Mmvt/dz3bZ/6Op+fpdY5R29H22YfXV+tpfFffb3wa/IHH2u6ah13v3RdXVSf59t3vyt/n2O0bduHP8v35uACulqZTT+7vl6arqtn0891fZXHKOXYX2OMXneuU2fdaps/n5/23o/Re9flG09ReUZdYNbBpfZxXp+67Ue/rquOqR9t7d7bfn9/firPOke567bderhbt7r1rF1f1J/92kc/f+k1Nj2E7rvr42Uf435tzbZr4z5f2/EquqkMVet1n8exveZrf7dWZaz7s29VNylD9h42EM8mM8nMMtvUC+pzpWLMbY551372ehwHliqyNnYs76/f87x+2vY6dM1727ZDthtataY/BleSgfTzWpxdP6dn1B1G2biN/r9y09llZNlc9xhdBtz38T6OIusdh67DYmNcPfg8PxcOMXSl2fZN6zLar19f/bxOLrbLQPVXq7wVN+Rnp9xi3rrvSz/PW8ll9v11vLzKuhtfOPZj183HpofUcg3db9N6azFL1+W2+t7fvEzDI+d9yagyrJa6jMYD6+Wv+tr2cp5a+deXDKs10/X1Ob2u3qDLA15vPGkb+iwvg6/O+1N2LC5PfOs6suC4bj1Ha/rhrVz3rafWtXcZeFxabbwRb/KfcXHdR9crLNioXY9871+HrvV6z/P8tK/jrefRE/EgcuL3XrvesXzJQ8/ragcLzyOMu3X56PHa+61FtPe3Kr/Ty8pTP9dnq52vz3vXS7xlAK2BXqiMXculv44D28eIRcaUp8sV7uvcj9eL1eCx29C76aV06ekYq7rZZk8Y9X/99T/Hz+c/hzyxYAy/Z9c1D605N080ln2F/BvP6xigca2pEN8FKnKma+N9j22bm0PX4a4P7fMQhJz3aQjZHM63IOQll+6suB5olpeuxa32HQdRGHOBao8oetkmqNIzt6GlL/Nzb+/Xq8vhZdBTX531a9+vz33uAgy9R72+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
-                                                         alt="Creative Platform" class="w-full h-full object-cover"
-                                                         role=presentation></div>
-                                                <div class="relative z-20">
-                                                    <svg width="20px" height="20px" viewBox="0 0 20 20" fill="none"
-                                                         xmlns="http://www.w3.org/2000/svg" color="currentColor">
-                                                        <path d="M8.31982 5.1875V14.8125" stroke="currentColor"
-                                                              stroke-width="1.5" stroke-linecap="round"></path>
-                                                        <path d="M5.1875 8.6875V11.3125" stroke="currentColor"
-                                                              stroke-width="1.5" stroke-linecap="round"></path>
-                                                        <path d="M11.6802 6.35416V13.6458" stroke="currentColor"
-                                                              stroke-width="1.5" stroke-linecap="round"></path>
-                                                        <path d="M14.8125 8.6875V11.3125" stroke="currentColor"
-                                                              stroke-width="1.5" stroke-linecap="round"></path>
-                                                    </svg>
-                                                </div>
-                                                <div aria-hidden=true
-                                                     class="flex absolute inset-0 text-gray-500 opacity-50">
-                                                    <div class="absolute -left-1 -top-1"><span class=flex
-                                                                                               <img src="assets/svg/indicators/star-rating.svg" alt="star-rating" class="w-1.5 h-1.5" />
-                                                    <div class="absolute -right-1 -top-1"><span class=flex
-                                                                                                <img src="assets/svg/indicators/star-rating.svg" alt="star-rating" class="w-1.5 h-1.5" />
-                                                    <div class="absolute -right-1 -bottom-1"><span class=flex
-                                                                                                   <img src="assets/svg/indicators/star-rating.svg" alt="star-rating" class="w-1.5 h-1.5" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <span id="platform-mode-label" class="hidden group-aria-expanded/sidebar:inline text-xs font-medium text-gray-600 whitespace-nowrap">Static</span>
-                                        <div class="hidden group-aria-expanded/sidebar:flex items-center justify-between flex-1 h-8">
-                                            <p id="current-platform-label" class="text-sm font-medium whitespace-nowrap">
-                                                Static Edit
-                                            </p>
-                                            <div class="flex items-center ml-auto mr-0.5 justify-center w-4 h-4">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                                     stroke-linecap="round" stroke-linejoin="round"
-                                                     class="lucide lucide-chevrons-up-down w-4 h-4 opacity-50">
-                                                    <path d="m7 15 5 5 5-5"></path>
-                                                    <path d="m7 9 5-5 5 5"></path>
-                                                </svg>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="relative flex flex-col grow fade-top-3 fade-bottom-3 w-full">
-                        <div class="relative stack overflow-y-auto no-scrollbar overflow-x-hidden grow w-full">
+                                <nav class="flex h-full flex-1 flex-col grow min-h-0" id="main-nav">
+                                    <div class="relative flex flex-col grow fade-top-3 fade-bottom-3 w-full">                        <div class="relative stack overflow-y-auto no-scrollbar overflow-x-hidden grow w-full">
                             <ul class="w-fit stack gap-4 lg:gap-5 shrink-0 p-3.5 pb-2 absolute top-0 left-0 right-0"
-                                aria-label="Main navigation" style=opacity:1;transform:none>
+                                aria-label="Main navigation" style="opacity:1;transform:none">
                                 <li>
                                     <!-- Simplified navigation - Export protector -->
                                     <ul class="stack gap-1">
@@ -106,21 +49,14 @@ if (window.location.pathname.includes('sidebar.html') || window.location.pathnam
                                             <div class="relative w-fit">
                                                 <a class="block w-fit rounded-lg outline-foreground" href="/dashboard/dashboard-modular.html">
                                                     <div class="relative group rounded-lg overflow-hidden bg-transparent transition-all duration-150 !bg-gray-alpha-100 !text-gray-alpha-950 w-[calc(var(--eleven-sidebar-width)-1.8125rem)] hover:text-gray-alpha-950 hover:bg-gray-alpha-100 group-aria-expanded/main-nav-item:bg-gray-alpha-100 group-aria-expanded/main-nav-item:text-gray-alpha-950 text-gray-600"
-                                                         data-state=closed>
+                                                         data-state="closed">
                                                         <div class="flex items-center gap-2 px-1.5 min-w-36">
                                                             <div class="center h-8">
-                                                                <svg width="1.25rem" height="1.25rem" viewBox="0 0 20 20"
-                                                                     fill="none" xmlns="http://www.w3.org/2000/svg"
-                                                                     color="currentColor">
-                                                                    <path d="M10.3258 5.88235C10.3258 7.47423 9.06066 8.76471 7.5 8.76471C5.93934 8.76471 4.67418 7.47423 4.67418 5.88235C4.67418 4.29047 5.93934 3 7.5 3C9.06066 3 10.3258 4.29047 10.3258 5.88235Z"
-                                                                          stroke="currentColor" stroke-width="1.5"
-                                                                          stroke-linejoin="round"></path>
-                                                                    <path d="M7.5 11.2353C5.09526 11.2353 3.20018 12.515 2.19824 14.4158C1.52238 15.6981 2.67793 17 4.10519 17H10.8948C12.3221 17 13.4776 15.6981 12.8018 14.4158C11.7998 12.515 9.90473 11.2353 7.5 11.2353Z"
-                                                                          stroke="currentColor" stroke-width="1.5"
-                                                                          stroke-linejoin="round"></path>
-                                                                    <path d="M15.6187 5C17.5713 6.95262 17.5713 10.1184 15.6187 12.0711M13.2616 7.35702C13.9125 8.0079 13.9125 9.06317 13.2616 9.71405"
-                                                                          stroke="currentColor" stroke-width="1.5"
-                                                                          stroke-linecap="round"></path>
+                                                                <svg width="1.25rem" height="1.25rem" viewBox="0 0 24 24"
+                                                                     fill="none" stroke="currentColor" stroke-width="1.5"
+                                                                     stroke-linecap="round" stroke-linejoin="round">
+                                                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                                                    <path d="m9 12 2 2 4-4"/>
                                                                 </svg>
                                                             </div>
                                                             <div class="flex items-center justify-between flex-1 h-8 transition-all duration-150 group-aria-expanded/sidebar:opacity-100 opacity-0 translate-x-1 group-aria-expanded/sidebar:translate-x-0">
@@ -133,7 +69,7 @@ if (window.location.pathname.includes('sidebar.html') || window.location.pathnam
                                             </div>
                                         </li>
                                     </ul>
-                                <li aria-label=History><h2
+                                <li aria-label="History"><h2
                                         class="text-sm font-medium text-gray-alpha-500 ml-1.5 mb-1.5 whitespace-nowrap group-aria-expanded/sidebar:opacity-100 opacity-0 transition-opacity duration-150 flex items-center gap-1.5">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="1rem" height="1rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
@@ -160,15 +96,68 @@ if (window.location.pathname.includes('sidebar.html') || window.location.pathnam
                         </div>
                     </div>
                     <div class="mt-auto stack">
+                        <!-- Platform Switcher (Bottom Position) -->
+                        <div class="relative px-3.5 mb-2">
+                            <div class="relative w-full">
+                                <button type="button" 
+                                        id="platform-switcher-trigger"
+                                        aria-haspopup="menu" 
+                                        aria-expanded="false" 
+                                        data-state="closed"
+                                        class="flex items-center justify-between w-full h-9 px-2 text-sm bg-transparent hover:bg-gray-alpha-100 rounded-lg transition-colors outline-none focus:ring-1 focus:ring-foreground group-aria-expanded/sidebar:w-[calc(var(--eleven-sidebar-width)-1.8125rem)]"
+                                        onclick="window.togglePlatformDropdown()">
+                                    
+                                    <!-- Content Container -->
+                                    <div class="flex items-center gap-2 w-full overflow-hidden">
+                                        <!-- Collapsed State: Icon Box -->
+                                        <div class="flex items-center justify-center w-5 h-5 rounded bg-foreground text-background shrink-0 group-aria-expanded/sidebar:hidden">
+                                            <span class="text-[10px] font-bold">S</span>
+                                        </div>
+                                        
+                                        <!-- Expanded State: Text Label -->
+                                        <span id="platform-label-display" class="text-[15px] font-semibold text-foreground truncate hidden group-aria-expanded/sidebar:block tracking-tight">Static Edit</span>
+                                    </div>
+
+                                    <!-- Chevron (Expanded only) -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 opacity-50 shrink-0 hidden group-aria-expanded/sidebar:block ml-2">
+                                        <path d="m7 15 5 5 5-5"></path>
+                                        <path d="m7 9 5-5 5 5"></path>
+                                    </svg>
+                                </button>
+
+                                <!-- Dropdown Content (Opens Upwards) -->
+                                <div id="platform-dropdown-content"
+                                     class="hidden absolute bottom-full left-0 z-[100] w-[200px] mb-2 p-1 bg-background border border-gray-200 rounded-md shadow-lg origin-bottom-left animate-in slide-in-from-bottom-2 fade-in-0"
+                                     role="menu">
+                                    <button class="flex items-center w-full px-2 py-1.5 text-sm text-foreground rounded-sm hover:bg-gray-100 outline-none select-none"
+                                            role="menuitem"
+                                            onclick="window.selectPlatform('static-edit', 'Static Edit')">
+                                        Static Edit
+                                        <svg id="check-static-edit" class="ml-auto w-3.5 h-3.5 opacity-100" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="20 6 9 17 4 12"></polyline>
+                                        </svg>
+                                    </button>
+                                    <button class="flex items-center w-full px-2 py-1.5 text-sm text-foreground rounded-sm hover:bg-gray-100 outline-none select-none"
+                                            role="menuitem"
+                                            onclick="window.selectPlatform('shared-artworks', 'Shared Artworks')">
+                                        Shared Artworks
+                                        <svg id="check-shared-artworks" class="ml-auto w-3.5 h-3.5 opacity-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="20 6 9 17 4 12"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="relative w-48 mb-1"></div>
                         <div class="px-3.5 mb-1">
-                            <div class=relative>
+                            <div class="relative">
                                 <ul class="stack gap-1">
                                     <li class="group w-full">
                                         <div class="relative w-fit"><a class="block w-fit rounded-lg outline-foreground"
-                                                                       href=https://elevenlabs.io/app/developers>
+                                                                       href="https://elevenlabs.io/app/developers">
                                             <div class="relative group rounded-lg overflow-hidden bg-transparent transition-all duration-150 w-[calc(var(--eleven-sidebar-width)-1.8125rem)] hover:text-gray-alpha-950 hover:bg-gray-alpha-100 group-aria-expanded/main-nav-item:bg-gray-alpha-100 group-aria-expanded/main-nav-item:text-gray-alpha-950 text-gray-600"
-                                                 data-state=closed>
+                                                 data-state="closed">
                                                 <div class="flex items-center gap-2 px-1.5 min-w-36">
                                                     <div class="center h-8">
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="1.25rem"
@@ -190,10 +179,10 @@ if (window.location.pathname.includes('sidebar.html') || window.location.pathnam
                             </div>
                         </div>
                         <div class="relative mb-1 px-3.5 flex">
-                            <button class="rounded-lg outline-foreground" type=button aria-haspopup=dialog
-                                    aria-expanded=false aria-controls=radix-:r1ff: data-state=closed>
+                            <button class="rounded-lg outline-foreground" type="button" aria-haspopup="dialog"
+                                    aria-expanded="false" aria-controls="radix-:r1ff:" data-state="closed">
                                 <div class="relative group rounded-lg overflow-hidden bg-transparent transition-all duration-150 w-[calc(var(--eleven-sidebar-width)-1.8125rem)] hover:text-gray-alpha-950 hover:bg-gray-alpha-100 group-aria-expanded/main-nav-item:bg-gray-alpha-100 group-aria-expanded/main-nav-item:text-gray-alpha-950 text-gray-600"
-                                     data-state=closed>
+                                     data-state="closed">
                                     <div class="flex items-center gap-2 px-1.5 min-w-36">
                                         <div class="center h-8">
                                             <div class="relative w-5 h-5">
@@ -216,15 +205,15 @@ if (window.location.pathname.includes('sidebar.html') || window.location.pathnam
                             </button>
                         </div>
                         <div class="relative px-3.5 mt-1">
-                            <button data-testid=user-menu-button aria-label="Your profile"
+                            <button data-testid="user-menu-button" aria-label="Your profile"
                                     class="group w-full relative items-center gap-0.5 h-11 shrink-0 justify-between flex rounded-lg text-sm leading-6 font-semibold outline-foreground w-[calc(var(--eleven-sidebar-width)-1.5rem)] transition-all duration-150 group-aria-expanded/sidebar:hover:bg-gray-alpha-100"
-                                    type=button aria-haspopup=dialog aria-expanded=false aria-controls=radix-:r1fh:
-                                    data-state=closed>
+                                    type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="radix-:r1fh:"
+                                    data-state="closed">
                                 <div class="shrink-0 relative group-aria-expanded/sidebar:translate-x-1 -translate-x-1 transition-transform duration-150">
-                                    <div class=relative>
-                                        <div class=flex style=opacity:1>
+                                    <div class="relative">
+                                        <div class="flex" style="opacity:1">
                                             <div class="opacity-100 transition-opacity duration-300 css-2c8lkk"
-                                                 aria-valuemax=100 aria-valuemin=0 aria-valuenow=0 role=progressbar>
+                                                 aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" role="progressbar">
                                                 <svg viewBox="0 0 100 100" class="css-bj12qo">
                                                     <circle cx="50" cy="50" r="42" stroke-width="4px"
                                                             class="chakra-progress__track css-131d71n"></circle>
@@ -236,7 +225,7 @@ if (window.location.pathname.includes('sidebar.html') || window.location.pathnam
                                             </div>
                                         </div>
                                         <div class="absolute top-0 left-0 h-full w-full rounded-full p-px"
-                                             style=transform:scale(0.7);opacity:1><img
+                                             style="transform:scale(0.7);opacity:1"><img
                                                 class="rounded-full shrink-0 bg-gray-50 object-cover h-full w-full"
                                                 data-sidebar-user-avatar
                                                 src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%236366f1'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='.35em' fill='white' font-size='40' font-family='system-ui'%3EU%3C/text%3E%3C/svg%3E"
@@ -244,10 +233,10 @@ if (window.location.pathname.includes('sidebar.html') || window.location.pathnam
                                     </div>
                                 </div>
                                 <div class="overflow-hidden flex items-center justify-between flex-1 h-11 transition-all duration-150 group-aria-expanded/sidebar:opacity-100 opacity-0 translate-x-1 group-aria-expanded/sidebar:translate-x-0 rounded-lg pl-2 pr-2">
-                                    <div class="text-start overflow-hidden"><p aria-hidden=true
+                                    <div class="text-start overflow-hidden"><p aria-hidden="true"
                                                                                class="text-sm text-foreground font-medium truncate inter" data-sidebar-user-name>
                                         User
-                                        <div style=height:auto;opacity:1><p aria-hidden=true
+                                        </p><div style="height:auto;opacity:1"><p aria-hidden="true"
                                                                             class="text-xs font-normal truncate -mt-0.5 overflow-ellipsis inter text-gray-alpha-500" data-sidebar-user-workspace>
                                             My Workspace</p></div>
                                     </div>

@@ -57,6 +57,16 @@
                                                                             </div>
                                                                         </div>
 
+                                                                        <!-- Visible Watermark -->
+                                                                        <div class="protection-card cursor-pointer p-3 border border-gray-200 rounded-[10px] transition-all duration-200 hover:border-gray-300 hover:shadow-sm"
+                                                                             data-protection="watermark"
+                                                                             onclick="toggleProtection(this)">
+                                                                            <div class="flex-1">
+                                                                                <div class="text-sm font-medium text-foreground">Visible Watermark</div>
+                                                                                <p class="text-xs text-subtle mt-0.5">Add visible watermark or text overlay to your artwork</p>
+                                                                            </div>
+                                                                        </div>
+
                                                                         <!-- Watermark Strategy -->
                                                                         <div class="stack gap-2">
                                                                             <label for="watermark-strategy-button" class="text-sm font-medium text-foreground">Watermark Strategy</label>
@@ -90,8 +100,8 @@
                                                                                         <div role="option"
                                                                                              data-value="visible-watermark"
                                                                                              class="watermark-option relative flex cursor-pointer select-none items-center rounded-md px-3 py-2 text-sm outline-none hover:bg-gray-50 focus:bg-gray-50 transition-colors"
-                                                                                             onclick="selectWatermarkStrategy('visible-watermark', 'Tree Ring Watermark')">
-                                                                                            Tree Ring Watermark
+                                                                                             onclick="selectWatermarkStrategy('visible-watermark', 'Visible Watermark')">
+                                                                                            Visible Watermark
                                                                                         </div>
                                                                                     </div>
                                                                                 </div>
@@ -99,7 +109,7 @@
                                                                                 <!-- Hidden select for form compatibility -->
                                                                                 <select id="watermark-strategy" style="display: none;">
                                                                                     <option value="invisible-watermark" selected>Invisible Watermark</option>
-                                                                                    <option value="visible-watermark">Tree Ring Watermark</option>
+                                                                                    <option value="visible-watermark">Visible Watermark</option>
                                                                                 </select>
                                                                             </div>
                                                                         </div>

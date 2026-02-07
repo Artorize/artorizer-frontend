@@ -479,10 +479,19 @@
         }
       );
 
+      console.log('[Progress] Final result from polling:', result);
+
       // Check final status
       if (result.status === 'failed') {
         showStatus(`Processing failed: ${result.error?.message || 'Unknown error'}`, 'error');
         return;
+      }
+
+      // Ensure all progress steps are marked as complete
+      // This handles cases where the final 'completed' status wasn't properly processed during polling
+      if (result.status === 'completed' || result.job_id) {
+        console.log('[Progress] Ensuring all steps marked complete after successful result');
+        updateProgressTracker({ status: 'completed', progress: { percentage: 100 } });
       }
 
       // Display result

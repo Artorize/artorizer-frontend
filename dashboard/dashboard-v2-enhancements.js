@@ -221,191 +221,319 @@ function loadHistoryContent() {
   }
 }
 
-// Current platform selection
-let currentPlatform = 'static-edit';
+// --- Platform Switcher Logic ---
+// We attach these to window explicitly to avoid scope issues with deferred scripts and dynamic components
 
-// Toggle Platform Dropdown (new popper-based dropdown)
-function togglePlatformDropdown() {
-  const dropdown = document.getElementById('platform-dropdown');
-  const button = document.getElementById('radix-:r1eo:');
+window.currentPlatform = 'static-edit';
 
-  if (!dropdown) return;
-
-  const isHidden = dropdown.classList.contains('hidden');
-
-  if (isHidden) {
-    // Position dropdown below the button
-    if (button) {
-      const rect = button.getBoundingClientRect();
-      dropdown.style.top = `${rect.bottom + 8}px`;
-      dropdown.style.left = `${rect.left}px`;
-      button.setAttribute('aria-expanded', 'true');
-      button.setAttribute('data-state', 'open');
-    }
-    dropdown.classList.remove('hidden');
-    dropdown.querySelector('[role="menu"]')?.setAttribute('data-state', 'open');
+window.togglePlatformDropdown = function() {
+  const content = document.getElementById('platform-dropdown-content');
+  const trigger = document.getElementById('platform-switcher-trigger');
+  
+  if (!content || !trigger) return;
+  
+  const isClosed = content.classList.contains('hidden');
+  
+  if (isClosed) {
+    content.classList.remove('hidden');
+    trigger.setAttribute('aria-expanded', 'true');
+    trigger.setAttribute('data-state', 'open');
   } else {
-    dropdown.classList.add('hidden');
-    dropdown.querySelector('[role="menu"]')?.setAttribute('data-state', 'closed');
-    if (button) {
-      button.setAttribute('aria-expanded', 'false');
-      button.setAttribute('data-state', 'closed');
-    }
+    content.classList.add('hidden');
+    trigger.setAttribute('aria-expanded', 'false');
+    trigger.setAttribute('data-state', 'closed');
   }
-}
+};
 
-// Close dropdown when clicking outside
-document.addEventListener('click', function(e) {
-  const dropdown = document.getElementById('platform-dropdown');
-  const button = document.getElementById('radix-:r1eo:');
+window.selectPlatform = function(platform, label) {
+  window.currentPlatform = platform;
 
-  if (!dropdown || dropdown.classList.contains('hidden')) return;
+  // Update label and indicator
+  const labelDisplay = document.getElementById('platform-label-display');
+  const triggerIcon = document.querySelector('#platform-switcher-trigger .bg-foreground span');
 
-  if (!dropdown.contains(e.target) && !button?.contains(e.target)) {
-    dropdown.classList.add('hidden');
-    dropdown.querySelector('[role="menu"]')?.setAttribute('data-state', 'closed');
-    if (button) {
-      button.setAttribute('aria-expanded', 'false');
-      button.setAttribute('data-state', 'closed');
-    }
-  }
-});
+  if (labelDisplay) labelDisplay.textContent = label;
+  if (triggerIcon) triggerIcon.textContent = platform === 'static-edit' ? 'S' : 'A';
 
-// Toggle Platform Radio (legacy function, kept for backward compatibility)
-function togglePlatformRadio() {
-  // Use the new dropdown toggle
-  togglePlatformDropdown();
-}
+  // Toggle checkmarks for all options
+  const checkStatic = document.getElementById('check-static-edit');
+  const checkShared = document.getElementById('check-shared-artworks');
+  if (checkStatic) checkStatic.style.opacity = platform === 'static-edit' ? '1' : '0';
+  if (checkShared) checkShared.style.opacity = platform === 'shared-artworks' ? '1' : '0';
 
-// Select Platform Card (new function for card-based selection)
-function selectPlatformCard(platform) {
-  currentPlatform = platform;
+  // Close dropdown
+  window.togglePlatformDropdown();
 
-  // Remove selected class from all cards
-  document.querySelectorAll('.platform-card').forEach(card => {
-    card.classList.remove('selected');
-  });
-
-  // Add selected class to the clicked card
-  const selectedCard = document.querySelector(`.platform-card[data-platform="${platform}"]`);
-  if (selectedCard) {
-    selectedCard.classList.add('selected');
+  // Open Shared Artworks window when selected
+  if (platform === 'shared-artworks' && window.SharedArtworks) {
+      window.SharedArtworks.open();
   }
 
   console.log('[Platform] Selected:', platform);
+};
 
-  // You can add additional logic here based on the selected platform
-  // For example, switching views or loading different configurations
-}
-
-// Select Platform (legacy function, kept for backward compatibility)
-function selectPlatform(platform, label) {
-  currentPlatform = platform;
-
-  // Update the sidebar platform label
-  const sidebarLabel = document.getElementById('current-platform-label');
-  if (sidebarLabel) {
-    sidebarLabel.textContent = label;
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+  const content = document.getElementById('platform-dropdown-content');
+  const trigger = document.getElementById('platform-switcher-trigger');
+  
+  if (!content || !trigger || content.classList.contains('hidden')) return;
+  
+  if (!content.contains(e.target) && !trigger.contains(e.target)) {
+    content.classList.add('hidden');
+    trigger.setAttribute('aria-expanded', 'false');
+    trigger.setAttribute('data-state', 'closed');
   }
+});
 
-  // Update the short mode label next to logo
-  const modeLabel = document.getElementById('platform-mode-label');
-  if (modeLabel) {
-    modeLabel.textContent = platform === 'static-edit' ? 'Static' : 'Export';
-  }
+let shareArtworksData = [];
+let shareArtworksFilter = 'all';
 
-  // Update the radio button label (legacy)
-  const labelEl = document.getElementById('platform-radio-label');
-  if (labelEl) {
-    labelEl.textContent = label;
-  }
-
-  // Update radio indicators
-  document.querySelectorAll('.platform-radio-indicator').forEach(indicator => {
-    const indicatorPlatform = indicator.getAttribute('data-platform');
-    if (indicatorPlatform === platform) {
-      indicator.classList.remove('hidden', 'bg-transparent');
-      indicator.classList.add('bg-blue-500');
-    } else {
-      indicator.classList.add('hidden', 'bg-transparent');
-      indicator.classList.remove('bg-blue-500');
-    }
-  });
-
-  // Update dropdown menu item selection
-  document.querySelectorAll('.platform-menu-item-wrapper').forEach(item => {
-    if (item.getAttribute('data-platform') === platform) {
-      item.classList.add('selected');
-    } else {
-      item.classList.remove('selected');
-    }
-  });
-
-  // Collapse the radio after selection
-  togglePlatformRadio();
-
-  // Handle Export to Website - show embed popup
-  if (platform === 'export-website') {
-    showEmbedCodePopup();
-  }
-
-  console.log('[Platform] Selected:', platform, label);
-}
-
-// Show Embed Code Popup for Export to Website
+// Show Share Artworks Popup (formerly Embed Code Popup)
 function showEmbedCodePopup() {
   const popup = document.getElementById('embed-code-popup');
   if (popup) {
     popup.classList.remove('hidden');
-    // Load artworks into the select dropdown
-    loadArtworksForEmbed();
+    loadShareArtworks();
   }
 }
 
-// Load artworks into embed select dropdown
-function loadArtworksForEmbed() {
-  const select = document.getElementById('embed-artwork-select');
-  if (!select) return;
+// Load artworks for sharing panel
+async function loadShareArtworks() {
+  const listEl = document.getElementById('share-artworks-list');
+  const loadingEl = document.getElementById('share-artworks-loading');
+  const emptyEl = document.getElementById('share-artworks-empty');
+  const countEl = document.getElementById('share-artwork-count');
 
-  // Clear existing options except the placeholder
-  select.innerHTML = '<option value="" disabled selected>Choose an artwork...</option>';
+  if (!listEl) return;
 
-  // Get artworks from history or current session
-  // This will be populated dynamically based on user's artworks
-  const artworks = window.userArtworks || [];
+  // Show loading
+  if (loadingEl) loadingEl.style.display = 'flex';
+  if (emptyEl) emptyEl.style.display = 'none';
 
-  if (artworks.length === 0) {
-    // Add a placeholder message if no artworks
-    const option = document.createElement('option');
-    option.value = '';
-    option.disabled = true;
-    option.textContent = 'No artworks available';
-    select.appendChild(option);
+  try {
+    const response = await fetch(`${window.ArtorizeConfig?.ROUTER_URL || ''}/artworks/me`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (loadingEl) loadingEl.style.display = 'none';
+
+    if (response.ok) {
+      const data = await response.json();
+      shareArtworksData = data.artworks || [];
+
+      if (shareArtworksData.length === 0) {
+        if (emptyEl) emptyEl.style.display = 'flex';
+        if (countEl) countEl.textContent = '0 artworks';
+        return;
+      }
+
+      if (countEl) countEl.textContent = shareArtworksData.length === 1 ? '1 artwork' : `${shareArtworksData.length} artworks`;
+      renderShareArtworks();
+    } else {
+      if (emptyEl) {
+        emptyEl.querySelector('p:first-of-type').textContent = 'Failed to load artworks';
+        emptyEl.style.display = 'flex';
+      }
+    }
+  } catch (error) {
+    console.error('Error loading share artworks:', error);
+    if (loadingEl) loadingEl.style.display = 'none';
+    if (emptyEl) {
+      emptyEl.querySelector('p:first-of-type').textContent = 'Network error';
+      emptyEl.style.display = 'flex';
+    }
+  }
+}
+
+// Render share artworks list
+function renderShareArtworks() {
+  const listEl = document.getElementById('share-artworks-list');
+  const emptyEl = document.getElementById('share-artworks-empty');
+  if (!listEl) return;
+
+  // Clear existing rows (but keep loading/empty divs)
+  const existingRows = listEl.querySelectorAll('.share-artwork-row');
+  existingRows.forEach(row => row.remove());
+
+  // Filter artworks
+  let filtered = shareArtworksData;
+  if (shareArtworksFilter === 'public') {
+    filtered = shareArtworksData.filter(a => a.isPublic || a.visibility === 'public');
+  } else if (shareArtworksFilter === 'private') {
+    filtered = shareArtworksData.filter(a => !a.isPublic && a.visibility !== 'public');
+  }
+
+  // Search filter
+  const searchInput = document.getElementById('share-search-input');
+  if (searchInput && searchInput.value.trim()) {
+    const query = searchInput.value.trim().toLowerCase();
+    filtered = filtered.filter(a =>
+      (a.title || '').toLowerCase().includes(query) ||
+      (a.artist || '').toLowerCase().includes(query)
+    );
+  }
+
+  if (filtered.length === 0) {
+    if (emptyEl) {
+      emptyEl.querySelector('p:first-of-type').textContent = shareArtworksFilter === 'all' ? 'No artworks yet' : `No ${shareArtworksFilter} artworks`;
+      emptyEl.style.display = 'flex';
+    }
     return;
   }
 
-  artworks.forEach(artwork => {
-    const option = document.createElement('option');
-    option.value = artwork.id;
-    option.textContent = artwork.name || `Artwork ${artwork.id}`;
-    select.appendChild(option);
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  // Render rows
+  filtered.forEach(artwork => {
+    const row = createShareArtworkRow(artwork);
+    listEl.appendChild(row);
   });
 }
 
-// Update embed code when artwork is selected
-function updateEmbedCode() {
-  const select = document.getElementById('embed-artwork-select');
-  const codeEl = document.getElementById('embed-code-content');
+// Create a share artwork row
+function createShareArtworkRow(artwork) {
+  const row = document.createElement('div');
+  row.className = 'share-artwork-row';
+  row.dataset.artworkId = artwork.id;
 
-  if (!select || !codeEl) return;
+  const isPublic = artwork.isPublic || artwork.visibility === 'public';
+  const shareUrl = `${window.ArtorizeConfig?.EMBED_URL || 'https://artorizer.com/artwork'}/${artwork.id}`;
+  const createdAt = new Date(artwork.createdAt);
+  const dateStr = createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
-  const embedUrl = window.ArtorizeConfig?.EMBED_URL || 'https://artorizer.com/embed';
-  const artworkId = select.value;
-  if (artworkId) {
-    codeEl.textContent = `<iframe src="${embedUrl}/${artworkId}" width="100%" height="600" frameborder="0" allowfullscreen></iframe>`;
-  } else {
-    codeEl.textContent = `<iframe src="${embedUrl}/YOUR_ARTWORK_ID" width="100%" height="600" frameborder="0" allowfullscreen></iframe>`;
+  row.innerHTML = `
+    <div class="share-artwork-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg>
+    </div>
+    <div class="share-artwork-info">
+      <p class="share-artwork-title">${artwork.title || 'Untitled'}</p>
+      <p class="share-artwork-meta">
+        <span>${artwork.artist || 'Unknown'}</span>
+        <span>•</span>
+        <span>${dateStr}</span>
+      </p>
+    </div>
+    <div class="share-artwork-actions">
+      <span class="artorize-badge ${isPublic ? 'artorize-badge-success' : 'artorize-badge-default'}">
+        ${isPublic ? 'Public' : 'Private'}
+      </span>
+      <button class="artorize-toggle ${isPublic ? 'active' : ''}" title="Toggle visibility" onclick="toggleArtworkVisibility('${artwork.id}', this)"></button>
+      <button class="share-url-btn" title="Copy share URL" onclick="copyShareUrl('${shareUrl}', this)" ${!isPublic ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        Copy URL
+      </button>
+    </div>
+  `;
+
+  return row;
+}
+
+// Toggle artwork visibility (public/private)
+async function toggleArtworkVisibility(artworkId, toggleEl) {
+  const row = toggleEl.closest('.share-artwork-row');
+  const badge = row.querySelector('.artorize-badge');
+  const copyBtn = row.querySelector('.share-url-btn');
+  const isCurrentlyPublic = toggleEl.classList.contains('active');
+  const newVisibility = isCurrentlyPublic ? 'private' : 'public';
+
+  // Optimistic UI update
+  toggleEl.classList.toggle('active');
+  badge.className = `artorize-badge ${newVisibility === 'public' ? 'artorize-badge-success' : 'artorize-badge-default'}`;
+  badge.textContent = newVisibility === 'public' ? 'Public' : 'Private';
+  if (copyBtn) {
+    copyBtn.disabled = newVisibility !== 'public';
+    copyBtn.style.opacity = newVisibility === 'public' ? '1' : '0.5';
+    copyBtn.style.cursor = newVisibility === 'public' ? 'pointer' : 'not-allowed';
   }
+
+  try {
+    const response = await fetch(`${window.ArtorizeConfig?.ROUTER_URL || ''}/artworks/${artworkId}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ visibility: newVisibility, isPublic: newVisibility === 'public' })
+    });
+
+    if (!response.ok) {
+      // Revert on error
+      toggleEl.classList.toggle('active');
+      badge.className = `artorize-badge ${isCurrentlyPublic ? 'artorize-badge-success' : 'artorize-badge-default'}`;
+      badge.textContent = isCurrentlyPublic ? 'Public' : 'Private';
+      if (copyBtn) {
+        copyBtn.disabled = !isCurrentlyPublic;
+        copyBtn.style.opacity = isCurrentlyPublic ? '1' : '0.5';
+        copyBtn.style.cursor = isCurrentlyPublic ? 'pointer' : 'not-allowed';
+      }
+      console.error('Failed to update artwork visibility');
+    } else {
+      // Update local data
+      const artwork = shareArtworksData.find(a => a.id === artworkId);
+      if (artwork) {
+        artwork.isPublic = newVisibility === 'public';
+        artwork.visibility = newVisibility;
+      }
+    }
+  } catch (error) {
+    console.error('Error updating visibility:', error);
+    // Revert
+    toggleEl.classList.toggle('active');
+  }
+}
+
+// Copy share URL to clipboard
+function copyShareUrl(url, btnEl) {
+  navigator.clipboard.writeText(url).then(() => {
+    btnEl.classList.add('copied');
+    const originalHTML = btnEl.innerHTML;
+    btnEl.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Copied!`;
+    setTimeout(() => {
+      btnEl.classList.remove('copied');
+      btnEl.innerHTML = originalHTML;
+    }, 2000);
+  });
+}
+
+// Filter share artworks
+function filterShareArtworks(filter) {
+  shareArtworksFilter = filter;
+
+  // Update button states
+  document.querySelectorAll('.share-filter-btn').forEach(btn => {
+    btn.classList.remove('active', 'artorize-btn-secondary');
+    btn.classList.add('artorize-btn-ghost');
+    if (btn.dataset.filter === filter) {
+      btn.classList.add('active', 'artorize-btn-secondary');
+      btn.classList.remove('artorize-btn-ghost');
+    }
+  });
+
+  renderShareArtworks();
+}
+
+// Search handler for share artworks
+function initShareArtworksSearch() {
+  const searchInput = document.getElementById('share-search-input');
+  if (searchInput) {
+    let debounceTimer;
+    searchInput.addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        renderShareArtworks();
+      }, 200);
+    });
+  }
+}
+
+// Legacy function stubs for backward compatibility
+function loadArtworksForEmbed() {
+  loadShareArtworks();
+}
+
+function updateEmbedCode() {
+  // No longer needed with new UI
 }
 
 // Close Embed Code Popup
@@ -448,6 +576,12 @@ window.closeEmbedCodePopup = closeEmbedCodePopup;
 window.copyEmbedCode = copyEmbedCode;
 window.loadArtworksForEmbed = loadArtworksForEmbed;
 window.updateEmbedCode = updateEmbedCode;
+// New share artworks functions
+window.loadShareArtworks = loadShareArtworks;
+window.renderShareArtworks = renderShareArtworks;
+window.toggleArtworkVisibility = toggleArtworkVisibility;
+window.copyShareUrl = copyShareUrl;
+window.filterShareArtworks = filterShareArtworks;
 
 // Initialize tab switching functionality
 function initializeTabs() {
@@ -764,6 +898,7 @@ function initEnhancements() {
   initializeWatermarkListener();
   updateProgressTracker();
   initializeDatePicker();
+  initShareArtworksSearch();
 }
 
 // Initialize when DOM is ready

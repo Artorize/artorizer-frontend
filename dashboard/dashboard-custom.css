@@ -7,6 +7,9 @@
 /* Import Inter font from Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+/* Import Cormorant Garamond for Artorize brand (gallery-grade serif) */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&display=swap');
+
 /* ============================================
    CSS VARIABLES
    ============================================ */
@@ -48,6 +51,98 @@
 }
 
 /* ============================================
+   ARTORIZE BRAND STYLING
+   ============================================ */
+
+.artorize-brand-text {
+    font-family: 'Cormorant Garamond', 'Baskerville', 'Georgia', serif !important;
+    font-weight: 600;
+    font-size: 1.375rem;
+    letter-spacing: 0.06em;
+    color: var(--art-text);
+    line-height: 1;
+    text-transform: capitalize;
+}
+
+/* Collapsed brand "A" - hidden by default */
+.artorize-collapsed-brand {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* Expand button - shown by default */
+.sidebar-expand-btn {
+    display: flex;
+}
+
+/* ========== EXPANDED STATE ========== */
+/* When expanded: show expand button, hide "A" */
+[aria-expanded="true"] .artorize-collapsed-brand {
+    display: none !important;
+}
+
+[aria-expanded="true"] .sidebar-expand-btn {
+    display: flex !important;
+}
+
+/* ========== COLLAPSED STATE (not hovering) ========== */
+/* When collapsed: show "A", hide expand button */
+[aria-expanded="false"] .artorize-collapsed-brand {
+    display: flex !important;
+    position: relative;
+    visibility: visible !important;
+}
+
+[aria-expanded="false"] .sidebar-expand-btn {
+    display: none !important;
+}
+
+/* ========== COLLAPSED STATE (hovering) ========== */
+/* When collapsed AND hovering: hide "A", show expand button */
+[aria-expanded="false"]:hover .artorize-collapsed-brand,
+.group\/sidebar:hover [aria-expanded="false"] .artorize-collapsed-brand {
+    display: none !important;
+}
+
+[aria-expanded="false"]:hover .sidebar-expand-btn,
+.group\/sidebar:hover [aria-expanded="false"] .sidebar-expand-btn {
+    display: flex !important;
+}
+
+/* ============================================
+   UNIFIED IMAGE DISPLAY STYLING
+   ============================================ */
+
+/* Ensure preview image matches processed image container styling */
+#preview-image {
+    max-width: 800px !important;
+    margin: 0 auto;
+    border-radius: var(--art-radius-lg);
+    background: transparent;
+    box-shadow: none;
+}
+
+/* Image comparison container styling - no backdrop or gradient */
+#image-comparison-container {
+    background: transparent;
+    border-radius: var(--art-radius-lg);
+    overflow: hidden;
+}
+
+/* Ensure no gradient overlays on images */
+#image-results-section {
+    background: transparent;
+}
+
+/* Remove any unwanted backgrounds from comparison images */
+#comparison-protected,
+#comparison-original {
+    background: transparent;
+}
+
+/* ============================================
    BASE STYLES
    ============================================ */
 
@@ -74,13 +169,13 @@ textarea:focus-visible,
 select:focus-visible {
     outline: none !important;
     box-shadow: none !important;
-    border-color: hsl(240, 5%, 26%) !important;
+    border-color: var(--art-border-focus) !important;
 }
 
 input:hover,
 textarea:hover,
 select:hover {
-    border-color: hsl(0, 0%, 82%) !important;
+    border-color: var(--art-border-hover) !important;
 }
 
 /* ============================================
@@ -130,8 +225,8 @@ select:hover {
 /* Main nav item expansion states */
 .group-aria-expanded\/main-nav-item:bg-gray-alpha-100,
 .group-aria-expanded\/main-nav-item:text-gray-alpha-950 {
-    background-color: hsl(240, 5%, 96%);
-    color: hsl(240, 5%, 10%);
+    background-color: var(--art-surface-hover);
+    color: var(--art-text);
 }
 
 /* Sidebar text visibility on expansion */
@@ -370,12 +465,12 @@ select:hover {
 }
 
 .ring-gray-alpha-200 {
-    --tw-ring-color: hsl(240, 5%, 88%);
+    --tw-ring-color: var(--art-border);
     box-shadow: 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);
 }
 
 .hover\:ring-gray-alpha-300:hover {
-    --tw-ring-color: hsl(240, 5%, 82%);
+    --tw-ring-color: var(--art-border-hover);
 }
 
 /* Overflow utilities */
@@ -460,17 +555,17 @@ select:hover {
    ============================================ */
 
 .tab-button {
-    color: hsl(240, 4%, 46%) !important;
+    color: var(--art-text-muted) !important;
     position: relative;
     z-index: 10;
 }
 
 .tab-button[data-state="active"] {
-    color: hsl(240, 3%, 6%) !important;
+    color: var(--art-text) !important;
 }
 
 .tab-button:hover {
-    color: hsl(240, 3%, 6%) !important;
+    color: var(--art-text) !important;
 }
 
 #tab-active-indicator {
@@ -496,9 +591,9 @@ select:hover {
 }
 
 .protection-card.selected {
-    border-color: hsl(240, 3%, 6%) !important;
+    border-color: var(--art-text) !important;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
-    background-color: hsl(240, 5%, 98%);
+    background-color: var(--art-surface-muted);
 }
 
 .protection-card:active {
@@ -519,7 +614,7 @@ select:hover {
 }
 
 .CheckStep-header:hover {
-    background-color: hsl(240, 5%, 96%);
+    background-color: var(--art-surface-hover);
 }
 /* ============================================
    PROGRESS STEP FLEX UTILITIES
@@ -570,7 +665,7 @@ select:hover {
    ============================================ */
 
 .rounded-2 {
-    border-radius: 6px;
+    border-radius: var(--art-radius-sm);
 }
 
 /* ============================================
@@ -594,7 +689,7 @@ select:hover {
 }
 
 .text-small {
-    font-size: 0.875rem;
+    font-size: var(--art-text-base);
 }
 
 
@@ -630,8 +725,8 @@ select:hover {
 .settings-modal-content {
     position: relative;
     background-color: white;
-    border-radius: 12px;
-    border: 1px solid hsl(240, 5%, 82%);
+    border-radius: var(--art-radius-lg);
+    border: 1px solid var(--art-border);
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
     width: min(34rem, calc(100% - 2.5rem));
     max-height: min(55rem, 80vh);
@@ -657,7 +752,7 @@ select:hover {
     justify-content: space-between;
     padding: 1.5rem;
     border-bottom: 1px solid;
-    border-color: hsl(240, 5%, 96%);
+    border-color: var(--art-surface-hover);
 }
 
 .settings-modal-close {
@@ -666,8 +761,8 @@ select:hover {
 }
 
 .settings-modal-close:hover {
-    background-color: hsl(240, 5%, 96%);
-    border-radius: 0.5rem;
+    background-color: var(--art-surface-hover);
+    border-radius: var(--art-radius-md);
 }
 
 .settings-modal-close svg {
@@ -680,20 +775,20 @@ select:hover {
     flex: 1 1 220px;
     min-width: 0;
     padding: 0.5rem 0.75rem;
-    border-radius: 0.5rem;
-    font-size: 0.875rem;
+    border-radius: var(--art-radius-md);
+    font-size: var(--art-text-base);
     border: 1px solid;
-    border-color: hsl(240, 5%, 96%);
+    border-color: var(--art-surface-hover);
 }
 
 .settings-modal input[type="text"]:hover {
-    border-color: hsl(0, 0%, 82%);
+    border-color: var(--art-border-hover);
 }
 
 .settings-modal input[type="text"]:focus {
     outline: none;
     box-shadow: none;
-    border-color: hsl(240, 5%, 26%);
+    border-color: var(--art-border-focus);
 }
 
 /* Settings modal button styling */
@@ -703,22 +798,22 @@ select:hover {
 }
 
 .settings-modal button#save-username-btn {
-    background-color: hsl(240, 3%, 6%) !important;
-    color: hsl(240, 5%, 100%) !important;
+    background-color: var(--art-primary) !important;
+    color: #fff !important;
 }
 
 .settings-modal button#save-username-btn:hover:not(:disabled) {
-    background-color: hsl(240, 3%, 16%) !important;
+    background-color: var(--art-primary-hover) !important;
 }
 
 .settings-modal button#save-username-btn:disabled {
-    background-color: hsl(240, 5%, 82%) !important;
-    color: hsl(240, 5%, 70%) !important;
+    background-color: var(--art-border-hover) !important;
+    color: var(--art-text-disabled) !important;
     cursor: not-allowed;
 }
 
 .settings-modal button#clear-all-btn {
-    border-radius: 10px !important;
+    border-radius: var(--art-radius-lg) !important;
     font-weight: 500;
 }
 
@@ -1522,12 +1617,12 @@ section.stack:has(#watermark-strategy-button) {
 }
 
 .text-xs {
-    font-size: 0.75rem;
+    font-size: var(--art-text-xs);
     line-height: 1rem;
 }
 
 .text-sm {
-    font-size: 0.875rem;
+    font-size: var(--art-text-base);
     line-height: 1.25rem;
 }
 
@@ -1552,32 +1647,32 @@ section.stack:has(#watermark-strategy-button) {
 }
 
 .text-foreground {
-    color: hsl(240, 3%, 6%);
+    color: var(--art-text);
 }
 
 .text-gray-600 {
-    color: hsl(240, 5%, 46%);
+    color: var(--art-text-muted);
 }
 
 .text-gray-alpha-500 {
-    color: hsl(240, 5%, 50%);
+    color: var(--art-text-muted);
 }
 
 .text-gray-alpha-600 {
-    color: hsl(240, 5%, 46%);
+    color: var(--art-text-muted);
 }
 
 .text-gray-alpha-950 {
-    color: hsl(240, 5%, 10%);
+    color: var(--art-text);
 }
 
 /* Hover state colors */
 .hover\:text-gray-alpha-950:hover {
-    color: hsl(240, 5%, 10%);
+    color: var(--art-text);
 }
 
 .hover\:bg-gray-alpha-100:hover {
-    background-color: hsl(240, 5%, 96%);
+    background-color: var(--art-surface-hover);
 }
 
 /* ============================================
@@ -1589,23 +1684,23 @@ section.stack:has(#watermark-strategy-button) {
 }
 
 .bg-gray-alpha-100 {
-    background-color: hsl(240, 5%, 96%);
+    background-color: var(--art-surface-hover);
 }
 
 .\!bg-gray-alpha-100 {
-    background-color: hsl(240, 5%, 96%) !important;
+    background-color: var(--art-surface-hover) !important;
 }
 
 .\!text-gray-alpha-950 {
-    color: hsl(240, 5%, 10%) !important;
+    color: var(--art-text) !important;
 }
 
 .bg-gray-50 {
-    background-color: hsl(240, 5%, 96%);
+    background-color: var(--art-surface-hover);
 }
 
 .\!bg-gray-100 {
-    background-color: hsl(240, 5%, 96%) !important;
+    background-color: var(--art-surface-hover) !important;
 }
 
 /* ============================================
@@ -2041,8 +2136,8 @@ div[class*="grid-cols-[auto,auto"] {
     background-color: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid hsl(240, 5%, 88%);
-    border-radius: 12px;
+    border: 1px solid var(--art-border);
+    border-radius: var(--art-radius-lg);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15),
                 0 4px 12px rgba(0, 0, 0, 0.08),
                 0 0 1px rgba(0, 0, 0, 0.1);
@@ -2062,7 +2157,7 @@ div[class*="grid-cols-[auto,auto"] {
     width: 100%;
     text-align: left;
     padding: 0.625rem 0.625rem;
-    border-radius: 8px;
+    border-radius: var(--art-radius-md);
     border: none;
     background: transparent;
     cursor: pointer;
@@ -2070,19 +2165,19 @@ div[class*="grid-cols-[auto,auto"] {
 }
 
 .platform-menu-item:hover {
-    background-color: hsl(240, 5%, 96%);
+    background-color: var(--art-surface-hover);
 }
 
 .platform-menu-separator {
     height: 1px;
-    background-color: hsl(240, 5%, 92%);
+    background-color: var(--art-border-subtle);
     margin: 0.25rem 0;
 }
 
 .platform-menu-icon {
     width: 1.75rem;
     height: 1.75rem;
-    border-radius: 8px;
+    border-radius: var(--art-radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2091,7 +2186,7 @@ div[class*="grid-cols-[auto,auto"] {
 }
 
 .platform-menu-icon--edit {
-    background: linear-gradient(135deg, hsl(240, 3%, 20%) 0%, hsl(240, 3%, 10%) 100%);
+    background: linear-gradient(135deg, var(--art-primary-hover) 0%, var(--art-primary) 100%);
 }
 
 .platform-menu-icon--export {
@@ -2106,35 +2201,35 @@ div[class*="grid-cols-[auto,auto"] {
 }
 
 .platform-menu-title {
-    font-size: 0.875rem;
+    font-size: var(--art-text-base);
     font-weight: 500;
-    color: hsl(240, 3%, 11%);
+    color: var(--art-text);
     line-height: 1.25;
 }
 
 .platform-menu-subtitle {
-    font-size: 0.75rem;
+    font-size: var(--art-text-xs);
     font-weight: 400;
-    color: hsl(240, 5%, 50%);
+    color: var(--art-text-muted);
     line-height: 1.2;
 }
 
 .platform-menu-subtitle--new {
-    color: hsl(217, 91%, 55%);
+    color: var(--art-info);
 }
 
 /* Selected state - subtle background like hover */
 .platform-menu-item-wrapper.selected .platform-menu-item {
-    background-color: hsl(240, 5%, 94%);
+    background-color: var(--art-surface-active);
 }
 
 .platform-menu-item-wrapper.selected .platform-menu-title {
-    color: hsl(240, 3%, 11%);
+    color: var(--art-text);
     font-weight: 600;
 }
 
 .platform-menu-item-wrapper.selected .platform-menu-subtitle {
-    color: hsl(240, 5%, 50%);
+    color: var(--art-text-muted);
 }
 
 /* ============================================
@@ -2165,8 +2260,8 @@ div[class*="grid-cols-[auto,auto"] {
 .embed-popup-content {
     position: relative;
     background-color: white;
-    border-radius: 12px;
-    border: 1px solid hsl(240, 5%, 88%);
+    border-radius: var(--art-radius-lg);
+    border: 1px solid var(--art-border);
     box-shadow: 0 12px 48px rgba(0, 0, 0, 0.18),
                 0 4px 16px rgba(0, 0, 0, 0.1),
                 0 0 1px rgba(0, 0, 0, 0.1);
@@ -2180,7 +2275,7 @@ div[class*="grid-cols-[auto,auto"] {
     align-items: center;
     justify-content: space-between;
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid hsl(240, 5%, 94%);
+    border-bottom: 1px solid var(--art-surface-active);
 }
 
 .embed-popup-header-left {
@@ -2192,7 +2287,7 @@ div[class*="grid-cols-[auto,auto"] {
 .embed-popup-icon {
     width: 2rem;
     height: 2rem;
-    border-radius: 8px;
+    border-radius: var(--art-radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2202,24 +2297,24 @@ div[class*="grid-cols-[auto,auto"] {
 
 .embed-popup-title {
     margin: 0;
-    font-size: 1rem;
+    font-size: var(--art-text-lg);
     font-weight: 600;
-    color: hsl(240, 3%, 11%);
+    color: var(--art-text);
 }
 
 .embed-popup-close {
     padding: 0.375rem;
     border: none;
     background: transparent;
-    border-radius: 6px;
+    border-radius: var(--art-radius-sm);
     cursor: pointer;
-    color: hsl(240, 5%, 50%);
+    color: var(--art-text-muted);
     transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .embed-popup-close:hover {
-    background-color: hsl(240, 5%, 96%);
-    color: hsl(240, 3%, 11%);
+    background-color: var(--art-surface-hover);
+    color: var(--art-text);
 }
 
 .embed-popup-body {
@@ -2228,8 +2323,8 @@ div[class*="grid-cols-[auto,auto"] {
 
 .embed-popup-description {
     margin: 0 0 1rem 0;
-    font-size: 0.875rem;
-    color: hsl(240, 5%, 45%);
+    font-size: var(--art-text-base);
+    color: var(--art-text-muted);
     line-height: 1.5;
 }
 
@@ -2240,9 +2335,9 @@ div[class*="grid-cols-[auto,auto"] {
 
 .embed-select-label {
     display: block;
-    font-size: 0.8125rem;
+    font-size: var(--art-text-sm);
     font-weight: 500;
-    color: hsl(240, 3%, 25%);
+    color: var(--art-text-secondary);
     margin-bottom: 0.375rem;
 }
 
@@ -2253,11 +2348,11 @@ div[class*="grid-cols-[auto,auto"] {
 .embed-select {
     width: 100%;
     padding: 0.625rem 2.25rem 0.625rem 0.75rem;
-    font-size: 0.875rem;
-    color: hsl(240, 3%, 11%);
+    font-size: var(--art-text-base);
+    color: var(--art-text);
     background-color: white;
-    border: 1px solid hsl(240, 5%, 88%);
-    border-radius: 8px;
+    border: 1px solid var(--art-border);
+    border-radius: var(--art-radius-md);
     cursor: pointer;
     appearance: none;
     -webkit-appearance: none;
@@ -2265,12 +2360,12 @@ div[class*="grid-cols-[auto,auto"] {
 }
 
 .embed-select:hover {
-    border-color: hsl(240, 5%, 75%);
+    border-color: var(--art-border-hover);
 }
 
 .embed-select:focus {
     outline: none;
-    border-color: hsl(240, 3%, 11%);
+    border-color: var(--art-border-focus);
     box-shadow: 0 0 0 2px hsl(240, 3%, 11%, 0.1);
 }
 
@@ -2280,7 +2375,7 @@ div[class*="grid-cols-[auto,auto"] {
     top: 50%;
     transform: translateY(-50%);
     pointer-events: none;
-    color: hsl(240, 5%, 50%);
+    color: var(--art-text-muted);
 }
 
 .embed-code-container {
@@ -2290,12 +2385,12 @@ div[class*="grid-cols-[auto,auto"] {
 .embed-code-block {
     margin: 0;
     padding: 1rem;
-    background-color: hsl(240, 5%, 97%);
-    border: 1px solid hsl(240, 5%, 90%);
-    border-radius: 8px;
+    background-color: var(--art-bg);
+    border: 1px solid var(--art-border-subtle);
+    border-radius: var(--art-radius-md);
     font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
-    font-size: 0.8125rem;
-    color: hsl(240, 3%, 25%);
+    font-size: var(--art-text-sm);
+    color: var(--art-text-secondary);
     line-height: 1.5;
     overflow-x: auto;
     white-space: pre-wrap;
@@ -2304,8 +2399,8 @@ div[class*="grid-cols-[auto,auto"] {
 
 .embed-popup-hint {
     margin: 0.5rem 0 0 0;
-    font-size: 0.75rem;
-    color: hsl(240, 5%, 55%);
+    font-size: var(--art-text-xs);
+    color: var(--art-text-faint);
 }
 
 .embed-popup-actions {
@@ -2319,18 +2414,18 @@ div[class*="grid-cols-[auto,auto"] {
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
-    background-color: hsl(240, 3%, 11%);
+    background-color: var(--art-primary);
     color: white;
-    font-size: 0.875rem;
+    font-size: var(--art-text-base);
     font-weight: 500;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--art-radius-md);
     cursor: pointer;
     transition: background-color 0.15s ease;
 }
 
 .embed-copy-btn:hover {
-    background-color: hsl(240, 3%, 20%);
+    background-color: var(--art-primary-hover);
 }
 
 .embed-copy-btn svg {
@@ -2339,14 +2434,14 @@ div[class*="grid-cols-[auto,auto"] {
 
 /* Upload zone drag state */
 #upload-zone.drag-over {
-    outline-color: hsl(240, 5%, 26%) !important;
-    background-color: hsl(240, 5%, 94%) !important;
+    outline-color: var(--art-border-focus) !important;
+    background-color: var(--art-surface-active) !important;
 }
 
 /* Results section drag state - allows dropping new image to process */
 #image-results-section.drag-over {
-    background-color: hsl(240, 5%, 96%) !important;
-    border: 2px dashed hsl(240, 5%, 50%) !important;
+    background-color: var(--art-surface-hover) !important;
+    border: 2px dashed var(--art-text-muted) !important;
     border-radius: 14px;
 }
 
@@ -2358,10 +2453,667 @@ div[class*="grid-cols-[auto,auto"] {
     transform: translate(-50%, -50%);
     font-size: 1.125rem;
     font-weight: 500;
-    color: hsl(240, 5%, 26%);
+    color: var(--art-border-focus);
     background: rgba(255, 255, 255, 0.9);
     padding: 1rem 2rem;
-    border-radius: 10px;
+    border-radius: var(--art-radius-lg);
     pointer-events: none;
+}
+
+/* ============================================
+   SIDEBAR PLATFORM SWITCHER FIXES
+   ============================================ */
+
+/* Hide short mode label to prevent overlap with icon */
+nav#main-nav button[aria-haspopup="menu"] #platform-mode-label {
+    display: none !important;
+}
+
+/* Platform switcher flex container - force horizontal layout with proper alignment */
+#platform-switcher-flex,
+nav#main-nav button[aria-haspopup="menu"] > div > div.flex.items-center {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: var(--art-radius-md) !important;
+    padding-left: 0.375rem !important;
+    padding-right: 0.375rem !important;
+}
+
+/* Icon wrapper - ensure proper sizing and prevent shrinking */
+#platform-icon-wrapper,
+nav#main-nav button[aria-haspopup="menu"] .center.h-8 {
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    flex-basis: 32px !important;
+    width: 32px !important;
+    min-width: 32px !important;
+    max-width: 32px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+    order: 1 !important;
+}
+
+/* Platform label container - position correctly, let Tailwind handle opacity */
+#platform-label-container,
+nav#main-nav button[aria-haspopup="menu"] #platform-label-container {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    align-items: center !important;
+    position: static !important;
+    margin-left: 0 !important;
+    order: 2 !important;
+}
+
+/* Platform label text - let Tailwind handle opacity */
+#current-platform-label,
+nav#main-nav button[aria-haspopup="menu"] #current-platform-label {
+    white-space: nowrap !important;
+    font-size: var(--art-text-base) !important;
+    font-weight: 500 !important;
+}
+
+/* ============================================
+   ARTORIZE UNIFIED MODAL SYSTEM
+   Modern, minimal modal styling matching dashboard theme
+   ============================================ */
+
+.artorize-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 120;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.artorize-modal.hidden {
+    display: none;
+}
+
+.artorize-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    opacity: 1;
+    transition: opacity 0.2s ease;
+}
+
+.artorize-modal-content {
+    position: relative;
+    background-color: #fff;
+    border-radius: var(--art-radius-xl);
+    border: 1px solid var(--art-border);
+    box-shadow: 0 16px 70px -12px rgba(0, 0, 0, 0.25),
+                0 4px 20px -4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: scale(1);
+    opacity: 1;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.artorize-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--art-space-4) var(--art-space-5);
+    border-bottom: 1px solid var(--art-border-subtle);
+    background: linear-gradient(to bottom, rgba(250, 250, 250, 0.8), rgba(255, 255, 255, 0.95));
+}
+
+.artorize-modal-title {
+    font-size: var(--art-text-md);
+    font-weight: 600;
+    color: var(--art-text);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.artorize-modal-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border: none;
+    background: transparent;
+    border-radius: var(--art-radius-md);
+    color: var(--art-text-muted);
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.artorize-modal-close:hover {
+    background-color: var(--art-surface-hover);
+    color: var(--art-text);
+}
+
+.artorize-modal-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--art-space-5);
+    overflow-y: auto;
+}
+
+.artorize-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: var(--art-space-3) var(--art-space-5);
+    border-top: 1px solid var(--art-border-subtle);
+    background: linear-gradient(to top, rgba(250, 250, 250, 0.8), rgba(255, 255, 255, 0.95));
+    gap: var(--art-space-3);
+}
+
+/* ============================================
+   ARTORIZE BUTTON SYSTEM
+   ============================================ */
+
+.artorize-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    font-weight: 500;
+    font-size: var(--art-text-sm);
+    border-radius: var(--art-radius-md);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+    height: var(--art-control-h-md);
+    padding: 0 var(--art-space-4);
+}
+
+.artorize-btn-sm {
+    height: var(--art-control-h-sm);
+    padding: 0 var(--art-space-3);
+    font-size: var(--art-text-sm);
+}
+
+.artorize-btn-xs {
+    height: 1.625rem;
+    padding: 0 var(--art-space-2);
+    font-size: var(--art-text-xs);
+}
+
+.artorize-btn-primary {
+    background-color: var(--art-primary);
+    color: #fff;
+    border-color: var(--art-primary);
+}
+
+.artorize-btn-primary:hover {
+    background-color: var(--art-primary-hover);
+    border-color: var(--art-primary-hover);
+}
+
+.artorize-btn-secondary {
+    background-color: var(--art-surface-active);
+    color: var(--art-text);
+    border-color: var(--art-border);
+}
+
+.artorize-btn-secondary:hover {
+    background-color: var(--art-surface-hover);
+    border-color: var(--art-border-hover);
+}
+
+.artorize-btn-ghost {
+    background-color: transparent;
+    color: var(--art-text-muted);
+    border-color: transparent;
+}
+
+.artorize-btn-ghost:hover {
+    background-color: var(--art-surface-hover);
+    color: var(--art-text);
+}
+
+.artorize-btn-danger {
+    background-color: #fef2f2;
+    color: var(--art-danger);
+    border-color: #fecaca;
+}
+
+.artorize-btn-danger:hover {
+    background-color: #fee2e2;
+    border-color: #fca5a5;
+}
+
+/* ============================================
+   ARTORIZE INPUT SYSTEM
+   ============================================ */
+
+.artorize-input {
+    width: 100%;
+    height: var(--art-control-h-md);
+    padding: 0 var(--art-space-3);
+    font-size: var(--art-text-sm);
+    color: var(--art-text);
+    background-color: #fff;
+    border: 1px solid var(--art-border);
+    border-radius: var(--art-radius-md);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.artorize-input:hover {
+    border-color: var(--art-border-hover);
+}
+
+.artorize-input:focus {
+    outline: none;
+    border-color: var(--art-border-focus);
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+}
+
+.artorize-input::placeholder {
+    color: var(--art-text-faint);
+}
+
+/* ============================================
+   ARTORIZE LIST COMPONENT (shadcn-style)
+   ============================================ */
+
+.artorize-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--art-space-1);
+}
+
+.artorize-list-item {
+    display: flex;
+    align-items: center;
+    gap: var(--art-space-3);
+    padding: var(--art-space-3);
+    background-color: #fff;
+    border: 1px solid var(--art-border-subtle);
+    border-radius: var(--art-radius-md);
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.artorize-list-item:hover {
+    background-color: var(--art-surface-hover);
+    border-color: var(--art-border);
+}
+
+.artorize-list-item-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.artorize-list-item-title {
+    font-size: var(--art-text-sm);
+    font-weight: 500;
+    color: var(--art-text);
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.artorize-list-item-subtitle {
+    font-size: var(--art-text-xs);
+    color: var(--art-text-muted);
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.artorize-list-item-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--art-space-2);
+    flex-shrink: 0;
+}
+
+.artorize-list-item-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--art-space-2);
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.artorize-list-item:hover .artorize-list-item-actions {
+    opacity: 1;
+}
+
+/* ============================================
+   ARTORIZE BADGE COMPONENT
+   ============================================ */
+
+.artorize-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    font-size: var(--art-text-xs);
+    font-weight: 500;
+    border-radius: 9999px;
+    line-height: 1.4;
+}
+
+.artorize-badge-default {
+    background-color: var(--art-surface-active);
+    color: var(--art-text-muted);
+}
+
+.artorize-badge-success,
+.artorize-badge-public {
+    background-color: hsl(240, 5%, 92%);
+    color: var(--art-primary);
+}
+
+.artorize-badge-warning {
+    background-color: #fef3c7;
+    color: #d97706;
+}
+
+.artorize-badge-danger {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+.artorize-badge-info {
+    background-color: #dbeafe;
+    color: #2563eb;
+}
+
+/* ============================================
+   ARTORIZE TOGGLE/SWITCH COMPONENT
+   ============================================ */
+
+.artorize-toggle {
+    position: relative;
+    width: 2.25rem;
+    height: 1.25rem;
+    background-color: var(--art-border-hover);
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    border: none;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.artorize-toggle::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 1rem;
+    height: 1rem;
+    background-color: #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease;
+}
+
+.artorize-toggle.active {
+    background-color: var(--art-primary);
+}
+
+.artorize-toggle.active::after {
+    transform: translateX(1rem);
+}
+
+/* ============================================
+   SHARE ARTWORKS SPECIFIC STYLES
+   ============================================ */
+
+.share-artwork-row {
+    display: flex;
+    align-items: center;
+    gap: var(--art-space-3);
+    padding: var(--art-space-3) var(--art-space-4);
+    background-color: #fff;
+    border: 1px solid var(--art-border-subtle);
+    border-radius: var(--art-radius-md);
+    margin-bottom: var(--art-space-2);
+    transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.share-artwork-row:hover {
+    background-color: var(--art-surface-hover);
+    border-color: var(--art-border);
+}
+
+.share-artwork-row:last-child {
+    margin-bottom: 0;
+}
+
+.share-artwork-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--art-radius-sm);
+    background-color: var(--art-surface-active);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--art-text-muted);
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.share-artwork-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.share-artwork-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.share-artwork-title {
+    font-size: var(--art-text-sm);
+    font-weight: 500;
+    color: var(--art-text);
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.share-artwork-meta {
+    font-size: var(--art-text-xs);
+    color: var(--art-text-muted);
+    margin: 0.125rem 0 0 0;
+    display: flex;
+    align-items: center;
+    gap: var(--art-space-2);
+}
+
+.share-artwork-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--art-space-2);
+    flex-shrink: 0;
+}
+
+.share-url-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    font-size: var(--art-text-xs);
+    font-weight: 500;
+    color: var(--art-text-muted);
+    background-color: transparent;
+    border: 1px solid var(--art-border);
+    border-radius: var(--art-radius-sm);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.share-url-btn:hover {
+    background-color: var(--art-surface-hover);
+    border-color: var(--art-border-hover);
+    color: var(--art-text);
+}
+
+.share-url-btn.copied {
+    background-color: var(--art-surface-active);
+    border-color: var(--art-border-focus);
+    color: var(--art-primary);
+}
+
+/* Filter buttons active state */
+.share-filter-btn.active {
+    background-color: var(--art-surface-active) !important;
+    color: var(--art-text) !important;
+    border-color: var(--art-border) !important;
+}
+
+/* ============================================
+   SETTINGS MODAL SPECIFIC OVERRIDES
+   ============================================ */
+
+#settings-modal .artorize-modal-content {
+    transform: scale(1);
+    opacity: 1;
+}
+
+#settings-modal.hidden .artorize-modal-content {
+    transform: scale(0.95);
+    opacity: 0;
+}
+
+#settings-modal .artorize-modal-backdrop {
+    opacity: 1;
+}
+
+#settings-modal.hidden .artorize-modal-backdrop {
+    opacity: 0;
+}
+
+/* Settings history list item (shadcn-style recreation) */
+.settings-history-item {
+    display: flex;
+    align-items: center;
+    gap: var(--art-space-3);
+    padding: var(--art-space-3);
+    background-color: #fff;
+    border: 1px solid var(--art-border-subtle);
+    border-radius: var(--art-radius-md);
+    margin-bottom: var(--art-space-2);
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.settings-history-item:hover {
+    background-color: var(--art-surface-hover);
+    border-color: var(--art-border);
+}
+
+.settings-history-item:last-child {
+    margin-bottom: 0;
+}
+
+.settings-history-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--art-radius-sm);
+    background-color: var(--art-surface-active);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--art-text-muted);
+    flex-shrink: 0;
+}
+
+.settings-history-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.settings-history-title {
+    font-size: var(--art-text-sm);
+    font-weight: 500;
+    color: var(--art-text);
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.settings-history-subtitle {
+    font-size: var(--art-text-xs);
+    color: var(--art-text-muted);
+    margin: 0.125rem 0 0 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.settings-history-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+    flex-shrink: 0;
+}
+
+.settings-history-date {
+    font-size: var(--art-text-xs);
+    color: var(--art-text-faint);
+    white-space: nowrap;
+}
+
+.settings-history-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--art-space-1);
+}
+
+.settings-delete-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.625rem;
+    height: 1.625rem;
+    border: none;
+    background: transparent;
+    border-radius: var(--art-radius-sm);
+    color: var(--art-text-muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    opacity: 0;
+}
+
+.settings-history-item:hover .settings-delete-btn {
+    opacity: 1;
+}
+
+.settings-delete-btn:hover {
+    background-color: #fee2e2;
+    color: var(--art-danger);
+}
+
+/* Clear all button styling */
+#clear-all-btn {
+    width: 100%;
+    margin-top: var(--art-space-3);
+}
+
+/* View all history button */
+.view-all-history-btn {
+    width: 100%;
+    margin-top: var(--art-space-2);
 }
 
