@@ -11,57 +11,33 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { width: 100%; height: 100%; overflow: hidden; background: transparent; }
-        .artorize-image { max-width: 100%; max-height: 100vh; display: block; margin: 0 auto; }
-        #error { display: none; text-align: center; padding: 40px; font-family: sans-serif; color: #666; }
+        #viewer { width: 100%; height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .artorize-image { max-width: 100%; max-height: 100vh; display: block; }
     </style>
 </head>
 <body>
-    <div id="artworkImage" class="artorize-image" data-src="" data-sac="" data-opacity="0.5" data-alt="Protected artwork"></div>
-    <div id="error">Artwork not found.</div>
-
+    <div id="viewer">
+        <div class="artorize-image" id="img" data-src="" data-sac="" data-opacity="0.5" data-alt="Protected artwork"></div>
+    </div>
     <script>
-        (async function() {
-            const parts = window.location.pathname.split('/');
-            const idx = parts.indexOf('embed');
-            const id = idx !== -1 && parts.length > idx + 1 ? parts[idx + 1] : null;
+        // Runs synchronously during parsing, before deferred embed.js executes.
+        // Extracts artwork ID from URL and sets CDN URLs on the artorize-image element.
+        (function() {
+            var parts = window.location.pathname.split('/');
+            var idx = parts.indexOf('embed');
+            var id = (idx !== -1 && parts.length > idx + 1) ? parts[idx + 1] : null;
+            if (!id) return;
 
-            if (!id) { document.getElementById('error').style.display = 'block'; return; }
+            var el = document.getElementById('img');
+            el.setAttribute('data-src', 'https://cdn.artorizer.com/api/artworks/' + id + '?variant=protected');
+            el.setAttribute('data-sac', 'https://cdn.artorizer.com/api/artworks/' + id + '/mask');
 
-            try {
-                const res = await fetch(`https://cdn.artorizer.com/api/artworks/${id}/metadata`);
-                if (!res.ok) throw new Error();
-                const meta = await res.json();
-
-                const el = document.getElementById('artworkImage');
-                el.setAttribute('data-src', `https://cdn.artorizer.com/api/artworks/${id}?variant=protected`);
-                el.setAttribute('data-sac', `https://cdn.artorizer.com/api/artworks/${id}/mask`);
-                el.setAttribute('data-alt', meta.title || 'Protected artwork');
-
-                // OG tags for social sharing
-                const title = `${meta.title || 'Artwork'} - Artorizer`;
-                document.title = title;
-                setMeta('og:title', title);
-                setMeta('og:image', `https://cdn.artorizer.com/api/artworks/${id}?variant=protected`);
-                setMeta('og:url', window.location.href);
-                setMeta('twitter:title', title);
-                setMeta('twitter:image', `https://cdn.artorizer.com/api/artworks/${id}?variant=protected`);
-
-                if (window.Artorize && window.Artorize.init) window.Artorize.init();
-            } catch (e) {
-                document.getElementById('error').style.display = 'block';
-            }
-
-            function setMeta(key, content) {
-                const attr = key.startsWith('og:') ? 'property' : 'name';
-                let el = document.querySelector(`meta[${attr}="${key}"]`);
-                if (!el) { el = document.createElement('meta'); el.setAttribute(attr, key); document.head.appendChild(el); }
-                el.setAttribute('content', content);
-            }
+            // OG tags for social sharing
+            var imgUrl = 'https://cdn.artorizer.com/api/artworks/' + id + '?variant=protected';
+            var m = document.createElement('meta'); m.setAttribute('property', 'og:image'); m.content = imgUrl; document.head.appendChild(m);
+            m = document.createElement('meta'); m.setAttribute('property', 'og:url'); m.content = window.location.href; document.head.appendChild(m);
+            m = document.createElement('meta'); m.setAttribute('name', 'twitter:image'); m.content = imgUrl; document.head.appendChild(m);
         })();
-
-        window.addEventListener('load', () => {
-            if (window.Artorize && window.Artorize.init) window.Artorize.init();
-        });
     </script>
 </body>
 </html>
