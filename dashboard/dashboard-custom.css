@@ -67,9 +67,6 @@
 /* Collapsed brand "A" - hidden by default */
 .artorize-collapsed-brand {
     display: none;
-    position: absolute;
-    top: 0;
-    left: 0;
 }
 
 /* Expand button - shown by default */
@@ -78,7 +75,6 @@
 }
 
 /* ========== EXPANDED STATE ========== */
-/* When expanded: show expand button, hide "A" */
 [aria-expanded="true"] .artorize-collapsed-brand {
     display: none !important;
 }
@@ -88,26 +84,20 @@
 }
 
 /* ========== COLLAPSED STATE (not hovering) ========== */
-/* When collapsed: show "A", hide expand button */
 [aria-expanded="false"] .artorize-collapsed-brand {
     display: flex !important;
-    position: relative;
-    visibility: visible !important;
 }
 
 [aria-expanded="false"] .sidebar-expand-btn {
     display: none !important;
 }
 
-/* ========== COLLAPSED STATE (hovering) ========== */
-/* When collapsed AND hovering: hide "A", show expand button */
-[aria-expanded="false"]:hover .artorize-collapsed-brand,
-.group\/sidebar:hover [aria-expanded="false"] .artorize-collapsed-brand {
+/* ========== COLLAPSED STATE (hovering on toggle container) ========== */
+[aria-expanded="false"] .sidebar-toggle-btn-container:hover .artorize-collapsed-brand {
     display: none !important;
 }
 
-[aria-expanded="false"]:hover .sidebar-expand-btn,
-.group\/sidebar:hover [aria-expanded="false"] .sidebar-expand-btn {
+[aria-expanded="false"] .sidebar-toggle-btn-container:hover .sidebar-expand-btn {
     display: flex !important;
 }
 
@@ -155,9 +145,9 @@ body {
     font-family: var(--dashboard-font-family) !important;
 }
 
-/* Ensure overflow is visible */
+/* Prevent page from scrolling to reveal background */
 html, body {
-    overflow: visible !important;
+    overflow: hidden !important;
 }
 
 /* Focus styles */

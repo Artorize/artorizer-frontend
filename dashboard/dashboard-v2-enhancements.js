@@ -229,12 +229,19 @@ window.currentPlatform = 'static-edit';
 window.togglePlatformDropdown = function() {
   const content = document.getElementById('platform-dropdown-content');
   const trigger = document.getElementById('platform-switcher-trigger');
-  
+
   if (!content || !trigger) return;
-  
+
   const isClosed = content.classList.contains('hidden');
-  
+
   if (isClosed) {
+    // Position dropdown above the trigger using fixed positioning
+    const rect = trigger.getBoundingClientRect();
+    content.style.position = 'fixed';
+    content.style.left = rect.left + 'px';
+    content.style.bottom = (window.innerHeight - rect.top + 8) + 'px';
+    content.style.width = '200px';
+    content.style.zIndex = '200';
     content.classList.remove('hidden');
     trigger.setAttribute('aria-expanded', 'true');
     trigger.setAttribute('data-state', 'open');
