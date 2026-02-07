@@ -995,41 +995,37 @@
 
       // Update sidebar width
       const root = document.documentElement;
+      // Get the "Artorize" text div (first child of logoContainer)
+      const brandTextDiv = logoContainer?.children[0];
+
       if (isExpanded) {
         // Collapse: set to icon-only width
         root.style.setProperty('--eleven-sidebar-width', '4rem');
-        // Hide logo
-        if (logoContainer) {
-          logoContainer.style.visibility = 'hidden';
-          logoContainer.style.opacity = '0';
-          logoContainer.style.position = 'absolute';
+        // Hide only the "Artorize" text, keep toggle container visible
+        if (brandTextDiv) {
+          brandTextDiv.style.visibility = 'hidden';
+          brandTextDiv.style.opacity = '0';
+          brandTextDiv.style.position = 'absolute';
         }
+        expandIconContainer.style.display = 'none';
 
-        // Show and center the expand icon container
-        expandIconContainer.style.display = 'flex';
-        expandIconContainer.style.position = 'relative';
-        expandIconContainer.style.justifyContent = 'center';
-        expandIconContainer.style.width = '100%';
-        expandIconContainer.style.height = 'var(--eleven-header-height)';
-        expandIconContainer.style.transform = 'none';
-        expandIconContainer.style.left = 'auto';
-
-        // Update toggle button icon to expand icon (though hidden)
+        // Update toggle button icon to expand icon
         toggleButton.innerHTML = expandSVG;
 
-        // Reset toggle button container
-        toggleButtonContainer.style.position = 'absolute';
+        // Center toggle button container in collapsed sidebar
+        toggleButtonContainer.style.position = 'relative';
         toggleButtonContainer.style.left = 'auto';
-        toggleButtonContainer.style.right = '0.125rem';
+        toggleButtonContainer.style.right = 'auto';
         toggleButtonContainer.style.transform = 'none';
+        toggleButtonContainer.style.margin = '0 auto';
       } else {
         // Expand: set to full width
         root.style.setProperty('--eleven-sidebar-width', '16rem');
-        // Show logo
-        if (logoContainer) {
-          logoContainer.style.visibility = 'visible';
-          logoContainer.style.opacity = '1';
-          logoContainer.style.position = 'relative';
+        // Show "Artorize" text again
+        if (brandTextDiv) {
+          brandTextDiv.style.visibility = 'visible';
+          brandTextDiv.style.opacity = '1';
+          brandTextDiv.style.position = 'relative';
         }
         expandIconContainer.style.display = 'none';
         // Update toggle button icon back to collapse icon
@@ -1042,6 +1038,7 @@
         toggleButtonContainer.style.left = 'auto';
         toggleButtonContainer.style.right = '0.125rem';
         toggleButtonContainer.style.transform = 'none';
+        toggleButtonContainer.style.margin = '0';
       }
     });
 
@@ -1050,6 +1047,16 @@
       e.stopPropagation();
       toggleButton.click();
     });
+
+    // Also allow clicking the "A" brand to expand the sidebar
+    const collapsedBrand = sidebar.querySelector('.artorize-collapsed-brand');
+    if (collapsedBrand) {
+      collapsedBrand.style.cursor = 'pointer';
+      collapsedBrand.addEventListener('click', function (e) {
+        e.stopPropagation();
+        toggleButton.click();
+      });
+    }
   }
 
   /**
