@@ -16,11 +16,11 @@
 
     let elements = {};
 
-    function init() {
+    async function init() {
         createWindowHTML();
         cacheElements();
         attachEventListeners();
-        loadArtworks();
+        await loadArtworks();
     }
 
     function createWindowHTML() {
@@ -170,17 +170,38 @@
         });
     }
 
-    function loadArtworks() {
-        state.artworks = [
-            { id: 1, title: 'Abstract Harmony', thumbnailUrl: 'https://picsum.photos/400/300?random=101', isPublic: true, shareSlug: 'abstract-harmony', createdAt: '2025-12-01T10:00:00Z' },
-            { id: 2, title: 'Urban Dreams', thumbnailUrl: 'https://picsum.photos/300/400?random=102', isPublic: false, shareSlug: 'urban-dreams', createdAt: '2025-11-28T14:30:00Z' },
-            { id: 3, title: 'Neon Nights', thumbnailUrl: 'https://picsum.photos/400/400?random=103', isPublic: true, shareSlug: 'neon-nights', createdAt: '2025-12-03T09:15:00Z' },
-            { id: 4, title: 'Silence', thumbnailUrl: 'https://picsum.photos/400/250?random=104', isPublic: false, shareSlug: 'silence', createdAt: '2025-10-15T16:45:00Z' },
-            { id: 5, title: 'Chaos Theory', thumbnailUrl: 'https://picsum.photos/300/300?random=105', isPublic: true, shareSlug: 'chaos-theory', createdAt: '2025-12-05T11:00:00Z' },
-            { id: 6, title: 'Serenity', thumbnailUrl: 'https://picsum.photos/400/500?random=106', isPublic: false, shareSlug: 'serenity', createdAt: '2025-09-20T08:30:00Z' },
-            { id: 7, title: 'Digital Bloom', thumbnailUrl: 'https://picsum.photos/350/450?random=107', isPublic: true, shareSlug: 'digital-bloom', createdAt: '2025-11-10T13:20:00Z' },
-            { id: 8, title: 'Fractured Light', thumbnailUrl: 'https://picsum.photos/450/300?random=108', isPublic: false, shareSlug: 'fractured-light', createdAt: '2025-12-04T17:00:00Z' }
-        ];
+    async function loadArtworks() {
+        const apiUrl = window.ArtorizeConfig?.ROUTER_URL || 'https://router.artorizer.com';
+        const cdnUrl = window.ArtorizeConfig?.CDN_URL || 'https://cdn.artorizer.com';
+
+        try {
+            const response = await fetch(`${apiUrl}/artworks/me?limit=100`, {
+                method: 'GET',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (!response.ok) {
+                console.warn('[SharedArtworks] Failed to fetch artworks:', response.status);
+                state.artworks = [];
+                return;
+            }
+
+            const data = await response.json();
+            const artworks = data.artworks || [];
+
+            state.artworks = artworks.map(a => ({
+                id: a._id || a.id,
+                title: a.title || a.artworkTitle || 'Untitled',
+                thumbnailUrl: `${cdnUrl}/api/artworks/${a._id || a.id}?variant=protected`,
+                isPublic: a.isPublic !== false,
+                shareSlug: a.shareSlug || (a._id || a.id),
+                createdAt: a.createdAt || new Date().toISOString()
+            }));
+        } catch (error) {
+            console.error('[SharedArtworks] Error loading artworks:', error);
+            state.artworks = [];
+        }
     }
 
     function renderGrid() {
@@ -472,7 +493,7 @@
         }, 3000);
     }
 
-    function open() {
+    async function open() {
         state.isOpen = true;
         state.selectedIds.clear();
         state.filter = 'all';
@@ -490,9 +511,11 @@
             allBtn.classList.add('active', 'artorize-btn-secondary');
             allBtn.classList.remove('artorize-btn-ghost');
         }
-        renderGrid();
         elements.overlay.classList.add('visible');
         document.body.style.overflow = 'hidden';
+        // Refresh artworks from API each time window opens
+        await loadArtworks();
+        renderGrid();
     }
 
     function close() {
