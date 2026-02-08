@@ -1245,17 +1245,17 @@
     `;
 
     dropdown.innerHTML = `
-      <button data-action="editing-history" class="user-menu-item" style="${buttonStyle}"
+      <button data-action="gallery" class="user-menu-item" style="${buttonStyle}"
         onmouseover="this.style.background='rgba(0,0,0,0.05)'; this.style.color='var(--gray-alpha-950, #111)'"
         onmouseout="this.style.background='transparent'; this.style.color='#4b5563'">
         <div style="display: flex; align-items: center; justify-content: center; height: 32px; width: 20px;">
           <svg xmlns="http://www.w3.org/2000/svg" width="1.25rem" height="1.25rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-            <path d="M3 3v5h5"></path>
-            <path d="M12 7v5l4 2"></path>
+            <rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect>
+            <line x1="3" y1="9" x2="21" y2="9"></line>
+            <line x1="9" y1="21" x2="9" y2="9"></line>
           </svg>
         </div>
-        <span style="white-space: nowrap;">Editing history</span>
+        <span style="white-space: nowrap;">Gallery</span>
       </button>
 
       <button data-action="settings" class="user-menu-item" style="${buttonStyle}"
@@ -1284,13 +1284,17 @@
       </button>
     `;
 
-    // Add editing history handler
-    const historyBtn = dropdown.querySelector('[data-action="editing-history"]');
-    if (historyBtn) {
-      historyBtn.addEventListener('click', function (e) {
+    // Add gallery handler
+    const galleryBtn = dropdown.querySelector('[data-action="gallery"]');
+    if (galleryBtn) {
+      galleryBtn.addEventListener('click', function (e) {
         e.preventDefault();
-        // Navigate to editing history page
-        window.location.href = '/dashboard/history.html';
+        // Close the user menu dropdown
+        dropdown.style.display = 'none';
+        // Toggle the gallery floating window
+        if (typeof window.toggleHistoryModal === 'function') {
+          window.toggleHistoryModal();
+        }
       });
     }
 
