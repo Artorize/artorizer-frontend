@@ -9,12 +9,12 @@ const selectedProtections = new Set();
 // Protection name mapping
 const protectionNames = {
   'upload': 'Uploading Artwork',
-  'fawkes': 'Fawkes Protection',
-  'photoguard': 'PhotoGuard Protection',
-  'mist': 'MIST Protection',
-  'nightshade': 'Nightshade Protection',
-  'c2pa': 'C2PA Manifest',
-  'watermark': 'Visible Watermark'
+  'fawkes': 'Face Privacy',
+  'photoguard': 'Edit Guard',
+  'mist': 'Training Block',
+  'nightshade': 'Data Poison',
+  'c2pa': 'Proof of Origin',
+  'watermark': 'Visible Mark'
 };
 
 // Toggle protection card selection
@@ -27,6 +27,54 @@ function toggleProtection(card) {
   } else {
     card.classList.add('selected');
     selectedProtections.add(protection);
+  }
+
+  updateProgressTracker();
+}
+
+// Preset definitions
+const presets = {
+  'lite': ['nightshade'],
+  'partial': ['nightshade', 'mist', 'c2pa'],
+  'full': ['fawkes', 'photoguard', 'mist', 'nightshade', 'c2pa', 'watermark']
+};
+
+// Apply a protection preset
+function applyPreset(presetName) {
+  const protections = presets[presetName];
+  if (!protections) return;
+
+  // Clear all current selections
+  document.querySelectorAll('.protection-card.selected').forEach(card => {
+    card.classList.remove('selected');
+  });
+  selectedProtections.clear();
+
+  // Select the preset's protections
+  protections.forEach(protection => {
+    const card = document.querySelector(`.protection-card[data-protection="${protection}"]`);
+    if (card) {
+      card.classList.add('selected');
+      selectedProtections.add(protection);
+    }
+  });
+
+  // Update preset button highlights
+  document.querySelectorAll('.preset-btn').forEach(btn => {
+    btn.classList.remove('border-foreground', 'bg-gray-50', 'text-foreground');
+    btn.classList.add('border-gray-200', 'text-subtle');
+  });
+  const activePreset = document.querySelector(`.preset-btn[data-preset="${presetName}"]`);
+  if (activePreset) {
+    activePreset.classList.add('border-foreground', 'bg-gray-50', 'text-foreground');
+    activePreset.classList.remove('border-gray-200', 'text-subtle');
+  }
+
+  // Set watermark strategy based on preset
+  if (presetName === 'lite' || presetName === 'partial') {
+    selectWatermarkStrategy('invisible-watermark', 'Invisible Watermark');
+  } else if (presetName === 'full') {
+    selectWatermarkStrategy('visible-watermark', 'Visible Watermark');
   }
 
   updateProgressTracker();
@@ -571,6 +619,7 @@ function copyEmbedCode() {
 // Expose helpers to the global window scope for reuse
 window.updateProgressStep = updateProgressStep;
 window.toggleProtection = toggleProtection;
+window.applyPreset = applyPreset;
 window.toggleWatermarkDropdown = toggleWatermarkDropdown;
 window.selectWatermarkStrategy = selectWatermarkStrategy;
 window.toggleHistoryModal = toggleHistoryModal;

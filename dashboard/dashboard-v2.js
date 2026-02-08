@@ -22,6 +22,36 @@
   let completedSteps = new Set();
   let lastProcessedProtection = null;
 
+  // Auto-fill metadata fields from user profile
+  function autoFillMetadata() {
+    // Auto-fill author name
+    const authorInput = document.getElementById('author-name');
+    if (authorInput && !authorInput.value && currentUser) {
+      const userName = currentUser.name || currentUser.displayName || currentUser.username ||
+        (currentUser.email ? currentUser.email.split('@')[0] : '');
+      if (userName) {
+        authorInput.value = userName;
+        authorInput.dispatchEvent(new Event('change', { bubbles: true }));
+        console.log('[AutoFill] Author name set to:', userName);
+      }
+    }
+
+    // Auto-fill creation date to today
+    const dateDisplay = document.getElementById('creation-date-display');
+    const dateHidden = document.getElementById('creation-date');
+    if (dateDisplay && dateHidden && !dateHidden.value) {
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'];
+      dateHidden.value = `${yyyy}-${mm}-${dd}`;
+      dateDisplay.value = `${monthNames[today.getMonth()]} ${today.getDate()}, ${yyyy}`;
+      console.log('[AutoFill] Creation date set to:', dateHidden.value);
+    }
+  }
+
   // Main initialization logic
   async function initializeDashboard() {
     console.log('Artorize Dashboard V2 initializing...');
@@ -40,6 +70,10 @@
         console.log('[Auth] User authenticated:', currentUser);
         console.log('[Auth] User name:', currentUser?.name);
         console.log('[Auth] User email:', currentUser?.email);
+        // Auto-fill metadata from user profile
+        setTimeout(() => {
+          autoFillMetadata();
+        }, 500);
       } catch (error) {
         console.error('Authentication check failed:', error);
         // Continue without auth if DashboardAuth throws
@@ -205,6 +239,13 @@
     }
 
     showStatus(`File selected: ${file.name}`, 'success');
+
+    // Auto-apply Lite preset if no protections are selected
+    const hasProtections = document.querySelectorAll('.protection-card.selected').length > 0;
+    if (!hasProtections && typeof window.applyPreset === 'function') {
+      window.applyPreset('lite');
+      console.log('[AutoPreset] Applied Lite preset');
+    }
   }
 
   /**
@@ -418,11 +459,13 @@
       // Reset progress tracker for new job
       resetProgressTracker();
 
-      // Prepare form data
+      // Prepare form data from actual form fields
       const formData = {
         imageFile: selectedFile,
-        artist_name: 'Artist', // You can add input fields for these
-        artwork_title: selectedFile.name,
+        artist_name: document.getElementById('author-name')?.value || currentUser?.name || 'Artist',
+        artwork_title: document.getElementById('artwork-title')?.value || selectedFile.name.replace(/\.[^/.]+$/, ''),
+        description: document.getElementById('description')?.value || '',
+        creation_date: document.getElementById('creation-date')?.value || '',
         protectionOptions: {
           enable_fawkes: selectedProtections.includes('fawkes'),
           enable_photoguard: selectedProtections.includes('photoguard'),

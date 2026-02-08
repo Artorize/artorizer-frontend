@@ -52,11 +52,17 @@ if (window.location.pathname.includes('sidebar.html') || window.location.pathnam
                                                          data-state="closed">
                                                         <div class="flex items-center gap-2 px-1.5 min-w-36">
                                                             <div class="center h-8">
-                                                                <svg width="1.25rem" height="1.25rem" viewBox="0 0 24 24"
-                                                                     fill="none" stroke="currentColor" stroke-width="1.5"
-                                                                     stroke-linecap="round" stroke-linejoin="round">
-                                                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                                                                    <path d="m9 12 2 2 4-4"/>
+                                                                <svg width="1.25rem" height="1.25rem" viewBox="0 -960 960 960" fill="currentColor" opacity="0.6">
+                                                                    <defs>
+                                                                        <mask id="ico-m-nav">
+                                                                            <rect fill="white" x="0" y="-960" width="960" height="960"/>
+                                                                            <circle fill="black" cx="730" cy="-210" r="230"/>
+                                                                        </mask>
+                                                                    </defs>
+                                                                    <path mask="url(#ico-m-nav)" stroke="currentColor" stroke-width="18" stroke-linejoin="round" d="M204-129q-30.94 0-52.97-22.03Q129-173.06 129-204v-552q0-30.94 22.03-52.97Q173.06-831 204-831h552q30.94 0 52.97 22.03Q831-786.94 831-756v552q0 30.94-22.03 52.97Q786.94-129 756-129H204Zm0-75h552v-552H204v552Zm44-79h465L568-476 450-319l-88-116-114 152Zm-44 79v-552 552Z"/>
+                                                                    <g transform="translate(490, 0) scale(0.5)">
+                                                                        <path stroke="currentColor" stroke-width="30" stroke-linejoin="round" d="M480-479.5ZM480-90q-135.09-34.2-223.05-155.84Q169-367.49 169-516v-237l311-117 311 117v237q0 10.56-.5 21.11-.5 10.56-1.5 20.89-9-2-18.5-3t-19.5-1q-9.5 0-18.5.75T714-474.5q1.5-10.5 1.75-20.5t.25-20.81v-185.74L480-790l-236 88.39V-516q0 119.29 66.75 216.9Q377.5-201.5 480-168.5q21-7.09 41-17.21 20-10.13 39-23.29v88.5q-19 10.5-39 18T480-90Zm187.79 0Q654-90 644.5-99.5T635-123v-129q0-14 9.5-23.5T668-285h6.5v-41q0-32.5 22.75-54.75T752.5-403q32.5 0 55.25 22.25T830.5-326v41h6.5q14 0 23.5 9.5T870-252v129q0 14-9.5 23.5T837.21-90H667.79Zm45.71-195h78v-41q0-17-11-28t-28-11q-17 0-28 11t-11 28v41Z"/>
+                                                                    </g>
                                                                 </svg>
                                                             </div>
                                                             <div class="flex items-center justify-between flex-1 h-8 transition-all duration-150 group-aria-expanded/sidebar:opacity-100 opacity-0 translate-x-1 group-aria-expanded/sidebar:translate-x-0">
@@ -69,14 +75,15 @@ if (window.location.pathname.includes('sidebar.html') || window.location.pathnam
                                             </div>
                                         </li>
                                     </ul>
-                                <li aria-label="History"><h2
+                                <li aria-label="Gallery"><h2
                                         class="text-sm font-medium text-gray-alpha-500 ml-1.5 mb-1.5 whitespace-nowrap group-aria-expanded/sidebar:opacity-100 opacity-0 transition-opacity duration-150 flex items-center gap-1.5">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="1rem" height="1rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-                                            <path d="M3 3v5h5"></path>
-                                            <path d="M12 7v5l4 2"></path>
+                                            <rect width="7" height="7" x="3" y="3" rx="1"/>
+                                            <rect width="7" height="7" x="14" y="3" rx="1"/>
+                                            <rect width="7" height="7" x="3" y="14" rx="1"/>
+                                            <rect width="7" height="7" x="14" y="14" rx="1"/>
                                         </svg>
-                                    History</h2>
+                                    Gallery</h2>
                                     <ul id="editing-history-list" class="stack gap-0.5">
                                         <!-- History items will be populated by JavaScript -->
                                     </ul>
@@ -85,7 +92,7 @@ if (window.location.pathname.includes('sidebar.html') || window.location.pathnam
                                                 id="view-all-history-btn"
                                                 onclick="toggleHistoryModal()"
                                                 class="flex items-center gap-1 text-xs text-gray-alpha-500 hover:text-gray-alpha-950 transition-colors duration-150">
-                                            View all history
+                                            View gallery
                                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                 <path d="M5 12h14"></path>
                                                 <path d="m12 5 7 7-7 7"></path>

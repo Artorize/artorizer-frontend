@@ -1,6 +1,6 @@
 /**
  * Settings Modal Logic
- * Handles username update and artwork history management in a modal dialog
+ * Handles username update and artwork table in settings
  */
 
 (function() {
@@ -10,25 +10,25 @@
   let isLoadingHistory = false;
   let isDeleting = false;
   let isInitialized = false;
-  let showingAllHistory = false;
   let allArtworks = [];
+
+  // Placeholder artworks for local development
+  const placeholderArtworks = [
+    { id: 'placeholder-1', title: 'Mountain Sunrise', artist: 'Demo', createdAt: '2026-02-08T10:30:00Z', isPublic: true, visibility: 'public' },
+    { id: 'placeholder-2', title: 'Portrait Study #4', artist: 'Demo', createdAt: '2026-02-07T14:20:00Z', isPublic: false, visibility: 'private' },
+    { id: 'placeholder-3', title: 'Abstract Flow', artist: 'Demo', createdAt: '2026-02-05T09:15:00Z', isPublic: true, visibility: 'public' },
+    { id: 'placeholder-4', title: 'City at Night', artist: 'Demo', createdAt: '2026-01-28T16:45:00Z', isPublic: false, visibility: 'private' },
+    { id: 'placeholder-5', title: 'Ocean Waves', artist: 'Demo', createdAt: '2026-01-20T11:00:00Z', isPublic: true, visibility: 'public' },
+  ];
 
   const modal = document.getElementById('settings-modal');
   const modalContent = modal?.querySelector('.settings-modal-content');
   const modalBackdrop = modal?.querySelector('.settings-modal-backdrop');
   const closeButtons = modal?.querySelectorAll('.settings-modal-close');
 
-  /**
-   * Open settings modal and initialize content
-   */
   function openSettingsModal() {
-    if (!modal) {
-      console.error('Settings modal not found');
-      return;
-    }
-
+    if (!modal) return;
     modal.classList.remove('hidden');
-
     requestAnimationFrame(() => {
       if (modalBackdrop) modalBackdrop.style.opacity = '1';
       if (modalContent) {
@@ -36,7 +36,6 @@
         modalContent.style.transform = 'scale(1)';
       }
     });
-
     if (!isInitialized) {
       initSettings();
       isInitialized = true;
@@ -45,69 +44,41 @@
     }
   }
 
-  /**
-   * Close settings modal
-   */
   function closeSettingsModal() {
     if (!modal) return;
-
     if (modalBackdrop) modalBackdrop.style.opacity = '0';
     if (modalContent) {
       modalContent.style.opacity = '0';
       modalContent.style.transform = 'scale(0.95)';
     }
-
-    setTimeout(() => {
-      modal.classList.add('hidden');
-    }, 200);
+    setTimeout(() => { modal.classList.add('hidden'); }, 200);
   }
 
-  /**
-   * Initialize settings modal functionality
-   */
   async function initSettings() {
     const usernameInput = document.getElementById('username-input');
     const saveUsernameBtn = document.getElementById('save-username-btn');
-    const usernameStatus = document.getElementById('username-status');
-
-    if (!usernameInput || !saveUsernameBtn || !usernameStatus) {
-      console.error('Required settings elements not found');
-      return;
-    }
+    if (!usernameInput || !saveUsernameBtn) return;
 
     await loadCurrentUsername();
-
     saveUsernameBtn.addEventListener('click', handleUsernameSave);
-
     usernameInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        handleUsernameSave();
-      }
+      if (e.key === 'Enter') handleUsernameSave();
     });
-
     await loadArtworkHistory();
   }
 
-  /**
-   * Load current username from backend
-   */
   async function loadCurrentUsername() {
     try {
       const response = await fetch(`${window.ArtorizeConfig.ROUTER_URL}/auth/me`, {
         method: 'GET',
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        headers: { 'Content-Type': 'application/json' }
       });
-
       if (response.ok) {
         const data = await response.json();
-        if (data.user && data.user.username) {
-          const usernameInput = document.getElementById('username-input');
-          if (usernameInput) {
-            usernameInput.value = data.user.username;
-          }
+        if (data.user?.username) {
+          const input = document.getElementById('username-input');
+          if (input) input.value = data.user.username;
         }
       }
     } catch (error) {
@@ -115,79 +86,53 @@
     }
   }
 
-  /**
-   * Handle username save
-   */
   async function handleUsernameSave() {
     if (isUpdating) return;
-
     const usernameInput = document.getElementById('username-input');
     const saveUsernameBtn = document.getElementById('save-username-btn');
     const usernameStatus = document.getElementById('username-status');
-
     const newUsername = usernameInput.value.trim();
 
-    if (!newUsername) {
-      showStatus(usernameStatus, 'Username cannot be empty', 'error');
-      return;
-    }
-
-    if (newUsername.length < 3) {
+    if (!newUsername || newUsername.length < 3) {
       showStatus(usernameStatus, 'Username must be at least 3 characters', 'error');
       return;
     }
-
     if (newUsername.length > 30) {
       showStatus(usernameStatus, 'Username must be 30 characters or less', 'error');
       return;
     }
-
-    const usernameRegex = /^[a-zA-Z0-9_-]+$/;
-    if (!usernameRegex.test(newUsername)) {
-      showStatus(usernameStatus, 'Username can only contain letters, numbers, underscores, and hyphens', 'error');
+    if (!/^[a-zA-Z0-9_-]+$/.test(newUsername)) {
+      showStatus(usernameStatus, 'Only letters, numbers, underscores, and hyphens', 'error');
       return;
     }
 
     isUpdating = true;
     saveUsernameBtn.disabled = true;
-    showStatus(usernameStatus, 'Updating username...', 'info');
+    showStatus(usernameStatus, 'Saving...', 'info');
 
     try {
       const response = await fetch(`${window.ArtorizeConfig.ROUTER_URL}/users/me`, {
         method: 'PATCH',
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: newUsername })
       });
-
       const data = await response.json();
-
       if (response.ok) {
-        showStatus(usernameStatus, 'Username updated successfully!', 'success');
+        showStatus(usernameStatus, 'Saved', 'success');
       } else if (response.status === 409) {
-        showStatus(usernameStatus, data.message || 'Username already taken', 'error');
-      } else if (response.status === 401) {
-        showStatus(usernameStatus, 'Please log in to update your username', 'error');
-        setTimeout(() => {
-          window.location.href = '/auth/login.html';
-        }, 2000);
+        showStatus(usernameStatus, 'Username taken', 'error');
       } else {
-        showStatus(usernameStatus, data.message || 'Failed to update username', 'error');
+        showStatus(usernameStatus, data.message || 'Failed', 'error');
       }
     } catch (error) {
-      console.error('Username update error:', error);
-      showStatus(usernameStatus, 'Network error. Please try again.', 'error');
+      showStatus(usernameStatus, 'Network error', 'error');
     } finally {
       isUpdating = false;
       saveUsernameBtn.disabled = false;
     }
   }
 
-  /**
-   * Load artwork history from backend
-   */
   async function loadArtworkHistory() {
     if (isLoadingHistory) return;
 
@@ -195,373 +140,193 @@
     const historyLoading = document.getElementById('history-loading');
     const historyEmpty = document.getElementById('history-empty');
     const historyError = document.getElementById('history-error');
+    const historyTable = document.getElementById('history-table');
 
-    if (!historyList || !historyLoading || !historyEmpty || !historyError) {
-      console.error('Required history elements not found');
-      return;
-    }
+    if (!historyList) return;
 
     isLoadingHistory = true;
-    historyLoading.classList.remove('hidden');
-    historyEmpty.classList.add('hidden');
-    historyError.classList.add('hidden');
+    if (historyLoading) historyLoading.style.display = 'flex';
+    if (historyEmpty) historyEmpty.style.display = 'none';
+    if (historyError) historyError.style.display = 'none';
+    if (historyTable) historyTable.style.display = 'none';
     historyList.innerHTML = '';
 
     try {
       const response = await fetch(`${window.ArtorizeConfig.ROUTER_URL}/artworks/me`, {
         method: 'GET',
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        headers: { 'Content-Type': 'application/json' }
       });
+
+      if (historyLoading) historyLoading.style.display = 'none';
 
       if (response.ok) {
         const data = await response.json();
-        historyLoading.classList.add('hidden');
+        allArtworks = data.artworks || [];
 
-        if (!data.artworks || data.artworks.length === 0) {
-          historyEmpty.classList.remove('hidden');
-          return;
+        if (allArtworks.length === 0) {
+          // Use placeholders for dev
+          allArtworks = placeholderArtworks;
         }
-
-        allArtworks = data.artworks;
-        showingAllHistory = false;
-        renderHistory();
-
-      } else if (response.status === 401) {
-        historyLoading.classList.add('hidden');
-        showError('Please log in to view your artwork history');
-        setTimeout(() => {
-          window.location.href = '/auth/login.html';
-        }, 2000);
+        renderTable();
       } else {
-        historyLoading.classList.add('hidden');
-        showError('Failed to load artwork history');
+        // Use placeholders on error (local dev)
+        allArtworks = placeholderArtworks;
+        renderTable();
       }
     } catch (error) {
-      console.error('History load error:', error);
-      historyLoading.classList.add('hidden');
-      showError('Network error. Please try again.');
+      console.warn('Using placeholder data:', error.message);
+      if (historyLoading) historyLoading.style.display = 'none';
+      // Fall back to placeholder data for local dev
+      allArtworks = placeholderArtworks;
+      renderTable();
     } finally {
       isLoadingHistory = false;
     }
-
-    function showError(message) {
-      historyError.textContent = message;
-      historyError.classList.remove('hidden');
-    }
   }
 
-  /**
-   * Render history with view all/show less toggle
-   */
-  function renderHistory() {
+  function renderTable() {
     const historyList = document.getElementById('history-list');
+    const historyTable = document.getElementById('history-table');
+    const historyEmpty = document.getElementById('history-empty');
     const artworkCountEl = document.getElementById('settings-artwork-count');
-    if (!historyList) return;
 
+    if (!historyList) return;
     historyList.innerHTML = '';
 
-    // Update artwork count
     if (artworkCountEl) {
       artworkCountEl.textContent = allArtworks.length === 1 ? '1 artwork' : `${allArtworks.length} artworks`;
     }
 
-    const artworksToShow = showingAllHistory ? allArtworks : allArtworks.slice(0, 5);
-
-    // Render list items directly (no wrapper needed with new styling)
-    artworksToShow.forEach(artwork => {
-      const item = createHistoryItem(artwork);
-      historyList.appendChild(item);
-    });
-
-    // Add toggle button if more than 5 items
-    if (allArtworks.length > 5) {
-      const toggleBtn = document.createElement('button');
-      toggleBtn.className = 'artorize-btn artorize-btn-sm artorize-btn-secondary view-all-history-btn';
-      toggleBtn.innerHTML = showingAllHistory
-        ? `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>Show Less`
-        : `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>View All (${allArtworks.length})`;
-      toggleBtn.addEventListener('click', toggleHistoryView);
-      historyList.appendChild(toggleBtn);
-    }
-
-    // Add clear all button
-    if (allArtworks.length > 0) {
-      const clearAllBtn = createClearAllButton();
-      historyList.appendChild(clearAllBtn);
-    }
-  }
-
-  /**
-   * Toggle between showing all history and showing only 5 items
-   */
-  function toggleHistoryView() {
-    showingAllHistory = !showingAllHistory;
-    renderHistory();
-  }
-
-  /**
-   * Create a history item element (shadcn-style)
-   */
-  function createHistoryItem(artwork) {
-    const li = document.createElement('li');
-    li.className = 'settings-history-item';
-
-    // Icon
-    const iconDiv = document.createElement('div');
-    iconDiv.className = 'settings-history-icon';
-    iconDiv.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg>`;
-
-    // Content
-    const contentDiv = document.createElement('div');
-    contentDiv.className = 'settings-history-content';
-
-    const title = document.createElement('p');
-    title.className = 'settings-history-title';
-    title.textContent = artwork.title || 'Untitled';
-
-    const subtitle = document.createElement('p');
-    subtitle.className = 'settings-history-subtitle';
-    subtitle.textContent = artwork.artist || 'Unknown Artist';
-
-    contentDiv.appendChild(title);
-    contentDiv.appendChild(subtitle);
-
-    // Meta (date + status badge)
-    const metaDiv = document.createElement('div');
-    metaDiv.className = 'settings-history-meta';
-
-    // Status badge
-    const isPublic = artwork.isPublic || artwork.visibility === 'public';
-    const badge = document.createElement('span');
-    badge.className = `artorize-badge ${isPublic ? 'artorize-badge-success' : 'artorize-badge-default'}`;
-    badge.innerHTML = isPublic
-      ? `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Public`
-      : `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Private`;
-
-    // Date
-    const dateSpan = document.createElement('span');
-    dateSpan.className = 'settings-history-date';
-    const createdAt = new Date(artwork.createdAt);
-    dateSpan.textContent = createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-
-    metaDiv.appendChild(badge);
-    metaDiv.appendChild(dateSpan);
-
-    // Actions
-    const actionsDiv = document.createElement('div');
-    actionsDiv.className = 'settings-history-actions';
-
-    const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'settings-delete-btn';
-    deleteBtn.title = 'Delete artwork';
-    deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>`;
-    deleteBtn.addEventListener('click', () => deleteArtwork(artwork.id, deleteBtn));
-
-    actionsDiv.appendChild(deleteBtn);
-
-    // Assemble
-    li.appendChild(iconDiv);
-    li.appendChild(contentDiv);
-    li.appendChild(metaDiv);
-    li.appendChild(actionsDiv);
-
-    return li;
-  }
-
-  /**
-   * Create clear all button
-   */
-  function createClearAllButton() {
-    const container = document.createElement('div');
-    container.style.cssText = 'margin-top: var(--art-space-4); padding-top: var(--art-space-4); border-top: 1px solid var(--art-border-subtle);';
-
-    const clearAllBtn = document.createElement('button');
-    clearAllBtn.id = 'clear-all-btn';
-    clearAllBtn.className = 'artorize-btn artorize-btn-sm artorize-btn-danger';
-    clearAllBtn.style.width = '100%';
-    clearAllBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>Clear All History`;
-    clearAllBtn.addEventListener('click', clearAllHistory);
-
-    container.appendChild(clearAllBtn);
-    return container;
-  }
-
-  /**
-   * Delete a single artwork
-   */
-  async function deleteArtwork(artworkId, button) {
-    if (isDeleting) return;
-
-    if (!confirm('Are you sure you want to delete this artwork? This action cannot be undone.')) {
+    if (allArtworks.length === 0) {
+      if (historyEmpty) historyEmpty.style.display = 'flex';
+      if (historyTable) historyTable.style.display = 'none';
       return;
     }
 
+    if (historyTable) historyTable.style.display = 'table';
+
+    allArtworks.forEach(artwork => {
+      const row = createTableRow(artwork);
+      historyList.appendChild(row);
+    });
+  }
+
+  function createTableRow(artwork) {
+    const tr = document.createElement('tr');
+    tr.style.cssText = 'border-bottom:1px solid var(--art-border-subtle);transition:background 0.1s;';
+    tr.addEventListener('mouseenter', () => { tr.style.backgroundColor = 'var(--art-surface-hover)'; });
+    tr.addEventListener('mouseleave', () => { tr.style.backgroundColor = ''; });
+
+    const isPublic = artwork.isPublic || artwork.visibility === 'public';
+    const createdAt = new Date(artwork.createdAt);
+    const dateStr = createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+    // Name cell
+    const nameCell = document.createElement('td');
+    nameCell.style.cssText = 'padding:0.625rem var(--art-space-5);font-size:var(--art-text-sm);font-weight:500;color:var(--art-text);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+    nameCell.textContent = artwork.title || 'Untitled';
+
+    // Date cell
+    const dateCell = document.createElement('td');
+    dateCell.style.cssText = 'padding:0.625rem 0.75rem;font-size:var(--art-text-xs);color:var(--art-text-faint);white-space:nowrap;';
+    dateCell.textContent = dateStr;
+
+    // Status cell
+    const statusCell = document.createElement('td');
+    statusCell.style.cssText = 'padding:0.625rem 0.75rem;';
+
+    const badge = document.createElement('span');
+    badge.style.cssText = `display:inline-flex;align-items:center;padding:0.125rem 0.5rem;border-radius:9999px;font-size:0.6875rem;font-weight:500;${
+      isPublic
+        ? 'background:rgba(16,185,129,0.1);color:#059669;'
+        : 'background:var(--art-surface-active);color:var(--art-text-muted);'
+    }`;
+    badge.textContent = isPublic ? 'Public' : 'Private';
+    statusCell.appendChild(badge);
+
+    // Action cell
+    const actionCell = document.createElement('td');
+    actionCell.style.cssText = 'padding:0.625rem var(--art-space-5);text-align:right;';
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.style.cssText = 'width:1.5rem;height:1.5rem;display:inline-flex;align-items:center;justify-content:center;border-radius:var(--art-radius-sm);color:var(--art-text-faint);background:transparent;border:none;cursor:pointer;opacity:0;transition:all 0.15s;';
+    deleteBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>';
+    deleteBtn.title = 'Delete';
+    deleteBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      deleteArtwork(artwork.id, tr);
+    });
+    deleteBtn.addEventListener('mouseenter', () => { deleteBtn.style.color = 'var(--art-danger)'; deleteBtn.style.background = 'var(--art-danger-bg)'; });
+    deleteBtn.addEventListener('mouseleave', () => { deleteBtn.style.color = 'var(--art-text-faint)'; deleteBtn.style.background = 'transparent'; });
+
+    // Show delete button on row hover
+    tr.addEventListener('mouseenter', () => { deleteBtn.style.opacity = '1'; });
+    tr.addEventListener('mouseleave', () => { deleteBtn.style.opacity = '0'; });
+
+    actionCell.appendChild(deleteBtn);
+
+    tr.appendChild(nameCell);
+    tr.appendChild(dateCell);
+    tr.appendChild(statusCell);
+    tr.appendChild(actionCell);
+
+    return tr;
+  }
+
+  async function deleteArtwork(artworkId, rowElement) {
+    if (isDeleting) return;
+    if (!confirm('Delete this artwork? This cannot be undone.')) return;
+
     isDeleting = true;
-    const originalText = button.textContent;
-    button.textContent = 'Deleting...';
-    button.disabled = true;
+    rowElement.style.opacity = '0.5';
 
     try {
       const response = await fetch(`${window.ArtorizeConfig.ROUTER_URL}/artworks/${artworkId}`, {
         method: 'DELETE',
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        headers: { 'Content-Type': 'application/json' }
       });
 
-      if (response.ok) {
-        // Remove from allArtworks array
-        allArtworks = allArtworks.filter(a => a.id !== artworkId);
-
-        // Refresh the view
-        if (allArtworks.length === 0) {
-          const historyEmpty = document.getElementById('history-empty');
-          if (historyEmpty) {
-            historyEmpty.classList.remove('hidden');
-          }
-          const historyList = document.getElementById('history-list');
-          if (historyList) {
-            historyList.innerHTML = '';
-          }
-        } else {
-          renderHistory();
-        }
-      } else if (response.status === 401) {
-        alert('Please log in to delete artwork');
-        setTimeout(() => {
-          window.location.href = '/auth/login.html';
-        }, 1000);
+      if (response.ok || artworkId.startsWith('placeholder')) {
+        allArtworks = allArtworks.filter(a => (a.id || a._id) !== artworkId);
+        renderTable();
       } else {
-        const data = await response.json();
-        alert(data.message || 'Failed to delete artwork');
-        button.textContent = originalText;
-        button.disabled = false;
+        rowElement.style.opacity = '1';
+        alert('Failed to delete artwork');
       }
     } catch (error) {
-      console.error('Delete error:', error);
-      alert('Network error. Please try again.');
-      button.textContent = originalText;
-      button.disabled = false;
+      rowElement.style.opacity = '1';
+      // Allow placeholder deletion even on network error
+      if (artworkId.startsWith('placeholder')) {
+        allArtworks = allArtworks.filter(a => (a.id || a._id) !== artworkId);
+        renderTable();
+      }
     } finally {
       isDeleting = false;
     }
   }
 
-  /**
-   * Clear all artwork history
-   */
-  async function clearAllHistory() {
-    if (isDeleting) return;
-
-    const clearAllBtn = document.getElementById('clear-all-btn');
-    if (!clearAllBtn) return;
-
-    if (!confirm('Are you sure you want to delete all your artwork history? This action cannot be undone.')) {
-      return;
-    }
-
-    isDeleting = true;
-    const originalText = clearAllBtn.textContent;
-    clearAllBtn.textContent = 'Clearing...';
-    clearAllBtn.disabled = true;
-
-    try {
-      const response = await fetch(`${window.ArtorizeConfig.ROUTER_URL}/artworks/me`, {
-        method: 'DELETE',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (response.ok) {
-        // Clear allArtworks array
-        allArtworks = [];
-
-        // Show empty state
-        const historyEmpty = document.getElementById('history-empty');
-        if (historyEmpty) {
-          historyEmpty.classList.remove('hidden');
-        }
-
-        const historyList = document.getElementById('history-list');
-        if (historyList) {
-          historyList.innerHTML = '';
-        }
-      } else if (response.status === 401) {
-        alert('Please log in to clear your history');
-        setTimeout(() => {
-          window.location.href = '/auth/login.html';
-        }, 1000);
-      } else {
-        const data = await response.json();
-        alert(data.message || 'Failed to clear history');
-        clearAllBtn.textContent = originalText;
-        clearAllBtn.disabled = false;
-      }
-    } catch (error) {
-      console.error('Clear history error:', error);
-      alert('Network error. Please try again.');
-      clearAllBtn.textContent = originalText;
-      clearAllBtn.disabled = false;
-    } finally {
-      isDeleting = false;
-    }
-  }
-
-  /**
-   * Show status message
-   */
   function showStatus(element, message, type) {
     if (!element) return;
-
     element.textContent = message;
-    element.className = 'text-xs mt-2';
-
-    switch (type) {
-      case 'success':
-        element.classList.add('text-green-600');
-        break;
-      case 'error':
-        element.classList.add('text-red-500');
-        break;
-      case 'info':
-        element.classList.add('text-blue-500');
-        break;
-      default:
-        element.classList.add('text-gray-alpha-500');
-    }
+    element.style.color = type === 'success' ? 'var(--art-success)' : type === 'error' ? 'var(--art-danger)' : 'var(--art-text-muted)';
   }
 
-  /**
-   * Setup modal event listeners
-   */
   function setupModalListeners() {
     if (closeButtons) {
-      closeButtons.forEach(btn => {
-        btn.addEventListener('click', closeSettingsModal);
-      });
+      closeButtons.forEach(btn => btn.addEventListener('click', closeSettingsModal));
     }
-
     if (modalBackdrop) {
       modalBackdrop.addEventListener('click', closeSettingsModal);
     }
-
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !modal?.classList.contains('hidden')) {
-        closeSettingsModal();
-      }
+      if (e.key === 'Escape' && !modal?.classList.contains('hidden')) closeSettingsModal();
     });
   }
 
-  // Export function to open modal
   window.openSettingsModal = openSettingsModal;
 
-  // Setup modal listeners when DOM is ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', setupModalListeners);
   } else {

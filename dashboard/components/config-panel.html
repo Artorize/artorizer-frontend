@@ -6,14 +6,24 @@
                                                                 <div class="stack gap-4 mb-6">
                                                                     <h3 class="text-sm font-medium text-foreground">Protection Layers</h3>
 
+                                                                    <!-- Protection Presets -->
+                                                                    <div class="flex gap-1.5">
+                                                                        <button type="button" class="preset-btn flex-1 h-7 text-xs font-medium rounded-lg border border-gray-200 bg-background text-subtle hover:border-gray-300 hover:text-foreground transition-all duration-150 cursor-pointer"
+                                                                                data-preset="lite" onclick="applyPreset('lite')">Lite</button>
+                                                                        <button type="button" class="preset-btn flex-1 h-7 text-xs font-medium rounded-lg border border-gray-200 bg-background text-subtle hover:border-gray-300 hover:text-foreground transition-all duration-150 cursor-pointer"
+                                                                                data-preset="partial" onclick="applyPreset('partial')">Partial</button>
+                                                                        <button type="button" class="preset-btn flex-1 h-7 text-xs font-medium rounded-lg border border-gray-200 bg-background text-subtle hover:border-gray-300 hover:text-foreground transition-all duration-150 cursor-pointer"
+                                                                                data-preset="full" onclick="applyPreset('full')">Full</button>
+                                                                    </div>
+
                                                                     <div class="stack gap-3">
                                                                         <!-- Fawkes -->
                                                                         <div class="protection-card cursor-pointer p-3 border border-gray-200 rounded-[10px] transition-all duration-200 hover:border-gray-300 hover:shadow-sm"
                                                                              data-protection="fawkes"
                                                                              onclick="toggleProtection(this)">
                                                                             <div class="flex-1">
-                                                                                <div class="text-sm font-medium text-foreground">Fawkes</div>
-                                                                                <p class="text-xs text-subtle mt-0.5">Privacy protection against facial recognition</p>
+                                                                                <div class="text-sm font-medium text-foreground">Face Privacy <span class="text-[10px] font-normal text-gray-400 ml-1">Fawkes</span></div>
+                                                                                <p class="text-xs text-subtle mt-0.5">Prevents facial recognition from identifying people</p>
                                                                             </div>
                                                                         </div>
 
@@ -22,8 +32,8 @@
                                                                              data-protection="photoguard"
                                                                              onclick="toggleProtection(this)">
                                                                             <div class="flex-1">
-                                                                                <div class="text-sm font-medium text-foreground">PhotoGuard</div>
-                                                                                <p class="text-xs text-subtle mt-0.5">Adversarial protection against image manipulation</p>
+                                                                                <div class="text-sm font-medium text-foreground">Edit Guard <span class="text-[10px] font-normal text-gray-400 ml-1">PhotoGuard</span></div>
+                                                                                <p class="text-xs text-subtle mt-0.5">Blocks AI from modifying your image</p>
                                                                             </div>
                                                                         </div>
 
@@ -32,8 +42,8 @@
                                                                              data-protection="mist"
                                                                              onclick="toggleProtection(this)">
                                                                             <div class="flex-1">
-                                                                                <div class="text-sm font-medium text-foreground">MIST</div>
-                                                                                <p class="text-xs text-subtle mt-0.5">Prevents AI model training on your artwork</p>
+                                                                                <div class="text-sm font-medium text-foreground">Training Block <span class="text-[10px] font-normal text-gray-400 ml-1">MIST</span></div>
+                                                                                <p class="text-xs text-subtle mt-0.5">Stops AI models from learning your style</p>
                                                                             </div>
                                                                         </div>
 
@@ -42,8 +52,8 @@
                                                                              data-protection="nightshade"
                                                                              onclick="toggleProtection(this)">
                                                                             <div class="flex-1">
-                                                                                <div class="text-sm font-medium text-foreground">Nightshade</div>
-                                                                                <p class="text-xs text-subtle mt-0.5">Data poisoning protection for AI datasets</p>
+                                                                                <div class="text-sm font-medium text-foreground">Data Poison <span class="text-[10px] font-normal text-gray-400 ml-1">Nightshade</span></div>
+                                                                                <p class="text-xs text-subtle mt-0.5">Corrupts AI datasets that try to copy you</p>
                                                                             </div>
                                                                         </div>
 
@@ -52,8 +62,8 @@
                                                                              data-protection="c2pa"
                                                                              onclick="toggleProtection(this)">
                                                                             <div class="flex-1">
-                                                                                <div class="text-sm font-medium text-foreground">C2PA Manifest</div>
-                                                                                <p class="text-xs text-subtle mt-0.5">Content authenticity and provenance metadata</p>
+                                                                                <div class="text-sm font-medium text-foreground">Proof of Origin <span class="text-[10px] font-normal text-gray-400 ml-1">C2PA</span></div>
+                                                                                <p class="text-xs text-subtle mt-0.5">Embeds verifiable ownership metadata</p>
                                                                             </div>
                                                                         </div>
 
@@ -62,8 +72,8 @@
                                                                              data-protection="watermark"
                                                                              onclick="toggleProtection(this)">
                                                                             <div class="flex-1">
-                                                                                <div class="text-sm font-medium text-foreground">Visible Watermark</div>
-                                                                                <p class="text-xs text-subtle mt-0.5">Add visible watermark or text overlay to your artwork</p>
+                                                                                <div class="text-sm font-medium text-foreground">Visible Mark <span class="text-[10px] font-normal text-gray-400 ml-1">Watermark</span></div>
+                                                                                <p class="text-xs text-subtle mt-0.5">Adds your name or logo overlay</p>
                                                                             </div>
                                                                         </div>
 
