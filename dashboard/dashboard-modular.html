@@ -281,6 +281,7 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr" defer></script>
 <script data-template-shadow-root src="dashboard-v2.js?v=20260207b" defer></script>
 <script src="settings.js" defer></script>
+<script src="feedback.js" defer></script>
 <!-- Export Window (macOS-style) -->
 <script src="export-window.js?v=20260207b" defer></script>
 <!-- Shared Artworks Manager (Floating Window) -->
@@ -463,6 +464,70 @@
         <div class="artorize-modal-footer" style="padding:var(--art-space-3) var(--art-space-5);">
             <div></div>
             <button class="artorize-btn artorize-btn-sm artorize-btn-secondary settings-modal-close">Done</button>
+        </div>
+    </div>
+</div>
+
+<!-- Feedback Modal -->
+<div id="feedback-modal" class="artorize-modal hidden">
+    <div class="artorize-modal-backdrop" onclick="closeFeedbackModal()"></div>
+    <div class="artorize-modal-content" style="width: min(32rem, calc(100% - 2.5rem)); max-height: min(40rem, 85vh);">
+        <!-- Header -->
+        <div class="artorize-modal-header">
+            <div style="display:flex;align-items:center;gap:0.75rem;">
+                <div style="width:2rem;height:2rem;border-radius:var(--art-radius-md);display:flex;align-items:center;justify-content:center;background:var(--art-surface-active);color:var(--art-text);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="artorize-modal-title">Send Feedback</h2>
+                    <p style="font-size:var(--art-text-xs);color:var(--art-text-muted);margin:0;">Help us improve Artorize</p>
+                </div>
+            </div>
+            <button class="artorize-modal-close" onclick="closeFeedbackModal()" aria-label="Close">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 6 6 18"></path>
+                    <path d="m6 6 12 12"></path>
+                </svg>
+            </button>
+        </div>
+        <!-- Body -->
+        <div class="artorize-modal-body" style="padding:var(--art-space-5);display:flex;flex-direction:column;gap:var(--art-space-4);">
+            <!-- Type -->
+            <div>
+                <label style="font-size:var(--art-text-sm);font-weight:500;color:var(--art-text-secondary);display:block;margin-bottom:var(--art-space-2);">Type</label>
+                <select id="feedback-type" class="artorize-input" style="height:var(--art-control-h-sm);font-size:var(--art-text-sm);width:100%;cursor:pointer;">
+                    <option value="bug">Bug Report</option>
+                    <option value="feature">Feature Request</option>
+                    <option value="general" selected>General Feedback</option>
+                </select>
+            </div>
+            <!-- Subject -->
+            <div>
+                <label style="font-size:var(--art-text-sm);font-weight:500;color:var(--art-text-secondary);display:block;margin-bottom:var(--art-space-2);">Subject</label>
+                <input type="text" id="feedback-subject" class="artorize-input" placeholder="Brief summary..." style="height:var(--art-control-h-sm);font-size:var(--art-text-sm);width:100%;">
+            </div>
+            <!-- Message -->
+            <div>
+                <label style="font-size:var(--art-text-sm);font-weight:500;color:var(--art-text-secondary);display:block;margin-bottom:var(--art-space-2);">Message</label>
+                <textarea id="feedback-message" class="artorize-input" placeholder="Tell us more..." rows="5" style="font-size:var(--art-text-sm);width:100%;resize:vertical;min-height:6rem;"></textarea>
+            </div>
+            <!-- Email -->
+            <div>
+                <label style="font-size:var(--art-text-sm);font-weight:500;color:var(--art-text-secondary);display:block;margin-bottom:var(--art-space-2);">Email</label>
+                <input type="email" id="feedback-email" class="artorize-input" placeholder="your@email.com" style="height:var(--art-control-h-sm);font-size:var(--art-text-sm);width:100%;">
+            </div>
+            <!-- Status message -->
+            <p id="feedback-status" style="font-size:var(--art-text-xs);min-height:1.25rem;margin:0;color:var(--art-text-muted);"></p>
+        </div>
+        <!-- Footer -->
+        <div class="artorize-modal-footer">
+            <div></div>
+            <div style="display:flex;gap:var(--art-space-2);">
+                <button class="artorize-btn artorize-btn-sm artorize-btn-secondary" onclick="closeFeedbackModal()">Cancel</button>
+                <button id="feedback-submit-btn" class="artorize-btn artorize-btn-sm artorize-btn-primary" onclick="submitFeedback()">Send Feedback</button>
+            </div>
         </div>
     </div>
 </div>
