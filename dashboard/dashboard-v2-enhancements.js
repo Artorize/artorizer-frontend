@@ -1069,7 +1069,6 @@ window.applyPreset = applyPreset;
 window.toggleWatermarkDropdown = toggleWatermarkDropdown;
 window.selectWatermarkStrategy = selectWatermarkStrategy;
 window.toggleHistoryModal = toggleHistoryModal;
-window.togglePlatformRadio = togglePlatformRadio;
 window.togglePlatformDropdown = togglePlatformDropdown;
 window.selectPlatform = selectPlatform;
 window.showEmbedCodePopup = showEmbedCodePopup;
