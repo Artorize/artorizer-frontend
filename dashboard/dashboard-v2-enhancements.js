@@ -1062,6 +1062,55 @@ function copyEmbedCode() {
   }
 }
 
+// Credits UI - fetch balance and update progress circle + text
+const CREDITS_MAX = 50; // Default max credits (free tier)
+const CREDITS_CIRCUMFERENCE = 264; // 2 * π * r (r=42)
+
+async function fetchAndUpdateCredits() {
+  const routerUrl = window.ArtorizeConfig?.ROUTER_URL || 'https://router.artorizer.com';
+  try {
+    const response = await fetch(`${routerUrl}/credits/me`, {
+      credentials: 'include'
+    });
+    if (!response.ok) return;
+    const data = await response.json();
+    updateCreditsUI(data.balance, CREDITS_MAX);
+  } catch (error) {
+    console.warn('[Credits] Failed to fetch credits:', error);
+  }
+}
+
+function updateCreditsUI(balance, max) {
+  const pct = Math.min(balance / max, 1);
+  const dashUsed = Math.round(pct * CREDITS_CIRCUMFERENCE);
+
+  // Main progress circle
+  const indicator = document.getElementById('credits-progress-indicator');
+  if (indicator) {
+    indicator.setAttribute('stroke-dasharray', `${dashUsed} ${CREDITS_CIRCUMFERENCE}`);
+  }
+  const progressBar = document.getElementById('credits-progress-bar');
+  if (progressBar) {
+    progressBar.setAttribute('aria-valuenow', Math.round(pct * 100));
+  }
+
+  // Credits text
+  const textEl = document.getElementById('credits-text');
+  if (textEl) {
+    textEl.textContent = `${balance} credits remaining`;
+  }
+
+  // Sidebar avatar progress ring
+  const sidebarIndicator = document.getElementById('sidebar-credits-indicator');
+  if (sidebarIndicator) {
+    sidebarIndicator.setAttribute('stroke-dasharray', `${dashUsed} ${CREDITS_CIRCUMFERENCE}`);
+  }
+}
+
+// Expose for use after protection jobs complete
+window.fetchAndUpdateCredits = fetchAndUpdateCredits;
+window.updateCreditsUI = updateCreditsUI;
+
 // Expose helpers to the global window scope for reuse
 window.updateProgressStep = updateProgressStep;
 window.toggleProtection = toggleProtection;
@@ -1408,6 +1457,7 @@ function initEnhancements() {
   updateProgressTracker();
   initializeDatePicker();
   initShareArtworksSearch();
+  fetchAndUpdateCredits();
 }
 
 // Initialize when DOM is ready

@@ -543,6 +543,11 @@
       // Refresh editing history so new item appears immediately
       await refreshEditingHistory();
 
+      // Refresh credits display after protection job
+      if (typeof window.fetchAndUpdateCredits === 'function') {
+        window.fetchAndUpdateCredits();
+      }
+
     } catch (error) {
       console.error('Submission error:', error);
       showStatus(`Error: ${error.message}`, 'error');
