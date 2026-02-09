@@ -204,70 +204,516 @@ function updateProgressStep(protection, status, time) {
   `;
 }
 
-// Toggle History Modal
+// Gallery state
+let galleryArtworksData = [];
+let gallerySearchDebounce = null;
+
+// Toggle Gallery Modal
 function toggleHistoryModal() {
-  console.log('[History Modal] Toggling history modal...');
-  let modal = document.getElementById('history-modal');
+  console.log('[Gallery Modal] Toggling gallery modal...');
+  let modal = document.getElementById('gallery-modal');
 
   if (!modal) {
-    // Create the modal if it doesn't exist
-    modal = document.createElement('div');
-    modal.id = 'history-modal';
-    modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm';
-    modal.innerHTML = `
-      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden m-4">
-        <div class="flex items-center justify-between p-4 border-b">
-          <h2 class="text-lg font-semibold">Full History</h2>
-          <button type="button" onclick="toggleHistoryModal()" class="p-2 hover:bg-gray-100 rounded-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 6 6 18"></path>
-              <path d="m6 6 12 12"></path>
-            </svg>
-          </button>
-        </div>
-        <div class="p-4 overflow-y-auto max-h-[60vh]" id="history-modal-content">
-          <p class="text-sm text-gray-500 text-center py-8">Loading history...</p>
-        </div>
-        <div class="flex justify-end gap-2 p-4 border-t bg-gray-50">
-          <button type="button" onclick="clearEditingHistory()" class="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg border border-red-200">
-            Clear All History
-          </button>
-          <button type="button" onclick="toggleHistoryModal()" class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg">
-            Close
-          </button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-
-    // Load history content
-    loadHistoryContent();
+    createGalleryModal();
+    loadGalleryArtworks();
   } else {
-    // Toggle existing modal
     if (modal.style.display === 'none') {
       modal.style.display = 'flex';
-      loadHistoryContent();
+      loadGalleryArtworks();
     } else {
       modal.style.display = 'none';
     }
   }
 }
 
-// Load history content into modal
-function loadHistoryContent() {
-  const content = document.getElementById('history-modal-content');
-  const historyList = document.getElementById('editing-history-list');
+// Create gallery modal structure
+function createGalleryModal() {
+  const modal = document.createElement('div');
+  modal.id = 'gallery-modal';
+  modal.className = 'artorize-modal-backdrop';
+  modal.style.cssText = 'position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px);';
 
-  if (content && historyList) {
-    // Clone the history list content
-    const historyItems = historyList.innerHTML;
-    if (historyItems.trim()) {
-      content.innerHTML = `<ul class="stack gap-2">${historyItems}</ul>`;
+  modal.innerHTML = `
+    <div class="artorize-modal-content" style="width: min(900px, calc(100vw - 48px)); max-height: calc(100vh - 96px); display: flex; flex-direction: column;">
+      <div class="artorize-modal-header" style="display: flex; align-items: center; gap: 12px; padding: 20px 24px; border-bottom: 1px solid var(--art-border-subtle, #e5e7eb);">
+        <h2 class="artorize-modal-title" style="flex: 1; font-size: 20px; font-weight: 600; margin: 0;">Gallery</h2>
+        <div style="flex: 1; position: relative;">
+          <input
+            type="text"
+            id="gallery-search-input"
+            class="artorize-input"
+            placeholder="Search artworks..."
+            style="width: 100%; padding-left: 36px;"
+            oninput="window.gallerySearchFilter(this.value)"
+          />
+          <svg style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--art-text-subtle, #6b7280);" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.3-4.3"/>
+          </svg>
+        </div>
+        <button type="button" class="artorize-modal-close artorize-btn artorize-btn-ghost artorize-btn-sm" onclick="window.toggleHistoryModal()" style="flex-shrink: 0;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6 6 18"/>
+            <path d="m6 6 12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="artorize-modal-body" id="gallery-modal-body" style="flex: 1; overflow-y: auto; padding: 24px;">
+        <div id="gallery-loading" style="display: flex; align-items: center; justify-content: center; padding: 48px; color: var(--art-text-subtle, #6b7280);">
+          <svg width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg" style="animation: spin 1s linear infinite; margin-right: 8px;">
+            <path opacity=".5" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" stroke="currentColor" stroke-width="2"/>
+            <path d="M22 12c0-5.523-4.477-10-10-10" stroke="currentColor" stroke-width="2"/>
+          </svg>
+          <span>Loading gallery...</span>
+        </div>
+        <div id="gallery-empty" style="display: none; flex-direction: column; align-items: center; justify-content: center; padding: 48px; text-align: center; color: var(--art-text-subtle, #6b7280);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 16px; opacity: 0.4;">
+            <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+            <circle cx="9" cy="9" r="2"/>
+            <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+          </svg>
+          <p style="font-size: 16px; font-weight: 500; margin: 0;">No artworks yet</p>
+          <p style="font-size: 14px; margin: 8px 0 0;">Upload an image to get started.</p>
+        </div>
+        <div id="gallery-grid" class="gallery-grid" style="display: none; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px;"></div>
+      </div>
+      <div class="artorize-modal-footer" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-top: 1px solid var(--art-border-subtle, #e5e7eb); background: var(--art-surface-subtle, #f9fafb);">
+        <span id="gallery-count" style="font-size: 14px; color: var(--art-text-subtle, #6b7280);">0 artworks</span>
+        <button type="button" class="artorize-btn artorize-btn-secondary artorize-btn-sm" onclick="window.toggleHistoryModal()">Close</button>
+      </div>
+    </div>
+  `;
+
+  // Add CSS for spinning animation
+  if (!document.getElementById('gallery-styles')) {
+    const style = document.createElement('style');
+    style.id = 'gallery-styles';
+    style.textContent = `
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      .gallery-grid {
+        display: grid;
+      }
+      .gallery-card {
+        background: white;
+        border: 1px solid var(--art-border-default, #e5e7eb);
+        border-radius: var(--art-radius-lg, 12px);
+        overflow: hidden;
+        transition: box-shadow 0.2s, transform 0.2s;
+      }
+      .gallery-card:hover {
+        box-shadow: var(--art-shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1));
+        transform: translateY(-2px);
+      }
+      .gallery-card-thumb {
+        width: 100%;
+        aspect-ratio: 1;
+        background: var(--art-surface-subtle, #f9fafb);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+      .gallery-card-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .gallery-card-body {
+        padding: 12px 16px;
+      }
+      .gallery-card-title {
+        margin: 0 0 4px;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--art-text-primary, #111827);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .gallery-card-date {
+        font-size: 12px;
+        color: var(--art-text-subtle, #6b7280);
+      }
+      .gallery-card-actions {
+        display: flex;
+        gap: 4px;
+        padding: 8px 12px;
+        border-top: 1px solid var(--art-border-subtle, #e5e7eb);
+      }
+      .gallery-download-group {
+        position: relative;
+      }
+      .gallery-download-menu {
+        position: absolute;
+        bottom: 100%;
+        left: 0;
+        margin-bottom: 4px;
+        background: white;
+        border: 1px solid var(--art-border-default, #e5e7eb);
+        border-radius: var(--art-radius-md, 8px);
+        box-shadow: var(--art-shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1));
+        min-width: 160px;
+        z-index: 10;
+        overflow: hidden;
+      }
+      .gallery-download-menu.hidden {
+        display: none;
+      }
+      .gallery-download-menu button {
+        width: 100%;
+        padding: 8px 12px;
+        text-align: left;
+        font-size: 13px;
+        background: white;
+        border: none;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      .gallery-download-menu button:hover {
+        background: var(--art-surface-hover, #f3f4f6);
+      }
+      .gallery-delete-btn:hover {
+        color: var(--art-danger, #dc2626);
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  document.body.appendChild(modal);
+
+  // Close on backdrop click
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      toggleHistoryModal();
+    }
+  });
+}
+
+// Load gallery artworks from API
+async function loadGalleryArtworks() {
+  const loadingEl = document.getElementById('gallery-loading');
+  const emptyEl = document.getElementById('gallery-empty');
+  const gridEl = document.getElementById('gallery-grid');
+  const countEl = document.getElementById('gallery-count');
+
+  if (loadingEl) loadingEl.style.display = 'flex';
+  if (emptyEl) emptyEl.style.display = 'none';
+  if (gridEl) gridEl.style.display = 'none';
+
+  try {
+    const routerUrl = window.ArtorizeConfig?.ROUTER_URL || 'https://router.artorizer.com';
+    const response = await fetch(`${routerUrl}/artworks/me`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (loadingEl) loadingEl.style.display = 'none';
+
+    if (response.ok) {
+      const data = await response.json();
+      galleryArtworksData = data.artworks || [];
+
+      if (countEl) {
+        countEl.textContent = galleryArtworksData.length === 1 ? '1 artwork' : `${galleryArtworksData.length} artworks`;
+      }
+
+      if (galleryArtworksData.length === 0) {
+        if (emptyEl) emptyEl.style.display = 'flex';
+      } else {
+        renderGalleryGrid();
+      }
     } else {
-      content.innerHTML = '<p class="text-sm text-gray-500 text-center py-8">No history yet</p>';
+      if (emptyEl) {
+        emptyEl.querySelector('p:first-of-type').textContent = 'Failed to load artworks';
+        emptyEl.style.display = 'flex';
+      }
+    }
+  } catch (error) {
+    console.error('[Gallery] Error loading artworks:', error);
+    if (loadingEl) loadingEl.style.display = 'none';
+    if (emptyEl) {
+      emptyEl.querySelector('p:first-of-type').textContent = 'Network error';
+      emptyEl.style.display = 'flex';
     }
   }
 }
+
+// Render gallery grid
+function renderGalleryGrid(filteredData) {
+  const gridEl = document.getElementById('gallery-grid');
+  const emptyEl = document.getElementById('gallery-empty');
+  if (!gridEl) return;
+
+  const artworks = filteredData || galleryArtworksData;
+
+  gridEl.innerHTML = '';
+
+  if (artworks.length === 0) {
+    gridEl.style.display = 'none';
+    if (emptyEl) {
+      emptyEl.querySelector('p:first-of-type').textContent = 'No artworks found';
+      emptyEl.style.display = 'flex';
+    }
+    return;
+  }
+
+  if (emptyEl) emptyEl.style.display = 'none';
+  gridEl.style.display = 'grid';
+
+  const cdnUrl = window.ArtorizeConfig?.CDN_URL || 'https://cdn.artorizer.com';
+
+  artworks.forEach(artwork => {
+    const artworkId = artwork.id || artwork._id;
+    const title = artwork.title || 'Untitled';
+    const createdAt = new Date(artwork.createdAt);
+    const dateStr = createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const escapedTitle = title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+    const card = document.createElement('div');
+    card.className = 'gallery-card';
+    card.dataset.artworkId = artworkId;
+    card.innerHTML = `
+      <div class="gallery-card-thumb">
+        <img src="${cdnUrl}/api/artworks/${artworkId}?variant=protected" alt="${title}" loading="lazy" onerror="this.style.display='none'; this.parentElement.innerHTML='<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;48&quot; height=&quot;48&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.5&quot; style=&quot;color: var(--art-text-subtle);&quot;><rect width=&quot;18&quot; height=&quot;18&quot; x=&quot;3&quot; y=&quot;3&quot; rx=&quot;2&quot; ry=&quot;2&quot;/><circle cx=&quot;9&quot; cy=&quot;9&quot; r=&quot;2&quot;/><path d=&quot;m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21&quot;/></svg>';" />
+      </div>
+      <div class="gallery-card-body">
+        <p class="gallery-card-title" title="${title}">${title}</p>
+        <span class="gallery-card-date">${dateStr}</span>
+      </div>
+      <div class="gallery-card-actions">
+        <div class="gallery-download-group">
+          <button class="artorize-btn artorize-btn-xs artorize-btn-ghost" title="Download" onclick="window.galleryToggleDownloadMenu('${artworkId}', this)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          </button>
+          <div class="gallery-download-menu hidden" id="download-menu-${artworkId}">
+            <button onclick="window.galleryDownload('${artworkId}', 'protected'); window.galleryCloseDownloadMenu('${artworkId}');">Protected Image</button>
+            <button onclick="window.galleryDownload('${artworkId}', 'mask'); window.galleryCloseDownloadMenu('${artworkId}');">SAC Mask</button>
+            <button onclick="window.galleryDownload('${artworkId}', 'original'); window.galleryCloseDownloadMenu('${artworkId}');">Original</button>
+          </div>
+        </div>
+        <button class="artorize-btn artorize-btn-xs artorize-btn-ghost" title="Copy embed URL" onclick="window.galleryCopyEmbed('${artworkId}')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+          </svg>
+        </button>
+        <button class="artorize-btn artorize-btn-xs artorize-btn-ghost" title="Rename" onclick="window.galleryRename('${artworkId}', '${escapedTitle}')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+            <path d="m15 5 4 4"/>
+          </svg>
+        </button>
+        <button class="artorize-btn artorize-btn-xs artorize-btn-ghost gallery-delete-btn" title="Delete" onclick="window.galleryDelete('${artworkId}')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18"/>
+            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+          </svg>
+        </button>
+      </div>
+    `;
+    gridEl.appendChild(card);
+  });
+}
+
+// Toggle download menu for an artwork
+function galleryToggleDownloadMenu(artworkId, btnEl) {
+  const menu = document.getElementById(`download-menu-${artworkId}`);
+  if (!menu) return;
+
+  const isHidden = menu.classList.contains('hidden');
+
+  // Close all other menus first
+  document.querySelectorAll('.gallery-download-menu').forEach(m => {
+    if (m !== menu) m.classList.add('hidden');
+  });
+
+  if (isHidden) {
+    menu.classList.remove('hidden');
+  } else {
+    menu.classList.add('hidden');
+  }
+}
+
+// Close download menu
+function galleryCloseDownloadMenu(artworkId) {
+  const menu = document.getElementById(`download-menu-${artworkId}`);
+  if (menu) menu.classList.add('hidden');
+}
+
+// Download artwork
+async function galleryDownload(artworkId, variant) {
+  try {
+    const routerUrl = window.ArtorizeConfig?.ROUTER_URL || 'https://router.artorizer.com';
+    const response = await fetch(`${routerUrl}/artworks/${artworkId}?variant=${variant}`, {
+      method: 'GET',
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      console.error('[Gallery] Download failed:', response.status);
+      return;
+    }
+
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `artwork-${artworkId}-${variant}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('[Gallery] Download error:', error);
+  }
+}
+
+// Rename artwork
+async function galleryRename(artworkId, currentTitle) {
+  const newTitle = prompt('Enter new title:', currentTitle);
+  if (!newTitle || newTitle.trim() === '' || newTitle === currentTitle) return;
+
+  try {
+    const routerUrl = window.ArtorizeConfig?.ROUTER_URL || 'https://router.artorizer.com';
+    const response = await fetch(`${routerUrl}/artworks/${artworkId}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: newTitle.trim() })
+    });
+
+    if (response.ok) {
+      // Update local data
+      const artwork = galleryArtworksData.find(a => (a.id || a._id) === artworkId);
+      if (artwork) artwork.title = newTitle.trim();
+
+      // Update UI
+      const card = document.querySelector(`.gallery-card[data-artwork-id="${artworkId}"]`);
+      if (card) {
+        const titleEl = card.querySelector('.gallery-card-title');
+        if (titleEl) {
+          titleEl.textContent = newTitle.trim();
+          titleEl.title = newTitle.trim();
+        }
+      }
+    } else {
+      alert('Failed to rename artwork');
+    }
+  } catch (error) {
+    console.error('[Gallery] Rename error:', error);
+    alert('Network error');
+  }
+}
+
+// Delete artwork
+async function galleryDelete(artworkId) {
+  if (!confirm('Are you sure you want to delete this artwork? This action cannot be undone.')) {
+    return;
+  }
+
+  try {
+    const routerUrl = window.ArtorizeConfig?.ROUTER_URL || 'https://router.artorizer.com';
+    const response = await fetch(`${routerUrl}/artworks/${artworkId}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+
+    if (response.ok) {
+      // Remove from local data
+      galleryArtworksData = galleryArtworksData.filter(a => (a.id || a._id) !== artworkId);
+
+      // Remove card from UI
+      const card = document.querySelector(`.gallery-card[data-artwork-id="${artworkId}"]`);
+      if (card) card.remove();
+
+      // Update count
+      const countEl = document.getElementById('gallery-count');
+      if (countEl) {
+        countEl.textContent = galleryArtworksData.length === 1 ? '1 artwork' : `${galleryArtworksData.length} artworks`;
+      }
+
+      // Show empty state if no artworks left
+      if (galleryArtworksData.length === 0) {
+        const gridEl = document.getElementById('gallery-grid');
+        const emptyEl = document.getElementById('gallery-empty');
+        if (gridEl) gridEl.style.display = 'none';
+        if (emptyEl) {
+          emptyEl.querySelector('p:first-of-type').textContent = 'No artworks yet';
+          emptyEl.style.display = 'flex';
+        }
+      }
+    } else {
+      alert('Failed to delete artwork');
+    }
+  } catch (error) {
+    console.error('[Gallery] Delete error:', error);
+    alert('Network error');
+  }
+}
+
+// Copy embed URL to clipboard
+function galleryCopyEmbed(artworkId) {
+  const embedUrl = `${window.ArtorizeConfig?.EMBED_URL || 'https://artorizer.com/embed'}/${artworkId}`;
+
+  navigator.clipboard.writeText(embedUrl).then(() => {
+    // Find the button and show feedback
+    const card = document.querySelector(`.gallery-card[data-artwork-id="${artworkId}"]`);
+    if (card) {
+      const btn = card.querySelector('[title="Copy embed URL"]');
+      if (btn) {
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        `;
+        setTimeout(() => {
+          btn.innerHTML = originalHTML;
+        }, 2000);
+      }
+    }
+  }).catch(err => {
+    console.error('[Gallery] Copy error:', err);
+  });
+}
+
+// Search filter with debounce
+function gallerySearchFilter(query) {
+  clearTimeout(gallerySearchDebounce);
+  gallerySearchDebounce = setTimeout(() => {
+    if (!query || query.trim() === '') {
+      renderGalleryGrid();
+      return;
+    }
+
+    const searchTerm = query.trim().toLowerCase();
+    const filtered = galleryArtworksData.filter(artwork => {
+      const title = (artwork.title || '').toLowerCase();
+      const artist = (artwork.artist || '').toLowerCase();
+      return title.includes(searchTerm) || artist.includes(searchTerm);
+    });
+
+    renderGalleryGrid(filtered);
+  }, 200);
+}
+
+// Close download menus when clicking outside
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.gallery-download-group')) {
+    document.querySelectorAll('.gallery-download-menu').forEach(menu => {
+      menu.classList.add('hidden');
+    });
+  }
+});
 
 // --- Platform Switcher Logic ---
 // We attach these to window explicitly to avoid scope issues with deferred scripts and dynamic components
@@ -623,7 +1069,6 @@ window.applyPreset = applyPreset;
 window.toggleWatermarkDropdown = toggleWatermarkDropdown;
 window.selectWatermarkStrategy = selectWatermarkStrategy;
 window.toggleHistoryModal = toggleHistoryModal;
-window.loadHistoryContent = loadHistoryContent;
 window.togglePlatformRadio = togglePlatformRadio;
 window.togglePlatformDropdown = togglePlatformDropdown;
 window.selectPlatform = selectPlatform;
@@ -632,12 +1077,21 @@ window.closeEmbedCodePopup = closeEmbedCodePopup;
 window.copyEmbedCode = copyEmbedCode;
 window.loadArtworksForEmbed = loadArtworksForEmbed;
 window.updateEmbedCode = updateEmbedCode;
-// New share artworks functions
+// Share artworks functions
 window.loadShareArtworks = loadShareArtworks;
 window.renderShareArtworks = renderShareArtworks;
 window.toggleArtworkVisibility = toggleArtworkVisibility;
 window.copyShareUrl = copyShareUrl;
 window.filterShareArtworks = filterShareArtworks;
+// Gallery functions
+window.loadGalleryArtworks = loadGalleryArtworks;
+window.galleryDownload = galleryDownload;
+window.galleryRename = galleryRename;
+window.galleryDelete = galleryDelete;
+window.galleryCopyEmbed = galleryCopyEmbed;
+window.gallerySearchFilter = gallerySearchFilter;
+window.galleryToggleDownloadMenu = galleryToggleDownloadMenu;
+window.galleryCloseDownloadMenu = galleryCloseDownloadMenu;
 
 // Initialize tab switching functionality
 function initializeTabs() {
